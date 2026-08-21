@@ -24,6 +24,21 @@ export const vendorApi = {
   listScorecards: (params?: { vendorId?: string; reviewPeriod?: string }) =>
     api.get("/vendor-scorecards", { params }).then((r) => r.data.data),
 
-  listContracts: (params?: { vendorId?: string }) =>
+  listContracts: (params?: { vendorId?: string; afeId?: string; tenderStatus?: string }) =>
     api.get("/vendor-contracts", { params }).then((r) => r.data.data),
+
+  createContract: (body: {
+    vendorId: string;
+    afeId: string;
+    contractValueUsd: number;
+    procurementRoute: "sole_source" | "competitive_tender";
+    tenderStatus?: "n_a" | "in_progress" | "awarded";
+    contractStart: string;
+    contractEnd: string;
+  }) => api.post("/vendor-contracts", body).then((r) => r.data.data),
+
+  updateContract: (id: string, body: Record<string, unknown>) =>
+    api.patch(`/vendor-contracts/${id}`, body).then((r) => r.data.data),
+
+  getContract: (id: string) => api.get(`/vendor-contracts/${id}`).then((r) => r.data.data),
 };

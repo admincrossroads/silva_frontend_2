@@ -29,6 +29,8 @@
     --sidebar-foreground: 150 20% 94%;
     --sidebar-accent: 165 24% 16%;
     --sidebar-border: 165 20% 18%;
+    --font-sans: "Manrope", "Segoe UI", sans-serif;
+    --font-display: "Fraunces", Georgia, serif;
   }
 
   * {

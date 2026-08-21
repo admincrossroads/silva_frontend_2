@@ -3,7 +3,6 @@ import {
   LayoutDashboard,
   FileText,
   ClipboardList,
-  Truck,
   CreditCard,
   Users,
   BarChart3,
@@ -11,6 +10,8 @@ import {
   Building2,
   Shield,
   User,
+  Layers,
+  Bell,
 } from "lucide-react";
 import type { RoleKey } from "@/lib/utils/constants";
 import type { User as AuthUser } from "@/types";
@@ -65,6 +66,20 @@ export function settingsSectionsFor(user: AuthUser): SettingsSection[] {
   if (
     role === "system_admin" ||
     role === "spx_principal" ||
+    role === "silva_owner" ||
+    role === "silva_country_manager"
+  ) {
+    sections.push({
+      label: "Programs",
+      href: "/settings/programs",
+      description: "Create programs, invite partner orgs, accept invites.",
+      icon: Layers,
+    });
+  }
+
+  if (
+    role === "system_admin" ||
+    role === "spx_principal" ||
     role === "vendor_admin" ||
     role === "silva_owner"
   ) {
@@ -86,16 +101,34 @@ export function settingsSectionsFor(user: AuthUser): SettingsSection[] {
       description: "Schedule 3, accountability matrix, and platform reference data.",
       icon: Shield,
     });
+    sections.push({
+      label: "Schedule 3 RACI",
+      href: "/settings/governance/raci",
+      description: "Full Execute / Validate / Decide / Author matrix.",
+      icon: Shield,
+    });
   }
 
   return sections;
 }
 
 export function canAccessSettingsRoute(pathname: string, user: AuthUser): boolean {
-  const allowed = settingsSectionsFor(user).some(
+  if (pathname.startsWith("/settings/programs")) {
+    const role = user.role as RoleKey;
+    return (
+      role === "system_admin" ||
+      role === "spx_principal" ||
+      role === "silva_owner" ||
+      role === "silva_country_manager" ||
+      role === "vendor_admin"
+    );
+  }
+  if (pathname.startsWith("/settings/governance")) {
+    return user.role === "spx_principal" || user.role === "system_admin";
+  }
+  return settingsSectionsFor(user).some(
     (section) => pathname === section.href || pathname.startsWith(`${section.href}/`),
   );
-  return allowed;
 }
 
 export function settingsTitleFor(user: AuthUser): string {
@@ -146,6 +179,10 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
   if (!isSilvaRole(role)) {
     executionChildren.push({ label: "Field Tickets", href: "/execution/field-tickets" });
   }
+  if (isVendorRole(role) || isSpxRole(role)) {
+    executionChildren.push({ label: "Field forms (IFS)", href: "/execution/forms" });
+    executionChildren.push({ label: "Season calendar", href: "/execution/calendar" });
+  }
   items.push({ label: "Execution", icon: ClipboardList, children: executionChildren });
 
   if (isSpxRole(role) || isSilvaRole(role) || role === "vendor_admin" || role === "vendor_field_lead") {
@@ -162,15 +199,33 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
   }
 
   if (isSilvaRole(role) || isSpxRole(role)) {
-    items.push({ label: "Vendors", href: "/vendors", icon: Users });
+    items.push({
+      label: "Vendors",
+      icon: Users,
+      children: [
+        { label: "Register", href: "/vendors" },
+        { label: "Contracts", href: "/vendors/contracts" },
+      ],
+    });
   }
 
   if (isSilvaRole(role) || isSpxRole(role)) {
     const reportChildren = [
       { label: "Weekly", href: "/reports/weekly" },
       { label: "Monthly", href: "/reports/monthly" },
+      { label: "Quarterly", href: "/reports/quarterly" },
+      { label: "Annual", href: "/reports/annual" },
       { label: "Budget vs Actual", href: "/reports/budget-vs-actual" },
+      { label: "Related parties", href: "/reports/disclosures" },
     ];
+    if (isSpxRole(role)) {
+      reportChildren.push({ label: "Narrative workspace", href: "/reports/workspace" });
+      reportChildren.push({ label: "COA mapping", href: "/reports/coa-mapping" });
+      reportChildren.push({ label: "GL exports", href: "/reports/gl-exports" });
+    }
+    if (role === "spx_principal" || role === "system_admin" || role === "silva_owner") {
+      reportChildren.push({ label: "Audit trail", href: "/reports/audit" });
+    }
     if (role === "spx_principal") {
       reportChildren.push({ label: "Revenue Ledger", href: "/reports/revenue" });
     }
@@ -180,6 +235,8 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
       children: reportChildren,
     });
   }
+
+  items.push({ label: "Notifications", href: "/notifications", icon: Bell });
 
   const settingsChildren = settingsSectionsFor(user)
     .filter((section) => section.href !== "/settings")

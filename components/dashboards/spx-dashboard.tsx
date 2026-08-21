@@ -130,7 +130,7 @@ export function SpxDashboard() {
               <p className="text-2xs text-muted-foreground">Author before releasing to Silva</p>
             </div>
             <Button variant="ghost" size="sm" className="text-2xs gap-1" asChild>
-              <Link href="/reports/monthly">
+              <Link href="/reports/workspace">
                 Reports <ChevronRight className="h-3 w-3" />
               </Link>
             </Button>

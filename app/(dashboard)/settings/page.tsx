@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Building2, Shield, User, Users } from "lucide-react";
+import { ArrowRight, Building2, Layers, Shield, User, Users } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -55,6 +55,7 @@ export default function SettingsOverviewPage() {
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <QuickLink title="Organization directory" description="Silva, SPX, and vendor organizations." href="/settings/organization" icon={Building2} />
+          <QuickLink title="Programs" description="Create programs and invite partner orgs." href="/settings/programs" icon={Layers} />
           <QuickLink title="Profile" description="Your system admin account." href="/settings/profile" icon={User} />
         </div>
       </div>
@@ -69,9 +70,11 @@ export default function SettingsOverviewPage() {
           <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Partners</p><p className="text-2xl font-bold">Vendors</p></CardContent></Card>
           <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Users</p><p className="text-2xl font-bold">SPX scope</p></CardContent></Card>
         </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           <QuickLink title="Organization" description="Manage SPX and partner organizations." href="/settings/organization" icon={Building2} />
+          <QuickLink title="Programs" description="Create programs and invite partner orgs." href="/settings/programs" icon={Layers} />
           <QuickLink title="Configuration" description="Schedule 3 bands and accountability matrix." href="/settings/config" icon={Shield} />
+          <QuickLink title="Schedule 3 RACI" description="Execute / Validate / Decide / Author matrix." href="/settings/governance/raci" icon={Shield} />
           <QuickLink title="Profile" description="Your principal account settings." href="/settings/profile" icon={User} />
         </div>
       </div>
@@ -111,7 +114,10 @@ export default function SettingsOverviewPage() {
         </Card>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {role === "silva_owner" ? (
-            <QuickLink title="Organization" description="Silva organization profile and members." href="/settings/organization" icon={Building2} />
+            <>
+              <QuickLink title="Organization" description="Silva organization profile and members." href="/settings/organization" icon={Building2} />
+              <QuickLink title="Programs" description="Create programs and invite partner orgs." href="/settings/programs" icon={Layers} />
+            </>
           ) : null}
           <QuickLink title="Profile" description="Update your account settings." href="/settings/profile" icon={User} />
         </div>

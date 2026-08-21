@@ -37,8 +37,17 @@ export const authApi = {
 export const programApi = {
   list: () => api.get<{ data: ProgramInfo[] }>("/programs").then((r) => r.data.data),
 
+  get: (programId: string) =>
+    api.get<{ data: ProgramInfo }>(`/programs/${programId}`).then((r) => r.data.data),
+
   create: (body: { name: string; slug?: string; branding?: Record<string, unknown> }) =>
     api.post<{ data: ProgramInfo }>("/programs", body).then((r) => r.data.data),
+
+  listMembers: (programId: string) =>
+    api.get(`/programs/${programId}/members`).then((r) => r.data.data),
+
+  listInvites: (programId: string) =>
+    api.get(`/programs/${programId}/invites`).then((r) => r.data.data),
 
   inviteOrg: (
     programId: string,

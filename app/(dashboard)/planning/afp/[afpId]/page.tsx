@@ -5,6 +5,7 @@ import { useAfp, useSubmitAfp, useApproveAfp } from "@/hooks/use-afps";
 import { StatusBadge } from "@/components/badges/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AttachmentsPanel } from "@/components/attachments/attachments-panel";
 
 const STATUS_STEPS = ["draft", "submitted", "approved", "closed"];
 
@@ -117,6 +118,12 @@ export default function AfpDetailPage() {
           </CardContent>
         </Card>
       </div>
+
+      <AttachmentsPanel
+        entityType="afp_line"
+        entityId={afp.id}
+        canUpload={afp.status === "draft"}
+      />
     </div>
   );
 }

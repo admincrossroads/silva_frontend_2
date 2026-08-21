@@ -66,8 +66,8 @@ const config: Config = {
         "4.5": "18px",
       },
       fontFamily: {
-        sans: ["var(--font-sans)", "Manrope", "Segoe UI", "sans-serif"],
-        display: ["var(--font-display)", "Fraunces", "Georgia", "serif"],
+        sans: ["var(--font-sans)"],
+        display: ["var(--font-display)"],
         mono: ["JetBrains Mono", "SF Mono", "Fira Code", "monospace"],
       },
       transitionDuration: {

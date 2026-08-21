@@ -13,6 +13,7 @@ import { usePermissions } from "@/hooks/use-permissions";
 import { StatusBadge } from "@/components/badges/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { AttachmentsPanel } from "@/components/attachments/attachments-panel";
 import { ArrowLeft } from "lucide-react";
 
 export default function FieldTicketDetailPage() {
@@ -107,6 +108,12 @@ export default function FieldTicketDetailPage() {
           </Button>
         ) : null}
       </div>
+
+      <AttachmentsPanel
+        entityType="field_ticket"
+        entityId={ft.id}
+        canUpload={ft.status === "draft"}
+      />
     </div>
   );
 }

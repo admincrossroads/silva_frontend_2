@@ -10,6 +10,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/badges/status-badge";
 import { Button } from "@/components/ui/button";
+import { AttachmentsPanel } from "@/components/attachments/attachments-panel";
 import { formatCurrency, formatDate } from "@/lib/utils/format";
 import { ArrowLeft } from "lucide-react";
 
@@ -92,6 +93,12 @@ export default function PaymentRequestDetailPage() {
           </CardContent>
         </Card>
       </div>
+
+      <AttachmentsPanel
+        entityType="payment_request"
+        entityId={pr.id}
+        canUpload={pr.status === "draft"}
+      />
     </div>
   );
 }

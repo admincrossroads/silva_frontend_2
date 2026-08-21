@@ -12,6 +12,7 @@ import { StatusBadge } from "@/components/badges/status-badge";
 import { BandBadge } from "@/components/badges/band-badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { AttachmentsPanel } from "@/components/attachments/attachments-panel";
 import { cn } from "@/lib/utils";
 import { Check, Circle, AlertCircle } from "lucide-react";
 
@@ -167,6 +168,8 @@ export default function AfeDetailPage() {
           </Button>
         </div>
       )}
+
+      <AttachmentsPanel entityType="afe" entityId={afe.id} canUpload={afe.status === "draft"} />
     </div>
   );
 }

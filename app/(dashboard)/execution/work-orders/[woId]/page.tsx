@@ -11,6 +11,7 @@ import {
 import { StatusBadge } from "@/components/badges/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { AttachmentsPanel } from "@/components/attachments/attachments-panel";
 import { ArrowLeft } from "lucide-react";
 
 export default function WorkOrderDetailPage() {
@@ -93,6 +94,12 @@ export default function WorkOrderDetailPage() {
           </Button>
         )}
       </div>
+
+      <AttachmentsPanel
+        entityType="work_order"
+        entityId={wo.id}
+        canUpload={wo.status === "draft"}
+      />
     </div>
   );
 }
