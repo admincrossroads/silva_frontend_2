@@ -1,0 +1,143 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Cool mist field atmosphere — forest leaf + espresso shell (not purple / cream-terracotta) */
+    --background: 150 18% 97%;
+    --foreground: 160 28% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 160 28% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 160 28% 12%;
+    --primary: 152 55% 28%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 150 14% 92%;
+    --secondary-foreground: 160 24% 18%;
+    --muted: 150 12% 93%;
+    --muted-foreground: 160 10% 38%;
+    --accent: 152 22% 90%;
+    --accent-foreground: 160 28% 14%;
+    --destructive: 4 72% 42%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 150 12% 86%;
+    --input: 150 12% 86%;
+    --ring: 152 55% 28%;
+    --radius: 0.625rem;
+    --sidebar: 165 32% 10%;
+    --sidebar-foreground: 150 20% 94%;
+    --sidebar-accent: 165 24% 16%;
+    --sidebar-border: 165 20% 18%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 100% -10%, hsl(152 40% 88% / 0.55), transparent),
+      radial-gradient(ellipse 60% 40% at 0% 100%, hsl(150 20% 90% / 0.45), transparent);
+    background-attachment: fixed;
+  }
+
+  td,
+  th {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  .page-header {
+    @apply flex items-center justify-between mb-6;
+  }
+
+  .page-title {
+    @apply font-display text-2xl font-semibold text-foreground tracking-tight;
+  }
+
+  .page-description {
+    @apply text-sm text-muted-foreground mt-0.5;
+  }
+
+  .stat-value {
+    @apply text-2xl font-bold text-foreground tracking-tight font-mono;
+  }
+
+  .stat-label {
+    @apply text-xs font-medium text-muted-foreground uppercase tracking-wider;
+  }
+
+  .badge-draft {
+    @apply bg-muted text-muted-foreground;
+  }
+  .badge-submitted {
+    @apply bg-sky-50 text-sky-800;
+  }
+  .badge-validated {
+    @apply bg-indigo-50 text-indigo-800;
+  }
+  .badge-approved {
+    @apply bg-primary/10 text-primary;
+  }
+  .badge-rejected {
+    @apply bg-destructive/10 text-destructive;
+  }
+  .badge-active {
+    @apply bg-primary/10 text-primary;
+  }
+  .badge-closed {
+    @apply bg-muted text-muted-foreground;
+  }
+  .badge-issued {
+    @apply bg-amber-50 text-amber-900;
+  }
+  .badge-in_progress {
+    @apply bg-sky-50 text-sky-800;
+  }
+  .badge-complete {
+    @apply bg-primary/10 text-primary;
+  }
+  .badge-verified {
+    @apply bg-primary/10 text-primary;
+  }
+  .badge-settled {
+    @apply bg-emerald-50 text-emerald-900;
+  }
+  .badge-released {
+    @apply bg-primary/10 text-primary;
+  }
+  .badge {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-2xs font-medium;
+  }
+}
+
+@keyframes landing-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes landing-drift {
+  from {
+    transform: scale(1.05) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.1) translate3d(-1.5%, 1%, 0);
+  }
+}
+
+/* Landing section spacing helper (py-22 not in default Tailwind) */
+.py-22 {
+  padding-top: 5.5rem;
+  padding-bottom: 5.5rem;
+}
+
+
