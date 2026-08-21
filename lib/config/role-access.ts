@@ -178,9 +178,9 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
   ];
   if (!isSilvaRole(role)) {
     executionChildren.push({ label: "Field Tickets", href: "/execution/field-tickets" });
-  }
-  if (isVendorRole(role) || isSpxRole(role)) {
     executionChildren.push({ label: "Field forms (IFS)", href: "/execution/forms" });
+  }
+  if (isVendorRole(role) || isSpxRole(role) || isSilvaRole(role)) {
     executionChildren.push({ label: "Season calendar", href: "/execution/calendar" });
   }
   items.push({ label: "Execution", icon: ClipboardList, children: executionChildren });
