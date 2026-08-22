@@ -114,7 +114,7 @@ export default function LandingPage() {
               Coffee Field OS
             </h1>
             <p className="max-w-md text-base leading-relaxed text-white/78 sm:text-lg">
-              Plan the season, authorize spend, and settle work — with owners, managers, and field crews each seeing
+              Plan the season, authorize spend, and settle work with owners, managers, and field crews each seeing
               only what they should.
             </p>
             <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:items-center">
@@ -220,7 +220,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl">
           <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[hsl(152_50%_65%)]">The flow</p>
           <h2 className="mt-3 font-display text-3xl tracking-tight text-white md:text-4xl">
-            From plan to payment — clearly
+            From plan to payment clearly
           </h2>
           <p className="mt-4 max-w-xl text-base leading-relaxed text-white/55">
             Follow one path your whole team recognizes. No jumping ahead, no mystery steps.
@@ -260,14 +260,14 @@ export default function LandingPage() {
         <div className="relative z-10 mx-auto grid max-w-6xl gap-10 px-5 py-20 md:grid-cols-2 md:items-center md:px-8 md:py-28">
           <div>
             <p className="font-display text-3xl leading-snug text-white md:text-4xl text-balance">
-              Built so everyone can move faster — without stepping on each other’s desk.
+              Built so everyone can move faster without stepping on each other’s desk.
             </p>
           </div>
           <div id="trust" className="scroll-mt-24 space-y-5 rounded-2xl border border-white/15 bg-[hsl(165_30%_8%/0.55)] p-6 backdrop-blur-md md:p-8">
             <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[hsl(152_50%_68%)]">Trust built in</p>
             <ul className="space-y-4">
               {[
-                "Owners see outcomes and settlements — not raw tickets.",
+                "Owners see outcomes and settlements not raw tickets.",
                 "Revenue stays with the SPX principal only.",
                 "People can’t approve their own submissions.",
                 "Missing insurance blocks work from going live.",
