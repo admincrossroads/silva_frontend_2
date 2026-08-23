@@ -144,12 +144,13 @@ export function dashboardTitleFor(user: AuthUser): string {
   const role = user.role as RoleKey;
   if (role === "system_admin") return "System Admin Dashboard";
   if (role === "spx_principal") return "SPX Principal Dashboard";
-  if (role === "spx_account_handler") return "SPX Operations Dashboard";
+  if (role === "spx_account_handler") return "SPX Planner Dashboard";
   if (role === "spx_field_supervisor") return "SPX Field Dashboard";
   if (role === "silva_owner") return "Silva Owner Dashboard";
   if (role === "silva_country_manager") return "Silva Country Manager Dashboard";
   if (role === "silva_finance") return "Silva Finance Dashboard";
   if (role === "vendor_admin") return "Vendor Admin Dashboard";
+  if (role === "vendor_manager") return "B-Agro Manager Dashboard";
   if (role === "vendor_supervisor") return "Vendor Supervisor Dashboard";
   if (role === "vendor_field_lead") return "Field Lead Dashboard";
   if (role === "vendor_worker") return "Field Worker Dashboard";
@@ -162,14 +163,28 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
   const role = user.role as RoleKey;
   const items: NavItem[] = [{ label: "Dashboard", href: "/dashboard", icon: LayoutDashboard }];
 
-  if (!isVendorRole(role) || role === "vendor_admin") {
+  if (!isVendorRole(role) || role === "vendor_admin" || role === "vendor_manager") {
+    const planningChildren: { label: string; href: string }[] = [
+      { label: "AFP Register", href: "/planning/afp" },
+      { label: "AFE Register", href: "/planning/afe" },
+    ];
+    if (role === "spx_account_handler" || role === "spx_principal" || role === "system_admin") {
+      planningChildren.unshift({ label: "Annual plan", href: "/planning/annual" });
+      planningChildren.push({ label: "Ad-hoc intake", href: "/planning/intake" });
+    }
+    if (isSilvaRole(role)) {
+      planningChildren.push({ label: "My activity requests", href: "/planning/requests" });
+    }
     items.push({
       label: "Planning",
       icon: FileText,
-      children: [
-        { label: "AFP Register", href: "/planning/afp" },
-        { label: "AFE Register", href: "/planning/afe" },
-      ],
+      children: planningChildren,
+    });
+  } else if (role === "vendor_field_lead" || role === "vendor_supervisor") {
+    items.push({
+      label: "Planning",
+      icon: FileText,
+      children: [{ label: "AFE Register", href: "/planning/afe" }],
     });
   }
 
@@ -179,6 +194,9 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
   if (!isSilvaRole(role)) {
     executionChildren.push({ label: "Field Tickets", href: "/execution/field-tickets" });
     executionChildren.push({ label: "Field forms (IFS)", href: "/execution/forms" });
+    if (role === "vendor_manager" || role === "vendor_admin" || isSpxRole(role)) {
+      executionChildren.push({ label: "Form review queue", href: "/execution/forms/review" });
+    }
   }
   if (isVendorRole(role) || isSpxRole(role) || isSilvaRole(role)) {
     executionChildren.push({ label: "Season calendar", href: "/execution/calendar" });

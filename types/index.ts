@@ -194,5 +194,6 @@ export interface Report {
   period: string;
   status: string;
   narrative: string | null;
+  sections?: Record<string, unknown> | null;
   createdAt: string;
 }

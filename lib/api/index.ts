@@ -15,6 +15,13 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
+    const code = error.response?.data?.error?.code;
+    if (error.response?.status === 400 && code === "PROGRAM_REQUIRED") {
+      if (typeof window !== "undefined" && !window.location.pathname.startsWith("/settings/programs")) {
+        window.location.href = "/settings/programs";
+      }
+      return Promise.reject(error);
+    }
     if (error.response?.status === 401) {
       const store = useAuthStore.getState();
       if (store.refreshToken) {

@@ -30,4 +30,7 @@ export const afeApi = {
 
   history: (id: string) =>
     api.get(`/afes/${id}/history`).then((r) => r.data.data),
+
+  listIntakeVendor: () =>
+    api.get("/afes/intake/vendor").then((r) => r.data.data),
 };

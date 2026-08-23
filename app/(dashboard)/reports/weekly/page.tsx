@@ -40,7 +40,8 @@ export default function WeeklyReportsPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {reports.map((r) => (
-            <Card key={r.id} className="hover:shadow-md transition-shadow cursor-pointer">
+            <Card key={r.id} className="hover:shadow-md transition-shadow">
+              <a href={`/reports/${r.id}`} className="block">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <FileText className="h-4 w-4 text-primary" />
@@ -60,6 +61,7 @@ export default function WeeklyReportsPage() {
                   <p className="text-sm text-muted-foreground line-clamp-2 pt-1">{r.narrative}</p>
                 )}
               </CardContent>
+              </a>
             </Card>
           ))}
         </div>

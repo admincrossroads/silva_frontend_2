@@ -1,6 +1,7 @@
 export const STATUS_COLORS: Record<string, string> = {
   draft: "bg-yellow-100 text-yellow-800 border-yellow-200",
   submitted: "bg-blue-100 text-blue-800 border-blue-200",
+  vendor_reviewed: "bg-teal-100 text-teal-800 border-teal-200",
   validated: "bg-indigo-100 text-indigo-800 border-indigo-200",
   approved: "bg-green-100 text-green-800 border-green-200",
   rejected: "bg-red-100 text-red-800 border-red-200",
@@ -24,18 +25,19 @@ export const ROLES = {
   silva_owner: "Silva Owner",
   silva_country_manager: "Silva Country Manager",
   silva_finance: "Silva Finance",
-  spx_principal: "SPX Principal",
-  spx_account_handler: "SPX Account Handler",
+  spx_principal: "SPX Executive",
+  spx_account_handler: "SPX Planner",
   spx_field_supervisor: "SPX Field Supervisor",
   system_admin: "System Admin",
   vendor_admin: "Vendor Admin",
+  vendor_manager: "B-Agro Manager",
   vendor_supervisor: "Vendor Supervisor",
-  vendor_field_lead: "Vendor Field Lead",
-  vendor_worker: "Vendor Worker",
+  vendor_field_lead: "Field Lead",
+  vendor_worker: "Field Worker / Agronomist",
 } as const;
 
 export type RoleKey = keyof typeof ROLES;
 
 export const SILVA_ROLES: RoleKey[] = ["silva_owner", "silva_country_manager", "silva_finance"];
 export const SPX_ROLES: RoleKey[] = ["spx_principal", "spx_account_handler", "spx_field_supervisor", "system_admin"];
-export const VENDOR_ROLES: RoleKey[] = ["vendor_admin", "vendor_supervisor", "vendor_field_lead", "vendor_worker"];
+export const VENDOR_ROLES: RoleKey[] = ["vendor_admin", "vendor_manager", "vendor_supervisor", "vendor_field_lead", "vendor_worker"];

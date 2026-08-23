@@ -13,18 +13,35 @@ import { formatDate } from "@/lib/utils/format";
 import { usePermissions } from "@/hooks/use-permissions";
 import { FileText } from "lucide-react";
 
+type CuratableLog = {
+  id: string;
+  formType: string;
+  title: string;
+  blockRef: string | null;
+  includeInSilvaReport: boolean;
+  createdAt: string;
+};
+
 export default function NarrativeWorkspacePage() {
   const qc = useQueryClient();
   const { has } = usePermissions();
   const canDraft = has("reports.draft") || has("reports.release");
   const canRelease = has("reports.release");
+  const canCurate = has("reports.curate") || canDraft;
   const [narrativeDrafts, setNarrativeDrafts] = useState<Record<string, string>>({});
+  const [selectedLogIds, setSelectedLogIds] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [activeId, setActiveId] = useState<string>("");
 
   const { data: drafts = [], isLoading } = useQuery<Report[]>({
     queryKey: ["reports", { status: "draft" }],
     queryFn: () => reportApi.findAll({ status: "draft" }),
+  });
+
+  const { data: curatableLogs = [] } = useQuery<CuratableLog[]>({
+    queryKey: ["curatable-logs"],
+    queryFn: () => reportApi.listCuratableLogs(),
+    enabled: canCurate,
   });
 
   const queue = useMemo(
@@ -53,6 +70,23 @@ export default function NarrativeWorkspacePage() {
     },
     onError: (err) => setError(getApiErrorMessage(err, "Could not release report")),
   });
+
+  const patchSections = useMutation({
+    mutationFn: ({ id, includeLogIds }: { id: string; includeLogIds: string[] }) =>
+      reportApi.patchSections(id, { includeLogIds }),
+    onSuccess: () => {
+      setError("");
+      qc.invalidateQueries({ queryKey: ["reports"] });
+      qc.invalidateQueries({ queryKey: ["curatable-logs"] });
+    },
+    onError: (err) => setError(getApiErrorMessage(err, "Could not update report sections")),
+  });
+
+  const toggleLog = (id: string) => {
+    setSelectedLogIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  };
 
   const narrative = selected
     ? narrativeDrafts[selected.id] ?? selected.narrative ?? ""
@@ -158,6 +192,62 @@ export default function NarrativeWorkspacePage() {
                     {selected.narrative || "No narrative yet."}
                   </p>
                 )}
+
+                {canCurate && selected ? (
+                  <div className="space-y-3 border-t pt-4">
+                    <p className="text-sm font-medium">Curate Silva field logs</p>
+                    <p className="text-xs text-muted-foreground">
+                      Pick validated daily logs to include in the released report snapshot.
+                    </p>
+                    <div className="max-h-48 space-y-2 overflow-y-auto rounded-md border p-2">
+                      {curatableLogs.length === 0 ? (
+                        <p className="text-xs text-muted-foreground">No validated logs available.</p>
+                      ) : (
+                        curatableLogs.map((log) => (
+                          <label
+                            key={log.id}
+                            className="flex cursor-pointer items-start gap-2 text-sm"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={
+                                selectedLogIds.includes(log.id) || log.includeInSilvaReport
+                              }
+                              onChange={() => toggleLog(log.id)}
+                              className="mt-1"
+                            />
+                            <span>
+                              <span className="font-medium">{log.title}</span>
+                              <span className="block text-xs text-muted-foreground">
+                                {log.formType} · {log.blockRef || "—"} · {formatDate(log.createdAt)}
+                              </span>
+                            </span>
+                          </label>
+                        ))
+                      )}
+                    </div>
+                    <div className="flex justify-end">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        disabled={patchSections.isPending || selectedLogIds.length === 0}
+                        onClick={() =>
+                          patchSections.mutate({
+                            id: selected.id,
+                            includeLogIds: selectedLogIds,
+                          })
+                        }
+                      >
+                        Preview sections
+                      </Button>
+                    </div>
+                    {selected.sections ? (
+                      <pre className="max-h-40 overflow-auto rounded-md bg-muted/60 p-2 text-xs">
+                        {JSON.stringify(selected.sections, null, 2)}
+                      </pre>
+                    ) : null}
+                  </div>
+                ) : null}
               </CardContent>
             </Card>
           ) : null}

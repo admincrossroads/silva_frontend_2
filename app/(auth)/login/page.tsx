@@ -21,10 +21,44 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-const demoAccounts = [
-  { label: "Silva Owner", email: "owner@silva.example", icon: User },
-  { label: "SPX Principal", email: "principal@spx.example", icon: Shield },
-  { label: "B-Agro Field Lead", email: "lead@bagro.example", icon: Truck },
+const DEMO_PASSWORD = "Password123!";
+
+const demoGroups = [
+  {
+    heading: "Silva",
+    icon: User,
+    accounts: [
+      { label: "Owner", email: "owner@silva.example" },
+      { label: "Country Manager", email: "naomi@silva.example" },
+      { label: "Finance", email: "finance@silva.example" },
+    ],
+  },
+  {
+    heading: "SPX",
+    icon: Shield,
+    accounts: [
+      { label: "Principal", email: "principal@spx.example" },
+      { label: "Planner", email: "handler@spx.example" },
+      { label: "Field Supervisor", email: "supervisor@spx.example" },
+      { label: "System Admin", email: "admin@spx.example" },
+    ],
+  },
+  {
+    heading: "B-Agro",
+    icon: Truck,
+    accounts: [
+      { label: "Manager", email: "manager@bagro.example" },
+      { label: "Admin", email: "admin@bagro.example" },
+      { label: "Field Lead", email: "lead@bagro.example" },
+      { label: "Supervisor", email: "supervisor@bagro.example" },
+      { label: "Worker", email: "worker@bagro.example" },
+    ],
+  },
+  {
+    heading: "Highland",
+    icon: Truck,
+    accounts: [{ label: "Admin", email: "admin@highland.example" }],
+  },
 ];
 
 export default function LoginPage() {
@@ -63,7 +97,7 @@ export default function LoginPage() {
   const onDemoLogin = async (email: string) => {
     try {
       setDemoLoading(email);
-      await doLogin(email, "Password123!");
+      await doLogin(email, DEMO_PASSWORD);
     } catch (err: any) {
       setError(getApiErrorMessage(err, "Demo login failed — is the API running on :5000?"));
     } finally {
@@ -134,19 +168,37 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <div className="grid gap-2">
-        {demoAccounts.map((demo) => (
-          <button
-            key={demo.email}
-            type="button"
-            disabled={!!demoLoading || isSubmitting}
-            onClick={() => onDemoLogin(demo.email)}
-            className="flex items-center gap-3 rounded-xl border border-border bg-card/80 px-4 py-3 text-sm font-medium transition hover:border-primary/40 hover:bg-accent/60 disabled:opacity-50"
-          >
-            <demo.icon className="h-4 w-4 text-primary" />
-            <span className="flex-1 text-left">{demo.label}</span>
-            <ArrowRight className="h-3.5 w-3.5 opacity-40" />
-          </button>
+      <p className="text-center text-xs text-muted-foreground">
+        Password for every seeded user: <span className="font-medium text-foreground">{DEMO_PASSWORD}</span>
+      </p>
+
+      <div className="grid gap-5">
+        {demoGroups.map((group) => (
+          <div key={group.heading} className="space-y-2">
+            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              <group.icon className="h-3.5 w-3.5 text-primary" />
+              {group.heading}
+            </div>
+            <div className="grid gap-2">
+              {group.accounts.map((demo) => (
+                <button
+                  key={demo.email}
+                  type="button"
+                  disabled={!!demoLoading || isSubmitting}
+                  onClick={() => onDemoLogin(demo.email)}
+                  className="flex items-center gap-3 rounded-xl border border-border bg-card/80 px-4 py-2.5 text-sm font-medium transition hover:border-primary/40 hover:bg-accent/60 disabled:opacity-50"
+                >
+                  <span className="flex-1 text-left">{demo.label}</span>
+                  <span className="hidden text-xs font-normal text-muted-foreground sm:inline">{demo.email}</span>
+                  {demoLoading === demo.email ? (
+                    <span className="text-xs text-muted-foreground">Signing in…</span>
+                  ) : (
+                    <ArrowRight className="h-3.5 w-3.5 opacity-40" />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
     </div>

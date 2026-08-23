@@ -24,6 +24,10 @@ export const ifsFormApi = {
   validate: (id: string) => api.post(`/ifs-forms/${id}/validate`, {}).then((r) => r.data.data),
   reject: (id: string, reason: string) =>
     api.post(`/ifs-forms/${id}/reject`, { reason }).then((r) => r.data.data),
+  vendorReview: (id: string) =>
+    api.post(`/ifs-forms/${id}/vendor-review`, {}).then((r) => r.data.data),
+  setIncludeInReport: (id: string, includeInSilvaReport: boolean) =>
+    api.patch(`/ifs-forms/${id}/include-in-report`, { includeInSilvaReport }).then((r) => r.data.data),
 };
 
 export const seasonCalendarApi = {

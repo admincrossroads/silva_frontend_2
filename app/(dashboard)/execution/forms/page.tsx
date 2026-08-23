@@ -55,6 +55,11 @@ export default function ExecutionFormsPage() {
   const role = (user?.role || "") as RoleKey;
   const canCreate = isVendorRole(role) || isSpxRole(role);
   const canValidate = isSpxRole(role) || has("afe.validate");
+  const canReview =
+    has("ifs_forms.review") ||
+    role === "vendor_manager" ||
+    role === "vendor_supervisor" ||
+    role === "vendor_admin";
 
   const [formType, setFormType] = useState("daily_work_log");
   const [title, setTitle] = useState("");
@@ -133,6 +138,11 @@ export default function ExecutionFormsPage() {
     mutationFn: (id: string) => ifsFormApi.reject(id, "Needs correction before acceptance"),
     onSuccess: invalidate,
     onError: (err) => setError(getApiErrorMessage(err, "Reject failed")),
+  });
+  const vendorReview = useMutation({
+    mutationFn: (id: string) => ifsFormApi.vendorReview(id),
+    onSuccess: invalidate,
+    onError: (err) => setError(getApiErrorMessage(err, "Manager review failed")),
   });
 
   const workOrders = Array.isArray(woQuery.data) ? woQuery.data : [];
@@ -234,6 +244,7 @@ export default function ExecutionFormsPage() {
                 <option value="">All statuses</option>
                 <option value="draft">Draft</option>
                 <option value="submitted">Submitted</option>
+                <option value="vendor_reviewed">Vendor reviewed</option>
                 <option value="validated">Validated</option>
                 <option value="rejected">Rejected</option>
               </NativeSelect>
@@ -311,10 +322,15 @@ export default function ExecutionFormsPage() {
                 <div className="flex flex-wrap gap-2 justify-end">
                   {selectedQuery.data.status === "draft" && canCreate ? (
                     <Button size="sm" onClick={() => submit.mutate(selectedQuery.data.id)}>
-                      Submit to SPX
+                      Submit for manager review
                     </Button>
                   ) : null}
-                  {selectedQuery.data.status === "submitted" && canValidate ? (
+                  {selectedQuery.data.status === "submitted" && canReview ? (
+                    <Button size="sm" onClick={() => vendorReview.mutate(selectedQuery.data.id)}>
+                      Manager approve
+                    </Button>
+                  ) : null}
+                  {selectedQuery.data.status === "vendor_reviewed" && canValidate ? (
                     <>
                       <Button size="sm" variant="secondary" onClick={() => reject.mutate(selectedQuery.data.id)}>
                         Reject

@@ -19,4 +19,10 @@ export const reportApi = {
     api.patch(`/reports/${id}/narrative`, { narrative }).then((r) => r.data.data),
 
   release: (id: string) => api.post(`/reports/${id}/release`, {}).then((r) => r.data.data),
+
+  listCuratableLogs: () =>
+    api.get("/reports/curatable-logs/list").then((r) => r.data.data),
+
+  patchSections: (id: string, body: { includeLogIds?: string[] }) =>
+    api.patch(`/reports/${id}/sections`, body).then((r) => r.data.data),
 };

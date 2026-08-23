@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
 import {
   useWorkOrder,
   useIssueWorkOrder,
@@ -8,21 +9,53 @@ import {
   useCompleteWorkOrder,
   useCloseWorkOrder,
 } from "@/hooks/use-work-orders";
+import { ifsFormApi } from "@/lib/api/field-ops";
+import { getApiErrorMessage } from "@/lib/api/errors";
+import { useAuth } from "@/hooks/use-auth";
+import { isVendorRole } from "@/lib/config/role-access";
+import type { RoleKey } from "@/lib/utils/constants";
 import { StatusBadge } from "@/components/badges/status-badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { AttachmentsPanel } from "@/components/attachments/attachments-panel";
 import { ArrowLeft } from "lucide-react";
+import { useState } from "react";
 
 export default function WorkOrderDetailPage() {
   const { woId } = useParams<{ woId: string }>();
   const router = useRouter();
+  const { user } = useAuth();
+  const role = (user?.role || "") as RoleKey;
+  const canQuickLog = role === "vendor_field_lead" || role === "vendor_worker";
   const { data: wo, isLoading } = useWorkOrder(woId);
+  const [logTitle, setLogTitle] = useState("Daily work log");
+  const [logSummary, setLogSummary] = useState("");
+  const [logError, setLogError] = useState("");
 
   const issueMutation = useIssueWorkOrder();
   const startMutation = useStartWorkOrder();
   const completeMutation = useCompleteWorkOrder();
   const closeMutation = useCloseWorkOrder();
+
+  const quickLog = useMutation({
+    mutationFn: async () => {
+      const form = await ifsFormApi.create({
+        formType: "daily_work_log",
+        title: logTitle,
+        workOrderId: woId,
+        payload: { summary: logSummary, hoursWorked: 8 },
+      });
+      return ifsFormApi.submit(form.id);
+    },
+    onSuccess: () => {
+      setLogError("");
+      setLogSummary("");
+      router.push("/execution/forms");
+    },
+    onError: (err) => setLogError(getApiErrorMessage(err, "Could not submit log")),
+  });
 
   if (isLoading) return <p className="text-muted-foreground p-6">Loading…</p>;
   if (!wo) return <p className="text-muted-foreground p-6">Work order not found.</p>;
@@ -94,6 +127,35 @@ export default function WorkOrderDetailPage() {
           </Button>
         )}
       </div>
+
+      {canQuickLog && wo.status !== "draft" && isVendorRole(role) ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Quick monitoring log</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Field Lead desk — submit a daily work log linked to this WO without leaving the page.
+            </p>
+            {logError ? <p className="text-sm text-destructive">{logError}</p> : null}
+            <Input label="Title" value={logTitle} onChange={(e) => setLogTitle(e.target.value)} />
+            <Textarea
+              label="Summary"
+              value={logSummary}
+              onChange={(e) => setLogSummary(e.target.value)}
+              placeholder="What happened in the field today?"
+            />
+            <div className="flex justify-end">
+              <Button
+                disabled={quickLog.isPending || !logSummary.trim()}
+                onClick={() => quickLog.mutate()}
+              >
+                Submit daily log
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <AttachmentsPanel
         entityType="work_order"
