@@ -10,7 +10,7 @@ import { Card } from "@/components/ui/card";
 
 /** Standard page wrapper — use on every dashboard page */
 export function PageShell({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn("space-y-6 animate-fade-in", className)}>{children}</div>;
+  return <div className={cn("min-w-0 space-y-4 animate-fade-in sm:space-y-6", className)}>{children}</div>;
 }
 
 type PageHeaderProps = {

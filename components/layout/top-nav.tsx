@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { Menu, Bell } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Breadcrumb } from "./breadcrumb";
 import { NotificationBell } from "./notification-bell";
@@ -18,41 +17,44 @@ export function TopNav() {
   const { activeFarmEstate } = useActiveFarmEstate();
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b bg-background/95 px-4 shadow-sm backdrop-blur-md">
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-9 w-9 md:hidden"
-        onClick={() => setMobileNavOpen(true)}
-        aria-label="Open navigation menu"
-      >
-        <Menu className="h-5 w-5" />
-      </Button>
-
-      <div className="hidden min-w-0 flex-1 md:block">
-        <Breadcrumb />
-      </div>
-
-      <div className="flex min-w-0 flex-1 items-center md:hidden">
-        <p className="truncate text-sm font-medium text-foreground">
-          {activeFarmEstate?.name || "Coffee Field OS"}
-        </p>
-      </div>
-
-      <div className="flex items-center gap-1.5 sm:gap-2">
-        <div className="hidden sm:flex sm:items-center sm:gap-2">
-          <FarmEstateSwitcher />
-          <ProgramSwitcher />
-        </div>
-        <LanguageToggle />
-        <ThemeToggle />
-        <NotificationBell />
-        <Button variant="ghost" size="icon" className="h-9 w-9 sm:hidden" asChild>
-          <Link href="/notifications" aria-label="Notifications">
-            <Bell className="h-4 w-4" />
-          </Link>
+    <header className="sticky top-0 z-30 shrink-0 border-b bg-background/95 shadow-sm backdrop-blur-md">
+      <div className="flex h-14 items-center gap-2 px-3 sm:gap-3 sm:px-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-9 w-9 shrink-0 md:hidden"
+          onClick={() => setMobileNavOpen(true)}
+          aria-label="Open navigation menu"
+        >
+          <Menu className="h-5 w-5" />
         </Button>
-        <UserMenu />
+
+        <div className="hidden min-w-0 flex-1 md:block">
+          <Breadcrumb />
+        </div>
+
+        <div className="min-w-0 flex-1 md:hidden">
+          <p className="truncate text-sm font-medium text-foreground">
+            {activeFarmEstate?.name || "Coffee Field OS"}
+          </p>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-0.5 sm:gap-1.5">
+          <div className="hidden items-center gap-2 lg:flex">
+            <FarmEstateSwitcher />
+            <ProgramSwitcher />
+          </div>
+          <LanguageToggle />
+          <ThemeToggle />
+          <NotificationBell />
+          <UserMenu />
+        </div>
+      </div>
+
+      {/* Mobile / tablet scope controls — farm + program stay reachable below md/lg */}
+      <div className="flex items-center gap-2 overflow-x-auto border-t px-3 py-2 lg:hidden">
+        <FarmEstateSwitcher compact />
+        <ProgramSwitcher compact />
       </div>
     </header>
   );

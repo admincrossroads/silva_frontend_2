@@ -3,9 +3,9 @@ import { Coffee } from "lucide-react";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-muted/20 lg:grid lg:grid-cols-[1.05fr_0.95fr]">
+    <div className="min-h-dvh bg-muted/20 lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
       {/* Brand panel — desktop */}
-      <section className="relative hidden flex-col justify-between overflow-hidden bg-[hsl(165_32%_10%)] p-10 text-[hsl(150_20%_94%)] xl:p-14 lg:flex">
+      <section className="relative hidden min-h-dvh flex-col justify-between overflow-hidden bg-[hsl(165_32%_10%)] p-8 text-[hsl(150_20%_94%)] lg:flex xl:p-14">
         <div
           className="pointer-events-none absolute inset-0 opacity-90"
           style={{
@@ -25,7 +25,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/25 ring-1 ring-primary/40">
             <Coffee className="h-5 w-5 text-[hsl(152_70%_72%)]" />
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="font-display text-2xl tracking-tight text-white">Coffee Field OS</p>
             <p className="text-xs uppercase tracking-[0.22em] text-white/45">Multi-tenant field OS</p>
           </div>
@@ -33,30 +33,35 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
         <div className="relative z-10 max-w-md space-y-6">
           <div className="space-y-2">
-            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[hsl(152_50%_65%)]">The instrument chain</p>
-            <h1 className="font-display text-4xl leading-[1.1] text-white text-balance xl:text-5xl">
+            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[hsl(152_50%_65%)]">
+              The instrument chain
+            </p>
+            <h1 className="font-display text-3xl leading-[1.1] text-balance text-white lg:text-4xl xl:text-5xl">
               Plan → Authorize → Execute → Settle
             </h1>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-white/65">
-            Asset owners govern. Program managers operate. Vendors execute. One workspace from AFP to settlement
-            with role firewalls built in.
+            Asset owners govern. Program managers operate. Vendors execute. One workspace from AFP to
+            settlement with role firewalls built in.
           </p>
           <ol className="grid grid-cols-3 gap-2 text-center text-[10px] font-medium uppercase tracking-wider text-white/50">
             {["AFP", "AFE", "WO", "FT", "PR", "STL"].map((step) => (
-              <li key={step} className="rounded-lg border border-white/10 bg-white/5 py-2 font-mono text-[hsl(152_50%_68%)]">
+              <li
+                key={step}
+                className="rounded-lg border border-white/10 bg-white/5 py-2 font-mono text-[hsl(152_50%_68%)]"
+              >
                 {step}
               </li>
             ))}
-          </ol> 
+          </ol>
         </div>
 
         <p className="relative z-10 text-xs text-white/40">Coffee Field OS</p>
       </section>
 
       {/* Form panel */}
-      <section className="flex min-h-screen flex-col">
-        <div className="flex flex-1 items-center justify-center p-5 sm:p-8 lg:p-10">{children}</div>
+      <section className="flex min-h-dvh flex-col">
+        <div className="flex flex-1 items-center justify-center p-4 sm:p-6 lg:p-10">{children}</div>
       </section>
     </div>
   );

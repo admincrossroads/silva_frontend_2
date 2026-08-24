@@ -114,8 +114,8 @@ export function FieldMobileNav() {
         </div>
       ) : null}
 
-      <nav className="fixed bottom-0 inset-x-0 z-40 border-t bg-background/95 backdrop-blur-md md:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
-        <div className="relative grid grid-cols-5 h-14">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(0,0,0,0.06)] backdrop-blur-md md:hidden">
+        <div className="relative grid h-14 grid-cols-5">
           {tabs.slice(0, 2).map((tab) => {
             const active = tab.match(pathname);
             const Icon = tab.icon;
@@ -167,7 +167,6 @@ export function FieldMobileNav() {
             );
           })}
         </div>
-        <div className="h-[env(safe-area-inset-bottom)]" />
       </nav>
     </>
   );

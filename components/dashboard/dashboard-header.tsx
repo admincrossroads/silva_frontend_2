@@ -34,11 +34,11 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
   });
 
   return (
-    <div className="dashboard-header rounded-xl border bg-card/80 backdrop-blur-sm px-5 py-4 shadow-sm">
+    <div className="dashboard-header rounded-xl border bg-card/80 px-4 py-4 shadow-sm backdrop-blur-sm sm:px-5">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-        <div>
+        <div className="min-w-0">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{today}</p>
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+          <h1 className="font-display text-xl font-semibold tracking-tight text-foreground sm:text-2xl md:text-3xl">
             {greeting(t, isVendor)}, {user.name.split(" ")[0]}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">

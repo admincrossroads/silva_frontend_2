@@ -10,7 +10,7 @@ type WorkspaceLoaderProps = {
 
 export function WorkspaceLoader({ label = "Loading workspace…", className }: WorkspaceLoaderProps) {
   return (
-    <div className={cn("flex h-screen flex-col items-center justify-center bg-muted/30", className)}>
+    <div className={cn("flex h-dvh flex-col items-center justify-center bg-muted/30", className)}>
       <div className="flex flex-col items-center gap-4 animate-fade-in">
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
           <Coffee className="h-7 w-7 text-primary" />

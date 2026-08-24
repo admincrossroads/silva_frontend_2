@@ -216,8 +216,8 @@ export function InteractiveSeasonTimeline({
         {hoverWeek ? <span className="tabular-nums">Week {hoverWeek}</span> : null}
       </div>
 
-      <div className="overflow-x-auto rounded-lg border bg-muted/10 p-3">
-        <div ref={trackRef} className="min-w-[960px] select-none space-y-1">
+      <div className="overflow-x-auto rounded-lg border bg-muted/10 p-2 sm:p-3">
+        <div ref={trackRef} className="min-w-[640px] select-none space-y-1 sm:min-w-[800px] lg:min-w-[960px]">
           {/* Week header — range selection target */}
           <div
             className={cn(

@@ -149,14 +149,14 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10">
-      <div className="grid gap-6 md:grid-cols-[1fr_0.52fr]">
-        <div className="space-y-6">
+    <div className="mx-auto min-h-dvh w-full max-w-5xl px-3 py-6 sm:px-4 sm:py-10">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,0.52fr)]">
+        <div className="min-w-0 space-y-6">
           <div>
             <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-primary">
               Getting started
             </p>
-            <h1 className="mt-2 font-display text-3xl tracking-tight">
+            <h1 className="mt-2 font-display text-2xl tracking-tight sm:text-3xl">
               {tenant?.displayName ? `Welcome, ${tenant.displayName}` : "Welcome"}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -191,7 +191,7 @@ export default function OnboardingPage() {
           {phase === "intro" && (
             <div
               key={slide.id}
-              className="rounded-2xl border border-border/80 bg-white/80 p-6 shadow-sm backdrop-blur-sm animate-[landing-rise_0.4s_ease-out]"
+              className="rounded-2xl border border-border/80 bg-card/80 p-4 shadow-sm backdrop-blur-sm animate-[landing-rise_0.4s_ease-out] sm:p-6"
             >
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/12 text-primary">
                 <SlideIcon className="h-5 w-5" />
@@ -213,10 +213,11 @@ export default function OnboardingPage() {
                 </ul>
               )}
 
-              <div className="mt-8 flex flex-wrap items-center justify-between gap-2">
+              <div className="mt-8 flex flex-col-reverse gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                 <Button
                   variant="ghost"
                   size="sm"
+                  className="w-full sm:w-auto"
                   disabled={introStep === 0}
                   onClick={() => setIntroStep((s) => Math.max(0, s - 1))}
                 >
@@ -224,10 +225,11 @@ export default function OnboardingPage() {
                   Back
                 </Button>
 
-                <div className="flex gap-2">
+                <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
                   <Button
                     variant="ghost"
                     size="sm"
+                    className="w-full sm:w-auto"
                     onClick={() => {
                       setPhase("setup");
                       setSetupStep(1);
@@ -239,6 +241,7 @@ export default function OnboardingPage() {
                   {introStep < INTRO_SLIDES.length - 1 ? (
                     <Button
                       size="sm"
+                      className="w-full sm:w-auto"
                       onClick={() =>
                         setIntroStep((s) =>
                           Math.min(INTRO_SLIDES.length - 1, s + 1),
@@ -251,6 +254,7 @@ export default function OnboardingPage() {
                   ) : (
                     <Button
                       size="sm"
+                      className="w-full sm:w-auto"
                       onClick={() => {
                         setPhase("setup");
                         setSetupStep(1);
@@ -266,7 +270,7 @@ export default function OnboardingPage() {
           )}
 
           {phase === "setup" && setupStep === 1 && (
-            <div className="rounded-2xl border border-border/80 bg-white/80 p-6 shadow-sm">
+            <div className="rounded-2xl border border-border/80 bg-card/80 p-4 shadow-sm sm:p-6">
               <h2 className="font-display text-xl">Create a program</h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 A Program is the shared workspace that groups your farm estates and the execution partners SPX will coordinate.
@@ -289,16 +293,17 @@ export default function OnboardingPage() {
                   onChange={(e) => setProgramName(e.target.value)}
                 />
 
-                <div className="flex justify-between gap-2">
-                  <Button variant="ghost" onClick={() => setPhase("intro")}>
+                <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
+                  <Button variant="ghost" className="w-full sm:w-auto" onClick={() => setPhase("intro")}>
                     Back to walkthrough
                   </Button>
 
-                  <div className="flex gap-2">
-                    <Button variant="ghost" onClick={() => setSetupStep(2)}>
+                  <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                    <Button variant="ghost" className="w-full sm:w-auto" onClick={() => setSetupStep(2)}>
                       Skip
                     </Button>
                     <Button
+                      className="w-full sm:w-auto"
                       disabled={!programName.trim() || busy}
                       onClick={createProgram}
                     >
@@ -311,7 +316,7 @@ export default function OnboardingPage() {
           )}
 
           {phase === "setup" && setupStep === 2 && (
-            <div className="rounded-2xl border border-border/80 bg-white/80 p-6 shadow-sm">
+            <div className="rounded-2xl border border-border/80 bg-card/80 p-4 shadow-sm sm:p-6">
               <h2 className="font-display text-xl">Tenant branding</h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 This is how your workspace will appear across dashboards (display name + tagline).
@@ -339,11 +344,11 @@ export default function OnboardingPage() {
                   onChange={(e) => setTagline(e.target.value)}
                 />
 
-                <div className="flex justify-between gap-2">
-                  <Button variant="ghost" onClick={() => setSetupStep(1)}>
+                <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
+                  <Button variant="ghost" className="w-full sm:w-auto" onClick={() => setSetupStep(1)}>
                     Back
                   </Button>
-                  <Button disabled={busy} onClick={finish}>
+                  <Button className="w-full sm:w-auto" disabled={busy} onClick={finish}>
                     Go to dashboard
                     <ArrowRight className="ml-1 h-4 w-4" />
                   </Button>
@@ -353,7 +358,7 @@ export default function OnboardingPage() {
           )}
         </div>
 
-        <aside className="hidden md:block">
+        <aside className="hidden min-w-0 lg:block">
           <div className="rounded-2xl border border-border/80 bg-white/60 p-5 shadow-sm backdrop-blur-sm">
             <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
               At a glance

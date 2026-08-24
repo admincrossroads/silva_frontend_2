@@ -31,13 +31,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <TenantBrandProvider>
       <AppShellProvider>
         <WorkspaceScopeSync />
-        <div className="flex h-screen overflow-hidden bg-background">
+        <div className="flex h-dvh max-h-dvh overflow-hidden bg-background">
           <Sidebar />
           <MobileSidebar />
-          <div className="flex min-w-0 flex-1 flex-col overflow-hidden pr-2">
+          <div className="flex min-w-0 flex-1 flex-col overflow-hidden md:pr-2">
             <TopNav />
-            <main className={`flex-1 overflow-y-auto ${isVendor ? "pb-16 md:pb-0" : ""}`}>
-              <div className="mx-auto max-w-7xl px-4 py-5 md:px-6 md:py-7">{children}</div>
+            <main
+              className={`min-h-0 flex-1 overflow-x-hidden overflow-y-auto ${
+                isVendor ? "pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-0" : ""
+              }`}
+            >
+              <div className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-4 sm:py-5 md:px-6 md:py-7">
+                {children}
+              </div>
             </main>
           </div>
           {isVendor ? <FieldMobileNav /> : null}

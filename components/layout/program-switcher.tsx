@@ -9,9 +9,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+
+type ProgramSwitcherProps = {
+  compact?: boolean;
+};
 
 /** Program switcher — only when SPX has multiple programs. Farm areas use FarmEstateSwitcher. */
-export function ProgramSwitcher() {
+export function ProgramSwitcher({ compact = false }: ProgramSwitcherProps) {
   const { programs, activeProgram, switchProgram } = useAuth();
   const { isSpx } = useRole();
 
@@ -24,7 +29,13 @@ export function ProgramSwitcher() {
         void switchProgram(id);
       }}
     >
-      <SelectTrigger className="h-8 w-[140px] text-xs text-muted-foreground">
+      <SelectTrigger
+        className={cn(
+          "h-8 min-w-0 text-xs text-muted-foreground [&>span]:truncate",
+          compact ? "w-[min(10rem,38vw)]" : "w-[140px]",
+        )}
+        aria-label="Program"
+      >
         <SelectValue placeholder="Program" />
       </SelectTrigger>
       <SelectContent>

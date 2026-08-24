@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { QueryProvider } from "@/lib/query-provider";
 import { SiteChrome } from "@/components/marketing/site-chrome";
 import "./globals.css";
@@ -9,13 +9,23 @@ export const metadata: Metadata = {
     "Multi-tenant coffee estate field operations — asset owners govern, program managers operate, vendors execute",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f4f7f5" },
+    { media: "(prefers-color-scheme: dark)", color: "#0d1614" },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="h-full overflow-x-clip">
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -30,7 +40,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="font-sans antialiased">
+      <body className="min-h-dvh overflow-x-clip font-sans antialiased">
         <QueryProvider>
           {children}
           <SiteChrome />
