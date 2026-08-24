@@ -12,11 +12,21 @@ import { StatusBadge } from "@/components/badges/status-badge";
 import { BandBadge } from "@/components/badges/band-badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { AttachmentsPanel } from "@/components/attachments/attachments-panel";
-import { cn } from "@/lib/utils";
-import { Check, Circle, AlertCircle } from "lucide-react";
+import { ActivityFeed, InfoRow, StatusTimeline } from "@/components/items/activity-feed";
+import { DetailPageHeader, PageLoading, PageShell } from "@/components/layout/page-shell";
+import {
+  AlertCircle,
+  Calendar,
+  DollarSign,
+  FileCheck,
+  FileText,
+  Layers,
+  Shield,
+} from "lucide-react";
 
-const STATUS_STEPS = ["draft", "submitted", "validated", "approved", "closed"];
+const STATUS_STEPS = ["draft", "submitted", "validated", "approved", "closed"] as const;
 
 function formatUsd(value: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 }).format(value);
@@ -32,144 +42,101 @@ export default function AfeDetailPage() {
 
   if (isLoading || !afe) {
     return (
-      <div className="space-y-4 animate-pulse">
-        <div className="h-6 w-48 bg-muted rounded" />
-        <div className="h-64 bg-muted rounded-lg" />
-      </div>
+      <PageShell>
+        <PageLoading label="Loading commitment…" />
+      </PageShell>
     );
   }
 
-  const currentStep = STATUS_STEPS.indexOf(afe.status);
   const isRejected = afe.status === "rejected";
   const isTerminal = isRejected || afe.status === "closed";
 
-  const fields = [
-    { label: "ID", value: afe.id },
-    { label: "Operating Discipline", value: afe.operatingDiscipline },
-    { label: "Description", value: afe.description },
-    { label: "Estimated Cost", value: formatUsd(afe.estimatedCostUsd) },
-    { label: "Band", value: <BandBadge band={afe.band} /> },
-    { label: "Silva Approval", value: afe.silvaApprovalRequired ? "Required" : "Not required" },
-    { label: "AFP Line", value: afe.afpLineId },
-    { label: "Created", value: new Date(afe.createdAt).toLocaleDateString() },
-  ];
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <h1 className="page-title">{afe.id}</h1>
-        <BandBadge band={afe.band} />
-        <StatusBadge status={afe.status} />
-      </div>
+    <PageShell>
+      <DetailPageHeader
+        title={afe.description}
+        backHref="/planning/afe"
+        backLabel="AFE register"
+        badges={
+          <>
+            <Badge variant="outline" className="font-mono text-[10px] font-normal">{afe.id}</Badge>
+            <BandBadge band={afe.band} />
+            <StatusBadge status={afe.status} />
+          </>
+        }
+      />
 
-      <Card className="p-4 border-primary/20 bg-primary/5">
-        <p className="text-sm font-medium text-foreground">Schedule 3 — Band {afe.band}</p>
-        <p className="text-xs text-muted-foreground mt-1">
-          {afe.band === "A" && "SPX may decide and issue directly within the approved AFP. Silva is informed in the monthly report."}
-          {afe.band === "B" &&
-            "SPX may issue and must notify Silva within 5 business days. Silva may object within that window; silence is deemed approval."}
-          {afe.band === "C" &&
-            "SPX recommends only. Silva written approval is required before the AFE issues — do not commit resources until approved."}
-          {afe.band === "D" &&
-            "Special Situation / major capital. Silva approval required, with competitive tender evidence where applicable."}
-        </p>
+      <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary/8 via-background to-background">
+        <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Estimated cost</p>
+            <p className="mt-1 font-display text-3xl font-semibold tabular-nums">{formatUsd(afe.estimatedCostUsd)}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{afe.operatingDiscipline} · Band {afe.band}</p>
+          </div>
+          <Badge variant="outline" className="gap-1 py-1">
+            <Shield className="h-3 w-3" />
+            Schedule 3
+          </Badge>
+        </div>
       </Card>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        <Card className="lg:col-span-2 p-5">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Details</h3>
-          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-            {fields.map((f) => (
-              <div key={f.label}>
-                <dt className="text-2xs font-medium text-muted-foreground uppercase tracking-wider">{f.label}</dt>
-                <dd className="mt-0.5 text-sm font-medium text-foreground">{f.value}</dd>
-              </div>
-            ))}
-          </dl>
-        </Card>
+        <div className="space-y-4 lg:col-span-2">
+          <Card className="p-5">
+            <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <FileText className="h-3.5 w-3.5" />
+              Information
+            </h3>
+            <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <InfoRow icon={Layers} label="Discipline" value={afe.operatingDiscipline} />
+              <InfoRow icon={FileCheck} label="Band" value={`Band ${afe.band}`} />
+              <InfoRow icon={FileText} label="Description" value={afe.description} className="sm:col-span-2" />
+              <InfoRow icon={DollarSign} label="Estimated cost" value={formatUsd(afe.estimatedCostUsd)} />
+              <InfoRow icon={Shield} label="Silva approval" value={afe.silvaApprovalRequired ? "Required" : "Not required"} />
+              <InfoRow icon={Calendar} label="AFP line" value={afe.afpLineId} className="sm:col-span-2" />
+            </dl>
+          </Card>
 
-        <Card className="p-5">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Progress</h3>
-          <ol className="space-y-3">
-            {STATUS_STEPS.map((step, idx) => {
-              const completed = idx < currentStep;
-              const current = idx === currentStep && !isRejected;
-              return (
-                <li key={step} className="flex items-center gap-3">
-                  <div
-                    className={cn(
-                      "flex h-5 w-5 items-center justify-center rounded-full border",
-                      completed && "bg-primary border-primary",
-                      current && "border-primary bg-primary/10",
-                      !completed && !current && "border-border bg-background"
-                    )}
-                  >
-                    {completed && <Check className="h-3 w-3 text-primary-foreground" />}
-                    {current && <Circle className="h-2 w-2 fill-primary text-primary" />}
-                  </div>
-                  <span className={cn("text-sm", completed || current ? "font-medium text-foreground" : "text-muted-foreground")}>
-                    {step.charAt(0).toUpperCase() + step.slice(1)}
-                  </span>
-                </li>
-              );
-            })}
-            {isRejected && (
-              <li className="flex items-center gap-3">
-                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-destructive border-destructive">
-                  <AlertCircle className="h-3 w-3 text-destructive-foreground" />
-                </div>
-                <span className="text-sm font-medium text-destructive">Rejected</span>
-              </li>
-            )}
-          </ol>
+          <ActivityFeed entityType="afe" entityId={afe.id} />
+        </div>
+
+        <Card className="p-5 lg:sticky lg:top-20 lg:self-start">
+          <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status timeline</h3>
+          {isRejected ? (
+            <div className="mb-4 flex items-center gap-2 text-sm text-destructive">
+              <AlertCircle className="h-4 w-4" />
+              Rejected
+            </div>
+          ) : (
+            <StatusTimeline steps={STATUS_STEPS} current={afe.status} />
+          )}
+
+          {!isTerminal ? (
+            <div className="mt-6 space-y-2 border-t pt-4">
+              {afe.status === "draft" ? (
+                <Button className="w-full" onClick={() => submitAfe.mutate({ id: afe.id, comment: "" })} disabled={submitAfe.isPending}>
+                  Submit for review
+                </Button>
+              ) : null}
+              {afe.status === "submitted" ? (
+                <Button className="w-full" onClick={() => validateAfe.mutate({ id: afe.id, comment: "" })} disabled={validateAfe.isPending}>
+                  Validate
+                </Button>
+              ) : null}
+              {afe.status === "validated" ? (
+                <Button className="w-full" onClick={() => approveAfe.mutate({ id: afe.id, comment: "" })} disabled={approveAfe.isPending}>
+                  Approve
+                </Button>
+              ) : null}
+              <Button variant="destructive" className="w-full" onClick={() => rejectAfe.mutate({ id: afe.id, reason: "" })} disabled={rejectAfe.isPending}>
+                Reject
+              </Button>
+            </div>
+          ) : null}
         </Card>
       </div>
 
-      {!isTerminal && (
-        <div className="sticky bottom-0 -mx-6 -mb-6 px-6 py-3 bg-background/95 backdrop-blur-sm border-t border-border flex items-center justify-end gap-2">
-          {afe.status === "draft" && (
-            <Button
-              size="sm"
-              className="text-xs"
-              onClick={() => submitAfe.mutate({ id: afe.id, comment: "" })}
-              disabled={submitAfe.isPending}
-            >
-              Submit for Review
-            </Button>
-          )}
-          {afe.status === "submitted" && (
-            <Button
-              size="sm"
-              className="text-xs"
-              onClick={() => validateAfe.mutate({ id: afe.id, comment: "" })}
-              disabled={validateAfe.isPending}
-            >
-              Validate
-            </Button>
-          )}
-          {afe.status === "validated" && (
-            <Button
-              size="sm"
-              className="text-xs"
-              onClick={() => approveAfe.mutate({ id: afe.id, comment: "" })}
-              disabled={approveAfe.isPending}
-            >
-              Approve
-            </Button>
-          )}
-          <Button
-            size="sm"
-            variant="destructive"
-            className="text-xs"
-            onClick={() => rejectAfe.mutate({ id: afe.id, reason: "" })}
-            disabled={rejectAfe.isPending}
-          >
-            Reject
-          </Button>
-        </div>
-      )}
-
       <AttachmentsPanel entityType="afe" entityId={afe.id} canUpload={afe.status === "draft"} />
-    </div>
+    </PageShell>
   );
 }

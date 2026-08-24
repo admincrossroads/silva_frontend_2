@@ -2,19 +2,41 @@
 
 import { useEffect } from "react";
 import { useAuthStore } from "@/stores/auth-store";
-
-/** Applies tenant branding CSS variables when available. */
+import {
+  applyWorkspaceTheme,
+  clearWorkspaceThemeOverrides,
+  resolveWorkspaceColor,
+} from "@/lib/branding/workspace-theme";
 export function TenantBrandProvider({ children }: { children: React.ReactNode }) {
   const tenant = useAuthStore((s) => s.tenant);
   const activeProgram = useAuthStore((s) => s.activeProgram);
 
   useEffect(() => {
-    const color =
-      (tenant?.branding as { primaryColor?: string } | null)?.primaryColor ||
-      (activeProgram?.branding as { primaryColor?: string } | null)?.primaryColor;
-    if (color && typeof document !== "undefined") {
-      document.documentElement.style.setProperty("--tenant-accent", color);
-    }
+    const syncTheme = () => {
+      const color = resolveWorkspaceColor(
+        tenant?.branding?.primaryColor,
+        activeProgram?.branding?.primaryColor,
+      );
+      const isDark = document.documentElement.classList.contains("dark");
+      if (color) {
+        applyWorkspaceTheme(color, isDark);
+      } else {
+        clearWorkspaceThemeOverrides();
+      }
+    };
+
+    syncTheme();
+
+    const observer = new MutationObserver(syncTheme);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => {
+      observer.disconnect();
+      clearWorkspaceThemeOverrides();
+    };
   }, [tenant, activeProgram]);
 
   return <>{children}</>;

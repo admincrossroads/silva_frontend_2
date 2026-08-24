@@ -17,73 +17,82 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Plus } from "lucide-react";
+import { ModulePageShell } from "@/components/items/module-page-shell";
+import { DraggableBoardView } from "@/components/items/draggable-board-view";
+import { afpToBoardItem, BOARD_TRANSITIONS, boardTransitionKey } from "@/lib/items/board-adapters";
+import type { ModuleViewMode } from "@/lib/config/procore-modules";
+import type { BoardItem } from "@/components/items/types";
+import { useSubmitAfp, useApproveAfp } from "@/hooks/use-afps";
 
 const STATUSES = ["draft", "submitted", "approved", "closed"];
+const BOARD_COLUMNS = ["draft", "submitted", "approved", "closed"] as const;
 
 export default function AfpPage() {
   const [open, setOpen] = useState(false);
+  const [view, setView] = useState<ModuleViewMode>("board");
   const [year, setYear] = useState<number | undefined>();
   const [status, setStatus] = useState<string | undefined>();
   const { has } = usePermissions();
   const canCreate = has("afp.create");
 
-  const { data: afps = [] } = useAfps({ year, status });
+  const { data: afps = [], isLoading } = useAfps({ year, status });
+  const submitAfp = useSubmitAfp();
+  const approveAfp = useApproveAfp();
+  const boardItems = afps.map(afpToBoardItem);
+
+  const handleMove = (item: BoardItem, toStatus: string) => {
+    const action = BOARD_TRANSITIONS.afp[boardTransitionKey(item.status, toStatus)];
+    if (action === "submit") submitAfp.mutate({ id: item.id, comment: "" });
+    else if (action === "approve") approveAfp.mutate({ id: item.id, comment: "" });
+  };
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">AFP Register</h1>
-        {canCreate && (
+    <ModulePageShell
+      moduleId="budget"
+      view={view}
+      onViewChange={setView}
+      actions={
+        canCreate ? (
           <Button onClick={() => setOpen(true)}>
             <Plus className="mr-2 h-4 w-4" /> Create AFP
           </Button>
-        )}
-      </div>
-
-      {!canCreate && (
-        <p className="text-sm text-muted-foreground">
-          Creating AFP lines requires an SPX Principal or Account Handler account (e.g.{" "}
-          <span className="font-mono text-xs">principal@spx.example</span>).
-        </p>
+        ) : undefined
+      }
+      filters={
+        <>
+          <Input
+            type="number"
+            placeholder="Year"
+            className="w-28"
+            onChange={(e) => setYear(e.target.value ? Number(e.target.value) : undefined)}
+          />
+          <Select value={status ?? "all"} onValueChange={(v) => setStatus(v === "all" ? undefined : v)}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All statuses</SelectItem>
+              {STATUSES.map((s) => (
+                <SelectItem key={s} value={s}>
+                  {s.charAt(0).toUpperCase() + s.slice(1)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </>
+      }
+    >
+      {view === "board" ? (
+        <DraggableBoardView columns={BOARD_COLUMNS} items={boardItems} loading={isLoading} onItemMove={handleMove} />
+      ) : (
+        <DataTable columns={afpColumns} data={afps} searchKey="activity" emptyMessage="No AFP lines found" />
       )}
 
-      <div className="flex items-center gap-4">
-        <Input
-          type="number"
-          placeholder="Filter by year"
-          className="w-32"
-          onChange={(e) => setYear(e.target.value ? Number(e.target.value) : undefined)}
-        />
-        <Select
-          value={status ?? "all"}
-          onValueChange={(v) => setStatus(v === "all" ? undefined : v)}
-        >
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            {STATUSES.map((s) => (
-              <SelectItem key={s} value={s}>
-                {s.charAt(0).toUpperCase() + s.slice(1)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <DataTable columns={afpColumns} data={afps} searchKey="activity" />
-
       {canCreate && (
-        <Modal
-          title="Create AFP"
-          description="Add a new Annual Field Plan line item."
-          isOpen={open}
-          onClose={() => setOpen(false)}
-        >
+        <Modal title="Create AFP" isOpen={open} onClose={() => setOpen(false)}>
           <AfpForm onSuccess={() => setOpen(false)} />
         </Modal>
       )}
-    </div>
+    </ModulePageShell>
   );
 }

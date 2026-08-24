@@ -56,6 +56,9 @@ export interface BudgetVsActualRow {
   afpLineId: string;
   activity: string;
   budgetAllocatedUsd: number;
+  budgetAllocatedEtb?: number | null;
+  plannedUsd?: number;
+  plannedEtb?: number;
   committedUsd: number;
   actualUsd: number;
   utilizationPercent: number;
@@ -103,7 +106,7 @@ export interface Afp {
   year: number;
   operatingDiscipline: string;
   activity: string;
-  budgetAllocatedUsd: number;
+  budgetAllocatedUsd: number | null;
   kpiTarget: string;
   notes: string | null;
   status: string;
@@ -127,6 +130,7 @@ export interface Afe {
 export interface WorkOrder {
   id: string;
   afeId: string;
+  activityCatalogId?: string | null;
   category: string;
   activity: string;
   tier: string;
@@ -141,12 +145,23 @@ export interface WorkOrder {
 export interface FieldTicket {
   id: string;
   workOrderId: string;
+  activityCatalogId?: string | null;
+  ticketType?: "field_execution" | "payroll_confirmation";
   activityRecorded: string;
   areaHa: number;
   laborCount: number;
   materialsUsed?: string | null;
+  actualQuantity?: number | null;
+  actualMandays?: number | null;
+  actualCostEtb?: number | null;
+  normValidation?: {
+    ok?: boolean;
+    flags?: Array<{ code: string; message: string; blockPayment?: boolean }>;
+  } | null;
   ticketDate: string;
   status: string;
+  signedOff?: boolean;
+  paymentRequestId?: string | null;
   submittedByUserId?: string;
   createdAt: string;
   updatedAt: string;
@@ -159,6 +174,7 @@ export interface PaymentRequest {
   type: string;
   amountRequestedEtb: number;
   status: string;
+  settlementId?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -188,11 +204,21 @@ export interface Vendor {
   createdAt: string;
 }
 
+export interface ReportSection {
+  key: string;
+  title: string;
+  payload: unknown;
+}
+
 export interface Report {
   id: string;
   type: string;
   period: string;
   status: string;
   narrative: string | null;
-  createdAt: string;
+  generatedAt?: string | null;
+  releasedAt?: string | null;
+  visibleToSilva?: boolean;
+  sections?: ReportSection[];
+  createdAt?: string;
 }

@@ -2,129 +2,132 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { dashboardApi } from "@/lib/api/dashboard";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ClipboardList, FileText, Wallet, ChevronRight } from "lucide-react";
+import { KpiStatCard } from "@/components/dashboard/kpi-stat-card";
+import { DashboardPanel, DashboardPanelEmpty, DashboardPanelRow } from "@/components/dashboard/dashboard-panel";
+import { ActionQueueCard } from "@/components/dashboard/action-queue-card";
+import { useVendorLocale } from "@/hooks/use-vendor-locale";
+import { dashboardTitleKeyForRole } from "@/lib/i18n/vendor-messages";
+import { ClipboardList, FileText, Wallet, Star } from "lucide-react";
 import Link from "next/link";
 
-function StatCard({
-  label,
-  value,
-  icon: Icon,
-  loading,
-}: {
-  label: string;
-  value: string;
-  icon: any;
-  loading: boolean;
-}) {
-  return (
-    <Card className="p-4 flex items-center gap-4">
-      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
-        <Icon className="h-4 w-4 text-muted-foreground" />
-      </div>
-      <div>
-        <p className="stat-label">{label}</p>
-        {loading ? (
-          <div className="h-7 w-12 bg-muted rounded animate-pulse mt-1" />
-        ) : (
-          <p className="stat-value text-xl">{value}</p>
-        )}
-      </div>
-    </Card>
-  );
-}
-
 export function VendorDashboard() {
+  const { t } = useVendorLocale();
   const { data, isLoading } = useQuery({
     queryKey: ["dashboard", "vendor-field"],
     queryFn: () => dashboardApi.vendorField(),
   });
 
+  const activeWo = data?.assignedWorkOrders?.currentCount ?? 0;
+  const draftFt = data?.fieldTickets?.draftCount ?? 0;
+  const upcoming = data?.assignedWorkOrders?.upcomingCount ?? 0;
+  const dueToday = data?.myTasks?.dueTodayCount ?? 0;
+  const awaitingValidation = data?.fieldTickets?.awaitingValidationCount ?? 0;
+
   return (
-    <div className="space-y-5">
-      <p className="text-sm text-muted-foreground">
-        Field workspace: your Work Orders, Field Tickets, Payment Requests, and scorecard only. SPX fees and Silva
-        budgets are not visible here.
-      </p>
-
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          label="Active work orders"
-          value={String(data?.assignedWorkOrders?.currentCount ?? 0)}
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <KpiStatCard
+          label={t("dashboard.activeWorkOrders")}
+          value={String(activeWo)}
+          sublabel={`${upcoming} ${t("dashboard.upcoming")}`}
           icon={ClipboardList}
+          tone="primary"
           loading={isLoading}
+          href="/execution/work-orders"
         />
-        <StatCard
-          label="Open tasks"
+        <KpiStatCard
+          label={t("dashboard.openTasks")}
           value={String(data?.myTasks?.openCount ?? 0)}
+          sublabel={dueToday ? `${dueToday} ${t("dashboard.dueToday")}` : t("dashboard.onSchedule")}
           icon={FileText}
+          tone="blue"
           loading={isLoading}
         />
-        <StatCard
-          label="Draft tickets"
-          value={String(data?.fieldTickets?.draftCount ?? 0)}
+        <KpiStatCard
+          label={t("dashboard.draftTickets")}
+          value={String(draftFt)}
+          sublabel={t("dashboard.readyToSubmit")}
           icon={FileText}
+          tone={draftFt > 0 ? "amber" : "slate"}
           loading={isLoading}
+          href="/execution/field-tickets"
         />
-        <StatCard
-          label="Pending payments"
+        <KpiStatCard
+          label={t("dashboard.pendingPayments")}
           value={String(data?.paymentRequests?.pendingCount ?? 0)}
+          sublabel={`${data?.paymentRequests?.verifiedCount ?? 0} ${t("dashboard.verified")}`}
           icon={Wallet}
+          tone="primary"
           loading={isLoading}
+          href="/payments/payment-requests"
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <Card>
-          <div className="flex items-center justify-between px-4 py-3 border-b">
-            <h3 className="text-sm font-semibold text-foreground">Work orders</h3>
-            <Button variant="ghost" size="sm" className="text-2xs gap-1" asChild>
-              <Link href="/execution/work-orders">
-                View all <ChevronRight className="h-3 w-3" />
-              </Link>
-            </Button>
-          </div>
-          <div className="px-4 py-6 text-sm text-muted-foreground">
-            {data?.assignedWorkOrders?.currentCount
-              ? `${data.assignedWorkOrders.currentCount} active, ${data.assignedWorkOrders.upcomingCount} upcoming`
-              : "No active work orders — wait for SPX to issue a Work Order before starting work."}
-          </div>
-        </Card>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2 space-y-6">
+          <DashboardPanel title={t("dashboard.executionSummary")} viewAllHref="/execution/work-orders">
+            <div className="p-4 grid gap-4 sm:grid-cols-2">
+              <div className="rounded-lg border bg-muted/30 p-4">
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  {t("dashboard.workOrders")}
+                </p>
+                <p className="mt-2 text-sm text-foreground">
+                  {activeWo
+                    ? `${activeWo} ${t("dashboard.activeAssignments")}`
+                    : t("dashboard.noActiveWorkOrders")}
+                </p>
+                <Link href="/execution/work-orders" className="mt-2 inline-block text-xs text-primary hover:underline">
+                  {t("dashboard.openWorkOrders")} →
+                </Link>
+              </div>
+              <div className="rounded-lg border bg-muted/30 p-4">
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  {t("dashboard.fieldTickets")}
+                </p>
+                <p className="mt-2 text-sm text-foreground">
+                  {awaitingValidation
+                    ? `${awaitingValidation} ${t("dashboard.awaitingValidation")}`
+                    : t("dashboard.noTicketsAwaiting")}
+                </p>
+                <Link href="/execution/field-tickets" className="mt-2 inline-block text-xs text-primary hover:underline">
+                  {t("dashboard.openFieldTickets")} →
+                </Link>
+              </div>
+            </div>
+          </DashboardPanel>
 
-        <Card>
-          <div className="flex items-center justify-between px-4 py-3 border-b">
-            <h3 className="text-sm font-semibold text-foreground">Field tickets</h3>
-            <Button variant="ghost" size="sm" className="text-2xs gap-1" asChild>
-              <Link href="/execution/field-tickets">
-                View all <ChevronRight className="h-3 w-3" />
-              </Link>
-            </Button>
-          </div>
-          <div className="px-4 py-6 text-sm text-muted-foreground">
-            Submit → supervisor review → SPX validation unlocks Payment Requests.
-            {data?.fieldTickets?.awaitingValidationCount
-              ? ` ${data.fieldTickets.awaitingValidationCount} awaiting SPX validation.`
-              : " No tickets awaiting validation."}
-          </div>
-        </Card>
+          {data?.ownScorecard ? (
+            <DashboardPanel title={t("dashboard.vendorScorecard")}>
+              <div className="p-4 flex items-center gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Star className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="text-3xl font-bold tabular-nums">
+                    {data.ownScorecard.overallScore}
+                    <span className="text-lg text-muted-foreground">/100</span>
+                  </p>
+                  {data.ownScorecard.reviewPeriod ? (
+                    <p className="text-xs text-muted-foreground mt-0.5">{data.ownScorecard.reviewPeriod}</p>
+                  ) : null}
+                  {data.ownScorecard.qualityScore != null ? (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {t("dashboard.quality")} {data.ownScorecard.qualityScore} · {t("dashboard.timeliness")}{" "}
+                      {data.ownScorecard.timelinessScore} · {t("dashboard.cost")} {data.ownScorecard.costAdherenceScore}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+            </DashboardPanel>
+          ) : null}
+        </div>
+
+        <ActionQueueCard
+          title={t("dashboard.fieldActionQueue")}
+          loadingLabel={t("queue.loading")}
+          emptyLabel={t("queue.empty")}
+        />
       </div>
-
-      {data?.ownScorecard ? (
-        <Card className="p-4">
-          <h3 className="text-sm font-semibold text-foreground">Your Vendor Scorecard</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {data.ownScorecard.reviewPeriod}: overall {data.ownScorecard.overallScore}/100
-            {data.ownScorecard.qualityScore != null && (
-              <>
-                {" "}
-                (Q {data.ownScorecard.qualityScore} · T {data.ownScorecard.timelinessScore} · C{" "}
-                {data.ownScorecard.costAdherenceScore})
-              </>
-            )}
-          </p>
-        </Card>
-      ) : null}
     </div>
   );
 }

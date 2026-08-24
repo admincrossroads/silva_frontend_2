@@ -1,78 +1,137 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useSettlement, useAuthorizeSettlement, useMarkSettled } from "@/hooks/use-settlements";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/badges/status-badge";
 import { Button } from "@/components/ui/button";
-import { formatCurrency, formatDate } from "@/lib/utils/format";
-import { ArrowLeft } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { AttachmentsPanel } from "@/components/attachments/attachments-panel";
+import { ActivityFeed, InfoRow, StatusTimeline } from "@/components/items/activity-feed";
+import { DetailPageHeader, PageLoading, PageShell } from "@/components/layout/page-shell";
+import { formatOptionalNumber } from "@/lib/utils/format";
+import { usePermissions } from "@/hooks/use-permissions";
+import { SETTLEMENT_COLUMNS } from "@/lib/items/board-adapters";
+import { Banknote, Calendar, FileText, Layers, User, Wrench } from "lucide-react";
 
 export default function SettlementDetailPage() {
   const { stlId } = useParams<{ stlId: string }>();
-  const router = useRouter();
+  const { has } = usePermissions();
   const { data: stl, isLoading } = useSettlement(stlId);
   const authorize = useAuthorizeSettlement();
   const markSettled = useMarkSettled();
 
-  if (isLoading) return <div className="py-12 text-center text-muted-foreground">Loading...</div>;
-  if (!stl) return <div className="py-12 text-center text-muted-foreground">Not found</div>;
+  const canAuthorize = has("settlements.authorize");
+  const canMarkSettled = has("settlements.mark_settled");
+
+  if (isLoading || !stl) {
+    return (
+      <PageShell>
+        <PageLoading label="Loading settlement…" />
+      </PageShell>
+    );
+  }
+
+  const isTerminal = stl.status === "settled";
+  const amountLabel = `${formatOptionalNumber(stl.amountEtb)} ETB`;
 
   return (
-    <div className="space-y-6">
-      <button onClick={() => router.back()} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" /> Back
-      </button>
+    <PageShell>
+      <DetailPageHeader
+        title={stl.payee}
+        backHref="/payments/settlements"
+        backLabel="Settlements"
+        badges={
+          <>
+            <Badge variant="secondary" className="font-mono text-[10px] font-normal">{stl.id}</Badge>
+            <StatusBadge status={stl.status} />
+          </>
+        }
+      />
 
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Settlement</h1>
-          <p className="font-mono text-sm text-muted-foreground">{stl.id}</p>
+      <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary/8 via-background to-background">
+        <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Owner settlement</p>
+            <p className="mt-1 font-display text-2xl font-semibold">{amountLabel}</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {stl.type.replace(/_/g, " ")} · {stl.paymentRequestId}
+            </p>
+          </div>
+          <Badge variant="outline" className="gap-1 py-1">
+            <Banknote className="h-3 w-3" />
+            Settlement
+          </Badge>
         </div>
-        <StatusBadge status={stl.status} />
-      </div>
+      </Card>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader><CardTitle>Details</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
-            <Row label="Work Order" value={stl.workOrderId} />
-            <Row label="Payment Request" value={stl.paymentRequestId} />
-            <Row label="Type" value={stl.type.replace(/_/g, " ")} />
-            <Row label="Payee" value={stl.payee} />
-            <Row label="Amount (ETB)" value={formatCurrency(stl.amountEtb, "ETB")} />
-            <Row label="Created" value={formatDate(stl.createdAt)} />
-          </CardContent>
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+        <div className="space-y-4 lg:col-span-2">
+          <Card className="p-5">
+            <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <FileText className="h-3.5 w-3.5" />
+              Information
+            </h3>
+            <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <InfoRow icon={User} label="Payee" value={stl.payee} className="sm:col-span-2" />
+              <InfoRow icon={Wrench} label="Work order" value={stl.workOrderId} />
+              <InfoRow icon={FileText} label="Payment request" value={stl.paymentRequestId} />
+              <InfoRow icon={Layers} label="Type" value={stl.type.replace(/_/g, " ")} />
+              <InfoRow icon={Banknote} label="Amount" value={amountLabel} />
+              <InfoRow icon={Calendar} label="Created" value={new Date(stl.createdAt).toLocaleDateString()} />
+            </dl>
+          </Card>
+
+          <ActivityFeed entityType="owner_settlement" entityId={stl.id} />
+          <AttachmentsPanel
+            entityType="owner_settlement"
+            entityId={stl.id}
+            canUpload={stl.status === "draft" && canAuthorize}
+          />
+        </div>
+
+        <Card className="p-5 lg:sticky lg:top-20 lg:self-start">
+          <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status timeline</h3>
+          <StatusTimeline steps={SETTLEMENT_COLUMNS} current={stl.status} />
+
+          {!isTerminal ? (
+            <div className="mt-6 space-y-2 border-t pt-4">
+              {stl.status === "draft" && canAuthorize ? (
+                <Button
+                  className="w-full"
+                  onClick={() => authorize.mutate(stl.id)}
+                  disabled={authorize.isPending}
+                >
+                  Authorize settlement
+                </Button>
+              ) : null}
+              {stl.status === "draft" && !canAuthorize ? (
+                <p className="text-center text-sm text-muted-foreground">
+                  Waiting for SPX to authorize this settlement.
+                </p>
+              ) : null}
+              {stl.status === "authorized" && canMarkSettled ? (
+                <Button
+                  className="w-full"
+                  onClick={() => markSettled.mutate(stl.id)}
+                  disabled={markSettled.isPending}
+                >
+                  Mark as settled
+                </Button>
+              ) : null}
+              {stl.status === "authorized" && !canMarkSettled ? (
+                <p className="text-center text-sm text-muted-foreground">
+                  Waiting for Silva owner or finance to mark this settlement as paid.
+                </p>
+              ) : null}
+            </div>
+          ) : (
+            <p className="mt-6 border-t pt-4 text-center text-sm text-muted-foreground">
+              This settlement has been completed.
+            </p>
+          )}
         </Card>
-
-        <Card>
-          <CardHeader><CardTitle>Actions</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
-            {stl.status === "pending" && (
-              <Button className="w-full" onClick={() => authorize.mutate(stlId)} disabled={authorize.isPending}>
-                Authorize Settlement
-              </Button>
-            )}
-            {stl.status === "authorized" && (
-              <Button className="w-full" onClick={() => markSettled.mutate(stlId)} disabled={markSettled.isPending}>
-                Mark as Settled
-              </Button>
-            )}
-            {stl.status === "settled" && (
-              <p className="text-sm text-muted-foreground text-center py-4">This settlement has been completed.</p>
-            )}
-          </CardContent>
-        </Card>
       </div>
-    </div>
-  );
-}
-
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex justify-between text-sm">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="font-medium capitalize">{value}</span>
-    </div>
+    </PageShell>
   );
 }

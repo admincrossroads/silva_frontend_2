@@ -25,6 +25,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDate } from "@/lib/utils/format";
+import { PageShell, PageHeader, PageContent } from "@/components/layout/page-shell";
 
 type CatalogItem = {
   formType: string;
@@ -138,17 +139,12 @@ export default function ExecutionFormsPage() {
   const workOrders = Array.isArray(woQuery.data) ? woQuery.data : [];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Field forms (IFS)</h1>
-        <p className="text-sm text-muted-foreground">
-          Instrument Field System subset — same Coffee Field OS tools, linked to Work Orders and Field Tickets. Not a
-          parallel B-Agro toolkit.
-        </p>
-      </div>
+    <PageShell>
+      <PageHeader title="Field forms (IFS)" />
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
+      <PageContent>
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-1">
           <CardHeader>
@@ -171,7 +167,6 @@ export default function ExecutionFormsPage() {
                 }`}
               >
                 <p className="font-medium">{item.label}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
               </button>
             ))}
           </CardContent>
@@ -330,6 +325,7 @@ export default function ExecutionFormsPage() {
           ) : null}
         </div>
       </div>
-    </div>
+      </PageContent>
+    </PageShell>
   );
 }

@@ -29,8 +29,38 @@
     --sidebar-foreground: 150 20% 94%;
     --sidebar-accent: 165 24% 16%;
     --sidebar-border: 165 20% 18%;
+    --sidebar-brand: 152 70% 72%;
+    --sidebar-brand-foreground: 152 70% 72%;
     --font-sans: "Manrope", "Segoe UI", sans-serif;
     --font-display: "Fraunces", Georgia, serif;
+  }
+
+  .dark {
+    --background: 165 28% 8%;
+    --foreground: 150 15% 94%;
+    --card: 165 24% 11%;
+    --card-foreground: 150 15% 94%;
+    --popover: 165 24% 11%;
+    --popover-foreground: 150 15% 94%;
+    --primary: 152 50% 42%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 165 20% 16%;
+    --secondary-foreground: 150 12% 88%;
+    --muted: 165 18% 15%;
+    --muted-foreground: 150 8% 58%;
+    --accent: 165 18% 18%;
+    --accent-foreground: 150 15% 92%;
+    --destructive: 4 62% 48%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 165 16% 20%;
+    --input: 165 16% 20%;
+    --ring: 152 50% 42%;
+    --sidebar: 165 32% 6%;
+    --sidebar-foreground: 150 18% 90%;
+    --sidebar-accent: 165 24% 12%;
+    --sidebar-border: 165 20% 14%;
+    --sidebar-brand: 152 65% 68%;
+    --sidebar-brand-foreground: 152 65% 68%;
   }
 
   * {
@@ -40,9 +70,15 @@
   body {
     @apply bg-background text-foreground antialiased;
     background-image:
-      radial-gradient(ellipse 80% 50% at 100% -10%, hsl(152 40% 88% / 0.55), transparent),
-      radial-gradient(ellipse 60% 40% at 0% 100%, hsl(150 20% 90% / 0.45), transparent);
+      radial-gradient(ellipse 80% 50% at 100% -10%, hsl(var(--primary) / 0.14), transparent),
+      radial-gradient(ellipse 60% 40% at 0% 100%, hsl(var(--accent) / 0.45), transparent);
     background-attachment: fixed;
+  }
+
+  .dark body {
+    background-image:
+      radial-gradient(ellipse 70% 45% at 100% -5%, hsl(var(--primary) / 0.22), transparent),
+      radial-gradient(ellipse 50% 35% at 0% 100%, hsl(var(--accent) / 0.35), transparent);
   }
 
   td,
@@ -53,15 +89,15 @@
 
 @layer components {
   .page-header {
-    @apply flex items-center justify-between mb-6;
+    @apply flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-6;
   }
 
   .page-title {
-    @apply font-display text-2xl font-semibold text-foreground tracking-tight;
+    @apply font-display text-2xl font-semibold text-foreground tracking-tight sm:text-3xl;
   }
 
   .page-description {
-    @apply text-sm text-muted-foreground mt-0.5;
+    @apply text-sm text-muted-foreground leading-relaxed;
   }
 
   .stat-value {
@@ -70,6 +106,51 @@
 
   .stat-label {
     @apply text-xs font-medium text-muted-foreground uppercase tracking-wider;
+  }
+
+  .kpi-card {
+    @apply shadow-sm;
+  }
+
+  .dashboard-panel {
+    @apply shadow-sm;
+  }
+
+  .app-sidebar {
+    background-image:
+      linear-gradient(180deg, hsl(var(--sidebar-brand) / 0.12), transparent 28%),
+      linear-gradient(180deg, hsl(var(--sidebar)), hsl(var(--sidebar-accent) / 0.35));
+  }
+
+  .sidebar-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--sidebar-brand) / 0.45) hsl(var(--sidebar-accent) / 0.6);
+  }
+
+  .sidebar-scroll::-webkit-scrollbar {
+    width: 7px;
+  }
+
+  .sidebar-scroll::-webkit-scrollbar-track {
+    margin: 4px 0;
+    border-radius: 9999px;
+    background: hsl(var(--sidebar-accent) / 0.35);
+  }
+
+  .sidebar-scroll::-webkit-scrollbar-thumb {
+    border: 1px solid transparent;
+    border-radius: 9999px;
+    background: hsl(var(--sidebar-brand) / 0.55);
+    background-clip: padding-box;
+  }
+
+  .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--sidebar-brand) / 0.85);
+    background-clip: padding-box;
+  }
+
+  .dashboard-header {
+    @apply border-border/60;
   }
 
   .badge-draft {

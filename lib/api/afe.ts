@@ -1,7 +1,7 @@
 import api from "./index";
 
 export const afeApi = {
-  findAll: (params?: { status?: string; page?: number; pageSize?: number }) =>
+  findAll: (params?: { status?: string; band?: string; page?: number; pageSize?: number }) =>
     api.get("/afes", { params }).then((r) => r.data.data),
 
   findById: (id: string) =>

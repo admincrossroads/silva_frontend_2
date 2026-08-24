@@ -52,12 +52,14 @@ export function DataTable<T>({
 
   return (
     <div className="space-y-3">
-      <DataTableToolbar
-        globalFilter={globalFilter}
-        setGlobalFilter={setGlobalFilter}
-        filterOptions={filterOptions}
-      />
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden shadow-sm">
+        <div className="border-b bg-muted/30 px-3 py-2.5">
+          <DataTableToolbar
+            globalFilter={globalFilter}
+            setGlobalFilter={setGlobalFilter}
+            filterOptions={filterOptions}
+          />
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-table">
             <thead>

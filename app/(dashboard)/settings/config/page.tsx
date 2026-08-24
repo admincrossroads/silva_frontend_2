@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { platformApi } from "@/lib/api/platform";
 import { dashboardApi } from "@/lib/api/dashboard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -13,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DollarSign, Layers, ShieldCheck, Shield } from "lucide-react";
+import { formatBandRange } from "@/lib/utils/compute-band";
 import type { AccountabilityRow, Schedule3Threshold, Schedule4Rule } from "@/types";
 
 export default function ConfigPage() {
@@ -57,26 +60,31 @@ export default function ConfigPage() {
       </Card>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between gap-3">
           <CardTitle className="flex items-center gap-2">
             <Layers className="h-4 w-4" /> Schedule 3 Thresholds
           </CardTitle>
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/settings/governance/bands">Manage bands</Link>
+          </Button>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Band</TableHead>
+                <TableHead>Range</TableHead>
                 <TableHead>Min USD</TableHead>
                 <TableHead>Max USD</TableHead>
                 <TableHead>SPX authority</TableHead>
-                <TableHead>Silva authority</TableHead>
+                <TableHead>Asset owner authority</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {(schedule3Query.data ?? []).map((t) => (
                 <TableRow key={t.band}>
                   <TableCell className="font-medium">Band {t.band}</TableCell>
+                  <TableCell className="text-sm">{formatBandRange(t)}</TableCell>
                   <TableCell>${t.minValueUsd.toLocaleString()}</TableCell>
                   <TableCell>{t.maxValueUsd == null ? "Open" : `$${t.maxValueUsd.toLocaleString()}`}</TableCell>
                   <TableCell>{t.spxAuthority}</TableCell>

@@ -16,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { OrganizationBrandingForm } from "@/components/settings/organization-branding-form";
 import { useAuth } from "@/hooks/use-auth";
 import { platformApi } from "@/lib/api/platform";
 import { getApiErrorMessage } from "@/lib/api/errors";
@@ -23,8 +24,21 @@ import { Users, Building2, Plus } from "lucide-react";
 import { ROLES, type RoleKey } from "@/lib/utils/constants";
 import type { User } from "@/types";
 
+function orgTypeLabel(type: string | undefined) {
+  switch (type) {
+    case "silva":
+      return "Asset owner";
+    case "spx":
+      return "Program manager";
+    case "vendor":
+      return "Execution vendor";
+    default:
+      return type?.replace(/_/g, " ") ?? "—";
+  }
+}
+
 export default function OrganizationPage() {
-  const { user } = useAuth();
+  const { user, tenant } = useAuth();
   const qc = useQueryClient();
   const [inviteOpen, setInviteOpen] = useState(false);
   const [email, setEmail] = useState("");
@@ -34,7 +48,9 @@ export default function OrganizationPage() {
   const isVendorAdmin = role === "vendor_admin";
   const isSystemAdmin = role === "system_admin";
   const isSpxPrincipal = role === "spx_principal";
+  const isSilvaOwner = role === "silva_owner";
   const canInvite = isVendorAdmin || isSpxPrincipal;
+  const canManageBranding = isVendorAdmin || isSpxPrincipal || isSilvaOwner || isSystemAdmin;
 
   const usersQuery = useQuery<User[]>({
     queryKey: ["users"],
@@ -69,29 +85,41 @@ export default function OrganizationPage() {
           {isVendorAdmin ? "Vendor team" : isSystemAdmin ? "Organization directory" : "Organization"}
         </h2>
         <p className="text-sm text-muted-foreground">
-          {isVendorAdmin && "Invite and manage users in your vendor organization."}
-          {isSystemAdmin && "All Silva, SPX, and vendor organizations in the platform."}
-          {isSpxPrincipal && "SPX and partner organization administration."}
-          {role === "silva_owner" && "Silva organization profile and membership."}
+          {isVendorAdmin && "Manage your vendor workspace branding and team members."}
+          {isSystemAdmin && "Platform organizations, branding, and membership."}
+          {isSpxPrincipal && "SPX organization profile, workspace branding, and partner administration."}
+          {isSilvaOwner && "Silva organization profile, workspace branding, and membership."}
+          {!isVendorAdmin && !isSystemAdmin && !isSpxPrincipal && !isSilvaOwner &&
+            "Organization profile and membership."}
         </p>
       </section>
 
+      {canManageBranding ? <OrganizationBrandingForm /> : null}
+
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Building2 className="h-4 w-4" /> Organization Info
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Building2 className="h-4 w-4" /> Organization details
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="flex justify-between text-sm">
+          <div className="flex justify-between gap-4 text-sm">
+            <span className="text-muted-foreground">Display name</span>
+            <span className="font-medium text-right">{tenant?.displayName ?? "—"}</span>
+          </div>
+          <div className="flex justify-between gap-4 text-sm">
             <span className="text-muted-foreground">Organization ID</span>
             <span className="font-mono text-xs">{user?.organizationId ?? "—"}</span>
           </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Type</span>
-            <Badge>{user?.organizationType ?? "—"}</Badge>
+          <div className="flex justify-between gap-4 text-sm">
+            <span className="text-muted-foreground">Slug</span>
+            <span className="font-mono text-xs">{tenant?.slug ?? "—"}</span>
           </div>
-          <div className="flex justify-between text-sm">
+          <div className="flex justify-between gap-4 text-sm">
+            <span className="text-muted-foreground">Type</span>
+            <Badge variant="outline">{orgTypeLabel(user?.organizationType)}</Badge>
+          </div>
+          <div className="flex justify-between gap-4 text-sm">
             <span className="text-muted-foreground">Your role</span>
             <Badge>{role ? (ROLES[role] ?? role) : "—"}</Badge>
           </div>
@@ -101,7 +129,7 @@ export default function OrganizationPage() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-base">
               <Users className="h-4 w-4" /> {isVendorAdmin ? "Team members" : "Members"}
             </CardTitle>
             {canInvite ? (
@@ -119,7 +147,7 @@ export default function OrganizationPage() {
         </CardHeader>
         <CardContent>
           {usersQuery.isLoading ? (
-            <p className="text-sm text-muted-foreground">Loading members...</p>
+            <p className="text-sm text-muted-foreground">Loading members…</p>
           ) : team.length === 0 ? (
             <p className="text-sm text-muted-foreground">No members in scope.</p>
           ) : (
@@ -147,7 +175,7 @@ export default function OrganizationPage() {
         </CardContent>
       </Card>
 
-      <Modal open={inviteOpen} onClose={() => setInviteOpen(false)} title="Invite Member">
+      <Modal open={inviteOpen} onClose={() => setInviteOpen(false)} title="Invite member">
         <form
           className="space-y-4"
           onSubmit={(e) => {
@@ -157,7 +185,7 @@ export default function OrganizationPage() {
         >
           <Input
             id="inviteEmail"
-            label="Email Address"
+            label="Email address"
             type="email"
             placeholder="user@example.com"
             value={email}
@@ -184,10 +212,10 @@ export default function OrganizationPage() {
               </>
             )}
           </Select>
-          {inviteError && <p className="text-sm text-destructive">{inviteError}</p>}
+          {inviteError ? <p className="text-sm text-destructive">{inviteError}</p> : null}
           <div className="flex justify-end">
             <Button type="submit" disabled={invite.isPending || !email}>
-              Send Invite
+              Send invite
             </Button>
           </div>
         </form>

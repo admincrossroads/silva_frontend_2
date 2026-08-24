@@ -7,7 +7,7 @@ import { settingsSectionsFor, settingsTitleFor } from "@/lib/config/role-access"
 import { ROLES, type RoleKey } from "@/lib/utils/constants";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout/page-shell";
 
 function isActive(pathname: string, href: string) {
   if (href === "/settings") return pathname === "/settings";
@@ -23,24 +23,10 @@ export function SettingsNav() {
   const roleLabel = ROLES[user.role as RoleKey] ?? user.role;
 
   return (
-    <div className="space-y-4 border-b pb-4">
-      <div className="space-y-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">{settingsTitleFor(user)}</h1>
-          <Badge variant="secondary">{roleLabel}</Badge>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          {user.role === "system_admin" && "Platform-wide user and organization management."}
-          {user.role === "spx_principal" && "Governance configuration, organizations, and user administration."}
-          {user.role === "vendor_admin" && "Manage your vendor field team and pending invites."}
-          {user.role.startsWith("silva_") && "Organization profile and account preferences."}
-          {!["system_admin", "spx_principal", "vendor_admin"].includes(user.role) &&
-            !user.role.startsWith("silva_") &&
-            "Account preferences for your role."}
-        </p>
-      </div>
+    <div className="space-y-4">
+      <PageHeader title={settingsTitleFor(user)} badge={<Badge variant="secondary">{roleLabel}</Badge>} />
 
-      <nav aria-label="Settings sections" className="flex flex-wrap gap-2">
+      <nav aria-label="Settings sections" className="flex gap-1 overflow-x-auto border-b pb-px scrollbar-none">
         {sections.map((section) => {
           const Icon = section.icon;
           const active = isActive(pathname, section.href);
@@ -50,8 +36,10 @@ export function SettingsNav() {
               href={section.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                buttonVariants({ variant: active ? "secondary" : "outline", size: "sm" }),
-                active && "border-primary/30 bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary",
+                "flex shrink-0 items-center gap-2 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors -mb-px",
+                active
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground hover:border-border",
               )}
             >
               <Icon className="h-4 w-4 shrink-0" />

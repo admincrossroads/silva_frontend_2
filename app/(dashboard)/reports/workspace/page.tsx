@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { formatDate } from "@/lib/utils/format";
 import { usePermissions } from "@/hooks/use-permissions";
+import { PageShell, PageHeader, PageContent } from "@/components/layout/page-shell";
+import Link from "next/link";
 import { FileText } from "lucide-react";
 
 export default function NarrativeWorkspacePage() {
@@ -59,16 +61,12 @@ export default function NarrativeWorkspacePage() {
     : "";
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Narrative workspace</h1>
-        <p className="text-sm text-muted-foreground">
-          Draft queue across weekly, monthly, quarterly, and annual reports needing SPX narrative.
-        </p>
-      </div>
+    <PageShell>
+      <PageHeader title="Narrative workspace" />
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
+      <PageContent>
       {isLoading ? (
         <p className="text-sm text-muted-foreground py-12 text-center">Loading…</p>
       ) : queue.length === 0 ? (
@@ -115,8 +113,11 @@ export default function NarrativeWorkspacePage() {
                   <StatusBadge status={selected.status} />
                 </CardTitle>
                 <p className="text-xs text-muted-foreground">
-                  Created {formatDate(selected.createdAt)}
+                  Generated {formatDate(selected.generatedAt ?? selected.createdAt)}
                 </p>
+                <Link href={`/reports/${selected.id}`} className="text-xs font-medium text-primary hover:underline">
+                  Open full report
+                </Link>
               </CardHeader>
               <CardContent className="space-y-4">
                 {canDraft ? (
@@ -163,6 +164,7 @@ export default function NarrativeWorkspacePage() {
           ) : null}
         </div>
       )}
-    </div>
+      </PageContent>
+    </PageShell>
   );
 }

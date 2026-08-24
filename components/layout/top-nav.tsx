@@ -1,47 +1,57 @@
 "use client";
 
 import Link from "next/link";
-import { Coffee, Search, Command } from "lucide-react";
+import { Menu, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Breadcrumb } from "./breadcrumb";
 import { NotificationBell } from "./notification-bell";
 import { UserMenu } from "./user-menu";
 import { ProgramSwitcher } from "./program-switcher";
-import { useAuth } from "@/hooks/use-auth";
+import { FarmEstateSwitcher } from "./farm-estate-switcher";
+import { ThemeToggle } from "./theme-toggle";
+import { LanguageToggle } from "./language-toggle";
+import { useAppShell } from "./app-shell-context";
+import { useActiveFarmEstate } from "@/hooks/use-active-farm-estate";
 
 export function TopNav() {
-  const { tenant, activeProgram } = useAuth();
+  const { setMobileNavOpen } = useAppShell();
+  const { activeFarmEstate } = useActiveFarmEstate();
 
   return (
-    <header className="sticky top-0 z-40 flex h-12 items-center border-b bg-background/95 backdrop-blur-sm px-4 gap-4">
-      <Link href="/dashboard" className="flex items-center gap-2 shrink-0">
-        <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary">
-          <Coffee className="h-3.5 w-3.5 text-primary-foreground" />
-        </div>
-        <span className="hidden lg:block text-xs font-medium text-foreground truncate max-w-[120px]">
-          {tenant?.displayName || "Coffee Field OS"}
-        </span>
-      </Link>
+    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b bg-background/95 px-4 shadow-sm backdrop-blur-md">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-9 w-9 md:hidden"
+        onClick={() => setMobileNavOpen(true)}
+        aria-label="Open navigation menu"
+      >
+        <Menu className="h-5 w-5" />
+      </Button>
 
-      <div className="flex-1 min-w-0">
+      <div className="hidden min-w-0 flex-1 md:block">
         <Breadcrumb />
       </div>
 
-      <div className="flex items-center gap-2">
-        <ProgramSwitcher />
-        {activeProgram && (
-          <span className="hidden xl:inline text-2xs text-muted-foreground truncate max-w-[100px]">
-            {activeProgram.name}
-          </span>
-        )}
-        <Button variant="ghost" size="sm" className="h-8 px-2.5 text-xs text-muted-foreground gap-1.5 hidden sm:flex">
-          <Search className="h-3.5 w-3.5" />
-          <span>Search</span>
-          <kbd className="ml-1 flex items-center gap-0.5 rounded border bg-muted px-1 py-0.5 text-2xs text-muted-foreground">
-            <Command className="h-2.5 w-2.5" />K
-          </kbd>
-        </Button>
+      <div className="flex min-w-0 flex-1 items-center md:hidden">
+        <p className="truncate text-sm font-medium text-foreground">
+          {activeFarmEstate?.name || "Coffee Field OS"}
+        </p>
+      </div>
+
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="hidden sm:flex sm:items-center sm:gap-2">
+          <FarmEstateSwitcher />
+          <ProgramSwitcher />
+        </div>
+        <LanguageToggle />
+        <ThemeToggle />
         <NotificationBell />
+        <Button variant="ghost" size="icon" className="h-9 w-9 sm:hidden" asChild>
+          <Link href="/notifications" aria-label="Notifications">
+            <Bell className="h-4 w-4" />
+          </Link>
+        </Button>
         <UserMenu />
       </div>
     </header>

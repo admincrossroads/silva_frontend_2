@@ -49,6 +49,8 @@ const config: Config = {
           foreground: "hsl(var(--sidebar-foreground))",
           accent: "hsl(var(--sidebar-accent))",
           border: "hsl(var(--sidebar-border))",
+          brand: "hsl(var(--sidebar-brand))",
+          "brand-foreground": "hsl(var(--sidebar-brand-foreground))",
         },
       },
       borderRadius: {

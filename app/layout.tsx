@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { QueryProvider } from "@/lib/query-provider";
+import { SiteChrome } from "@/components/marketing/site-chrome";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Coffee Field OS",
-  description: "Multi-tenant coffee estate field operations — Silva governs, SPX manages, vendors execute",
+  description:
+    "Multi-tenant coffee estate field operations — asset owners govern, program managers operate, vendors execute",
 };
 
 export default function RootLayout({
@@ -13,8 +15,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('cfos-theme');var d=t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d)document.documentElement.classList.add('dark')}catch(e){}})();`,
+          }}
+        />
         {/* Browser-loaded fonts — avoids next/font/google blocking compile when Google is unreachable */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -24,7 +31,10 @@ export default function RootLayout({
         />
       </head>
       <body className="font-sans antialiased">
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          {children}
+          <SiteChrome />
+        </QueryProvider>
       </body>
     </html>
   );

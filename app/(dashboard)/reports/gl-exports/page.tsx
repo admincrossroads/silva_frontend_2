@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { platformApi } from "@/lib/api/platform";
+import { exportApi, downloadBlob } from "@/lib/api/exports";
 import { getApiErrorMessage } from "@/lib/api/errors";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDate } from "@/lib/utils/format";
+import { PageShell, PageHeader, PageContent } from "@/components/layout/page-shell";
 
 type GlExport = {
   id: string;
@@ -64,19 +66,31 @@ export default function GlExportsPage() {
     onError: (err) => setError(getApiErrorMessage(err, "Could not generate export")),
   });
 
+  const silvaDrop = useMutation({
+    mutationFn: () => exportApi.silvaGlDrop(period),
+    onSuccess: (row) => {
+      setError("");
+      setSelectedId(row.exportId);
+      qc.invalidateQueries({ queryKey: ["gl-exports"] });
+    },
+    onError: (err) => setError(getApiErrorMessage(err, "Silva GL drop failed")),
+  });
+
+  const boardPack = useMutation({
+    mutationFn: () => exportApi.boardPackPdf(period || "current"),
+    onSuccess: (blob) => downloadBlob(blob, `board-pack-${period || "current"}.pdf`),
+    onError: (err) => setError(getApiErrorMessage(err, "Board pack export failed")),
+  });
+
   const detail = detailQuery.data;
 
   return (
-    <div className="space-y-6 max-w-4xl">
-      <div>
-        <h1 className="text-2xl font-bold">GL journal exports</h1>
-        <p className="text-sm text-muted-foreground">
-          Generate period exports for SPX restricted accounting credentials.
-        </p>
-      </div>
+    <PageShell className="max-w-4xl">
+      <PageHeader title="GL journal exports" />
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
+      <PageContent>
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Generate by period</CardTitle>
@@ -94,6 +108,20 @@ export default function GlExportsPage() {
             onClick={() => generate.mutate()}
           >
             Generate
+          </Button>
+          <Button
+            variant="secondary"
+            disabled={!/^\d{4}-\d{2}$/.test(period) || silvaDrop.isPending}
+            onClick={() => silvaDrop.mutate()}
+          >
+            Silva GL drop
+          </Button>
+          <Button
+            variant="outline"
+            disabled={boardPack.isPending}
+            onClick={() => boardPack.mutate()}
+          >
+            Board pack PDF
           </Button>
         </CardContent>
       </Card>
@@ -172,18 +200,22 @@ export default function GlExportsPage() {
                       <TableRow>
                         <TableHead>Date</TableHead>
                         <TableHead>Account</TableHead>
-                        <TableHead>Debit</TableHead>
-                        <TableHead>Credit</TableHead>
+                        <TableHead className="text-right">Debit (ETB)</TableHead>
+                        <TableHead className="text-right">Credit (ETB)</TableHead>
                         <TableHead>Memo</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {detail.rows.map((line, i) => (
                         <TableRow key={i}>
-                          <TableCell>{line.date}</TableCell>
+                          <TableCell>{line.date ? formatDate(line.date) : "—"}</TableCell>
                           <TableCell>{line.account}</TableCell>
-                          <TableCell>{Number(line.debitEtb).toLocaleString()}</TableCell>
-                          <TableCell>{Number(line.creditEtb).toLocaleString()}</TableCell>
+                          <TableCell className="text-right tabular-nums">
+                            {Number(line.debitEtb).toLocaleString()}
+                          </TableCell>
+                          <TableCell className="text-right tabular-nums">
+                            {Number(line.creditEtb).toLocaleString()}
+                          </TableCell>
                           <TableCell>{line.memo}</TableCell>
                         </TableRow>
                       ))}
@@ -191,7 +223,7 @@ export default function GlExportsPage() {
                   </Table>
                 ) : (
                   <p className="text-muted-foreground">
-                    Line detail is available via restricted export credential when issued.
+                    No journal lines for this export. Generate after owner settlements are marked settled.
                   </p>
                 )}
               </>
@@ -201,6 +233,7 @@ export default function GlExportsPage() {
           </CardContent>
         </Card>
       ) : null}
-    </div>
+      </PageContent>
+    </PageShell>
   );
 }

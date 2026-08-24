@@ -9,6 +9,8 @@ export const dashboardApi = {
 
   vendorField: () => api.get("/dashboard/vendor-field").then((r) => r.data.data),
 
+  actionQueues: () => api.get("/dashboard/action-queues").then((r) => r.data.data),
+
   budgetVsActual: (year?: number) =>
     api.get("/budget-vs-actual", { params: { year, pageSize: 100 } }).then((r) => r.data.data),
 

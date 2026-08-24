@@ -15,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDate } from "@/lib/utils/format";
+import { PageShell, PageHeader, PageFilters, PageContent } from "@/components/layout/page-shell";
 
 type AuditRow = {
   id: string;
@@ -45,40 +46,33 @@ export default function AuditLogPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl">
-      <div>
-        <h1 className="text-2xl font-bold">Audit trail</h1>
-        <p className="text-sm text-muted-foreground">Filter platform mutations by entity and action.</p>
-      </div>
+    <PageShell className="max-w-5xl">
+      <PageHeader title="Audit trail" />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Filters</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-end">
-          <Input
-            label="Entity type"
-            value={entityType}
-            onChange={(e) => setEntityType(e.target.value)}
-            placeholder="afe"
-          />
-          <Input
-            label="Entity ID"
-            value={entityId}
-            onChange={(e) => setEntityId(e.target.value)}
-          />
-          <Input
-            label="Action"
-            value={action}
-            onChange={(e) => setAction(e.target.value)}
-            placeholder="update"
-          />
-          <Button onClick={apply} disabled={isFetching}>
-            Apply
-          </Button>
-        </CardContent>
-      </Card>
+      <PageFilters>
+        <Input
+          label="Entity type"
+          value={entityType}
+          onChange={(e) => setEntityType(e.target.value)}
+          placeholder="afe"
+        />
+        <Input
+          label="Entity ID"
+          value={entityId}
+          onChange={(e) => setEntityId(e.target.value)}
+        />
+        <Input
+          label="Action"
+          value={action}
+          onChange={(e) => setAction(e.target.value)}
+          placeholder="update"
+        />
+        <Button onClick={apply} disabled={isFetching}>
+          Apply
+        </Button>
+      </PageFilters>
 
+      <PageContent>
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Log</CardTitle>
@@ -115,6 +109,7 @@ export default function AuditLogPage() {
           )}
         </CardContent>
       </Card>
-    </div>
+      </PageContent>
+    </PageShell>
   );
 }

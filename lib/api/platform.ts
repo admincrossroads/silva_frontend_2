@@ -18,6 +18,17 @@ export const platformApi = {
 
   listSchedule3: () => api.get("/schedule3-thresholds").then((r) => r.data.data),
 
+  patchSchedule3: (
+    band: string,
+    body: {
+      minValueUsd?: number;
+      maxValueUsd?: number | null;
+      spxAuthority?: string;
+      silvaAuthority?: string;
+      effectiveYear?: number;
+    },
+  ) => api.patch(`/schedule3-thresholds/${band}`, body).then((r) => r.data.data),
+
   listSchedule4: () => api.get("/schedule4-insurance").then((r) => r.data.data),
 
   listDisclosures: () => api.get("/related-party-disclosures").then((r) => r.data.data),
@@ -83,6 +94,26 @@ export const platformApi = {
 
   listRevenue: (params?: Record<string, unknown>) =>
     api.get("/revenue-ledger", { params }).then((r) => r.data.data),
+
+  createRevenue: (body: {
+    period: string;
+    tier: string;
+    feeDescription: string;
+    amountUsd: number;
+    amountEtb?: number;
+    invoiceDate: string;
+    paymentStatus?: string;
+  }) => api.post("/revenue-ledger", body).then((r) => r.data.data),
+
+  updateRevenue: (
+    id: string,
+    body: {
+      feeDescription?: string;
+      amountUsd?: number;
+      amountEtb?: number;
+      paymentStatus?: string;
+    },
+  ) => api.patch(`/revenue-ledger/${id}`, body).then((r) => r.data.data),
 
   listAudit: (params?: Record<string, unknown>) =>
     api.get("/audit-log", { params }).then((r) => r.data.data),

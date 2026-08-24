@@ -11,9 +11,11 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/use-auth";
+import { useVendorLocale } from "@/hooks/use-vendor-locale";
 
 export function UserMenu() {
   const { user, logout } = useAuth();
+  const { isVendor, t, locale, setLocale } = useVendorLocale();
 
   return (
     <DropdownMenu>
@@ -29,14 +31,22 @@ export function UserMenu() {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/settings/profile">Profile</Link>
+          <Link href="/settings/profile">{isVendor ? t("menu.profile") : "Profile"}</Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/settings">Settings</Link>
+          <Link href="/settings">{isVendor ? t("menu.settings") : "Settings"}</Link>
         </DropdownMenuItem>
+        {isVendor ? (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => setLocale(locale === "am" ? "en" : "am")}>
+              {locale === "am" ? t("lang.english") : t("lang.amharic")}
+            </DropdownMenuItem>
+          </>
+        ) : null}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive">
-          Logout
+          {isVendor ? t("menu.logout") : "Logout"}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

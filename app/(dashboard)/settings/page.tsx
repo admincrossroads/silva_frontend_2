@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Building2, Layers, Shield, User, Users } from "lucide-react";
+import { ArrowRight, Building2, Layers, Shield, User, Users, MapPin, ClipboardCheck } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,12 +9,10 @@ import { ROLES, type RoleKey } from "@/lib/utils/constants";
 
 function QuickLink({
   title,
-  description,
   href,
   icon: Icon,
 }: {
   title: string;
-  description: string;
   href: string;
   icon: typeof User;
 }) {
@@ -24,7 +22,6 @@ function QuickLink({
         <CardHeader className="flex flex-row items-start justify-between gap-3 pb-2">
           <div>
             <CardTitle className="text-base">{title}</CardTitle>
-            <p className="text-sm text-muted-foreground">{description}</p>
           </div>
           <Icon className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
         </CardHeader>
@@ -53,10 +50,12 @@ export default function SettingsOverviewPage() {
           <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Organizations</p><p className="text-2xl font-bold">All</p></CardContent></Card>
           <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Users</p><p className="text-2xl font-bold">All orgs</p></CardContent></Card>
         </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <QuickLink title="Organization directory" description="Silva, SPX, and vendor organizations." href="/settings/organization" icon={Building2} />
-          <QuickLink title="Programs" description="Create programs and invite partner orgs." href="/settings/programs" icon={Layers} />
-          <QuickLink title="Profile" description="Your system admin account." href="/settings/profile" icon={User} />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <QuickLink title="Organization directory" href="/settings/organization" icon={Building2} />
+          <QuickLink title="Programs" href="/settings/programs" icon={Layers} />
+          <QuickLink title="Registrations" href="/settings/registrations" icon={ClipboardCheck} />
+          <QuickLink title="Farm estates" href="/settings/farm-estates" icon={MapPin} />
+          <QuickLink title="Profile" href="/settings/profile" icon={User} />
         </div>
       </div>
     );
@@ -71,11 +70,15 @@ export default function SettingsOverviewPage() {
           <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Users</p><p className="text-2xl font-bold">SPX scope</p></CardContent></Card>
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <QuickLink title="Organization" description="Manage SPX and partner organizations." href="/settings/organization" icon={Building2} />
-          <QuickLink title="Programs" description="Create programs and invite partner orgs." href="/settings/programs" icon={Layers} />
-          <QuickLink title="Configuration" description="Schedule 3 bands and accountability matrix." href="/settings/config" icon={Shield} />
-          <QuickLink title="Schedule 3 RACI" description="Execute / Validate / Decide / Author matrix." href="/settings/governance/raci" icon={Shield} />
-          <QuickLink title="Profile" description="Your principal account settings." href="/settings/profile" icon={User} />
+          <QuickLink title="Organization" href="/settings/organization" icon={Building2} />
+          <QuickLink title="Programs" href="/settings/programs" icon={Layers} />
+          <QuickLink title="Registrations" href="/settings/registrations" icon={ClipboardCheck} />
+          <QuickLink title="Contact inbox" href="/settings/contact" icon={ClipboardCheck} />
+          <QuickLink title="Configuration" href="/settings/config" icon={Shield} />
+          <QuickLink title="Farm estates" href="/settings/farm-estates" icon={MapPin} />
+          <QuickLink title="Spend bands" href="/settings/governance/bands" icon={Shield} />
+          <QuickLink title="Schedule 3 RACI" href="/settings/governance/raci" icon={Shield} />
+          <QuickLink title="Profile" href="/settings/profile" icon={User} />
         </div>
       </div>
     );
@@ -95,8 +98,8 @@ export default function SettingsOverviewPage() {
           <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Team admin</p><p className="text-2xl font-bold">Invite & manage</p></CardContent></Card>
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <QuickLink title="Team directory" description="Invite and manage vendor field users." href="/settings/organization" icon={Users} />
-          <QuickLink title="Profile" description="Your vendor admin account." href="/settings/profile" icon={User} />
+          <QuickLink title="Team directory" href="/settings/organization" icon={Users} />
+          <QuickLink title="Profile" href="/settings/profile" icon={User} />
         </div>
       </div>
     );
@@ -115,11 +118,12 @@ export default function SettingsOverviewPage() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {role === "silva_owner" ? (
             <>
-              <QuickLink title="Organization" description="Silva organization profile and members." href="/settings/organization" icon={Building2} />
-              <QuickLink title="Programs" description="Create programs and invite partner orgs." href="/settings/programs" icon={Layers} />
+              <QuickLink title="Organization" href="/settings/organization" icon={Building2} />
+              <QuickLink title="Programs" href="/settings/programs" icon={Layers} />
             </>
           ) : null}
-          <QuickLink title="Profile" description="Update your account settings." href="/settings/profile" icon={User} />
+          <QuickLink title="Spend bands" href="/settings/governance/bands" icon={Shield} />
+          <QuickLink title="Profile" href="/settings/profile" icon={User} />
         </div>
       </div>
     );
@@ -129,7 +133,7 @@ export default function SettingsOverviewPage() {
     <Card>
       <CardHeader><CardTitle>Account settings</CardTitle></CardHeader>
       <CardContent>
-        <QuickLink title="Profile" description="Update your name and password." href="/settings/profile" icon={User} />
+        <QuickLink title="Profile" href="/settings/profile" icon={User} />
       </CardContent>
     </Card>
   );

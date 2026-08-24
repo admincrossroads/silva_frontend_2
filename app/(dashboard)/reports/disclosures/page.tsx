@@ -17,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { PageShell, PageHeader, PageContent } from "@/components/layout/page-shell";
 
 type Disclosure = {
   id: string;
@@ -86,16 +87,12 @@ export default function DisclosuresPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl">
-      <div>
-        <h1 className="text-2xl font-bold">Related-party disclosures</h1>
-        <p className="text-sm text-muted-foreground">
-          Period disclosures for related parties. SPX authors; Silva can view.
-        </p>
-      </div>
+    <PageShell className="max-w-4xl">
+      <PageHeader title="Related-party disclosures" />
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
+      <PageContent>
       {canEdit ? (
         <Card>
           <CardHeader>
@@ -195,6 +192,7 @@ export default function DisclosuresPage() {
           )}
         </CardContent>
       </Card>
-    </div>
+      </PageContent>
+    </PageShell>
   );
 }

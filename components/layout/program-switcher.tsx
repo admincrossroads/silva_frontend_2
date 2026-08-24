@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/hooks/use-auth";
+import { useRole } from "@/hooks/use-role";
 import {
   Select,
   SelectContent,
@@ -9,15 +10,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+/** Program switcher — only when SPX has multiple programs. Farm areas use FarmEstateSwitcher. */
 export function ProgramSwitcher() {
   const { programs, activeProgram, switchProgram } = useAuth();
-  if (!programs?.length) {
-    return (
-      <span className="hidden md:inline text-xs text-muted-foreground truncate max-w-[140px]">
-        No program
-      </span>
-    );
-  }
+  const { isSpx } = useRole();
+
+  if (!isSpx || !programs || programs.length <= 1) return null;
 
   return (
     <Select
@@ -26,8 +24,8 @@ export function ProgramSwitcher() {
         void switchProgram(id);
       }}
     >
-      <SelectTrigger className="h-8 w-[160px] text-xs">
-        <SelectValue placeholder="Select program" />
+      <SelectTrigger className="h-8 w-[140px] text-xs text-muted-foreground">
+        <SelectValue placeholder="Program" />
       </SelectTrigger>
       <SelectContent>
         {programs.map((p) => (

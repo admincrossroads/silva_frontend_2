@@ -7,27 +7,37 @@ import { usePaymentRequests, useCreatePaymentRequest } from "@/hooks/use-payment
 import { PaymentRequestForm } from "@/components/forms/payment-request/payment-request-form";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
+import { ModulePageShell } from "@/components/items/module-page-shell";
+import { BoardView } from "@/components/items/board-view";
+import { DEFAULT_WORKFLOW } from "@/lib/config/procore-modules";
+import { paymentRequestToBoardItem } from "@/lib/items/board-adapters";
+import type { ModuleViewMode } from "@/lib/config/procore-modules";
 import { Plus } from "lucide-react";
+
+const BOARD_COLUMNS = [...DEFAULT_WORKFLOW, "rejected"] as const;
 
 export default function PaymentRequestsPage() {
   const [open, setOpen] = useState(false);
+  const [view, setView] = useState<ModuleViewMode>("board");
   const { data = [], isLoading } = usePaymentRequests();
   const create = useCreatePaymentRequest();
+  const boardItems = data.map(paymentRequestToBoardItem);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Payment Requests</h1>
-          <p className="text-sm text-muted-foreground">Manage payment requests for field operations</p>
-        </div>
+    <ModulePageShell
+      moduleId="billing"
+      view={view}
+      onViewChange={setView}
+      actions={
         <Button onClick={() => setOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          New Request
+          New invoice
         </Button>
-      </div>
-
-      {isLoading ? (
+      }
+    >
+      {view === "board" ? (
+        <BoardView columns={BOARD_COLUMNS} items={boardItems} loading={isLoading} />
+      ) : isLoading ? (
         <div className="text-center py-12 text-muted-foreground">Loading...</div>
       ) : (
         <DataTable columns={paymentRequestColumns} data={data} searchKey="type" />
@@ -41,6 +51,6 @@ export default function PaymentRequestsPage() {
           }}
         />
       </Modal>
-    </div>
+    </ModulePageShell>
   );
 }

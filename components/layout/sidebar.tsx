@@ -1,143 +1,118 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, PanelLeftClose, PanelLeft, Coffee } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getSidebarNav } from "@/lib/config/role-access";
 import { useAuth } from "@/hooks/use-auth";
+import { useVendorLocale } from "@/hooks/use-vendor-locale";
+import { useLocalizedNavItems } from "@/lib/i18n/translate-nav";
+import { useAppShell } from "@/components/layout/app-shell-context";
+import { SidebarNav } from "@/components/layout/sidebar-nav";
+import { Avatar } from "@/components/ui/avatar";
+import { ROLES, type RoleKey } from "@/lib/utils/constants";
 
 export function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
-  const [openSections, setOpenSections] = useState<string[]>([]);
-  const pathname = usePathname();
-  const { user, tenant, activeProgram } = useAuth();
-  const sidebarNav = user ? getSidebarNav(user) : [];
-  const brandName = tenant?.displayName || "Coffee Field OS";
-  const programLabel = activeProgram?.name || "Workspace";
-
-  useEffect(() => {
-    sidebarNav.forEach((item) => {
-      if (item.children?.some((child) => pathname.startsWith(child.href))) {
-        setOpenSections((prev) => (prev.includes(item.label) ? prev : [...prev, item.label]));
-      }
-    });
-  }, [pathname, user?.role]);
-
-  function toggleSection(label: string) {
-    setOpenSections((prev) =>
-      prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label],
-    );
-  }
+  const { user, logout } = useAuth();
+  const { sidebarCollapsed, setSidebarCollapsed } = useAppShell();
+  const { isVendor, locale, t } = useVendorLocale();
+  const rawNav = user ? getSidebarNav(user) : [];
+  const sidebarNav = useLocalizedNavItems(rawNav, locale, isVendor);
+  const roleLabel = user ? ROLES[user.role as RoleKey] ?? user.role : "";
 
   return (
     <aside
       className={cn(
-        "flex flex-col h-full bg-sidebar text-sidebar-foreground transition-all duration-200 ease-out shrink-0 border-r border-sidebar-border",
-        collapsed ? "w-[56px]" : "w-[236px]",
+        "app-sidebar hidden md:flex flex-col shrink-0 self-start transition-all duration-300 ease-out",
+        "sticky top-2 ml-2 h-[calc(100vh-1rem)]",
+        "rounded-2xl border border-sidebar-border bg-sidebar text-sidebar-foreground shadow-xl shadow-black/10",
+        "overflow-hidden",
+        sidebarCollapsed ? "w-[72px]" : "w-[264px]",
       )}
     >
-      <div className={cn("flex items-center gap-2 px-3 py-4", collapsed && "justify-center px-2")}>
-          {!collapsed ? (
-          <Link href="/dashboard" className="flex items-center gap-2.5 min-w-0 flex-1">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/25">
-              <Coffee className="h-4 w-4 text-[hsl(152_70%_72%)]" />
-            </span>
-            <span className="min-w-0">
-              <span className="block font-display text-[15px] leading-tight text-sidebar-foreground truncate">
-                {brandName}
-              </span>
-              <span className="block text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/45 truncate">
-                {programLabel}
-              </span>
-            </span>
-          </Link>
-        ) : (
-          <Coffee className="h-4 w-4 text-[hsl(152_70%_72%)]" />
-        )}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="rounded-md p-1.5 text-sidebar-foreground/55 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {collapsed ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
-        </button>
-      </div>
+      <div className="h-1 shrink-0 bg-gradient-to-r from-sidebar-brand via-primary to-sidebar-brand/40" />
+      <SidebarNav
+        items={sidebarNav}
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        collapseLabel={isVendor ? t("nav.collapse") : "Collapse sidebar"}
+      />
 
-      <nav className="flex-1 space-y-px px-2 overflow-y-auto pb-4">
-        {sidebarNav.map((item) => {
-          if (item.href) {
-            const active = pathname === item.href;
-            return (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors",
-                  active
-                    ? "bg-primary/15 text-[hsl(152_70%_72%)]"
-                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
-                )}
-              >
-                {item.icon && <item.icon className="h-4 w-4 shrink-0" />}
-                {!collapsed && <span>{item.label}</span>}
-              </Link>
-            );
-          }
-
-          const isOpen = openSections.includes(item.label);
-          const childActive = item.children?.some((child) => pathname === child.href);
-
-          return (
-            <div key={item.label}>
-              <button
-                onClick={() => toggleSection(item.label)}
-                className={cn(
-                  "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors",
-                  childActive
-                    ? "text-sidebar-foreground"
-                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
-                )}
-              >
-                {item.icon && <item.icon className="h-4 w-4 shrink-0" />}
-                {!collapsed && (
-                  <>
-                    <span className="flex-1 text-left">{item.label}</span>
-                    <ChevronDown
-                      className={cn(
-                        "h-3 w-3 text-sidebar-foreground/50 transition-transform duration-150",
-                        isOpen && "rotate-180",
-                      )}
-                    />
-                  </>
-                )}
-              </button>
-              {!collapsed && isOpen && item.children && (
-                <div className="mt-0.5 ml-[22px] border-l border-sidebar-border pl-2.5 space-y-px">
-                  {item.children.map((child) => {
-                    const active = pathname === child.href;
-                    return (
-                      <Link
-                        key={child.href}
-                        href={child.href}
-                        className={cn(
-                          "block rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
-                          active
-                            ? "text-[hsl(152_70%_72%)]"
-                            : "text-sidebar-foreground/55 hover:text-sidebar-foreground",
-                        )}
-                      >
-                        {child.label}
-                      </Link>
-                    );
-                  })}
-                </div>
-              )}
+      <div className={cn("mt-auto border-t border-sidebar-border p-2", sidebarCollapsed && "px-1.5")}>
+        {!sidebarCollapsed && user ? (
+          <div className="flex items-center gap-2.5 rounded-lg px-2 py-2">
+            <Avatar name={user.name} src={user.avatar} size="sm" />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-medium text-sidebar-foreground">{user.name}</p>
+              <p className="truncate text-[10px] text-sidebar-foreground/50">{roleLabel}</p>
             </div>
-          );
-        })}
-      </nav>
+            <button
+              type="button"
+              onClick={logout}
+              className="rounded-md p-1.5 text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+              aria-label={isVendor ? t("menu.signOut") : "Sign out"}
+            >
+              <LogOut className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ) : sidebarCollapsed && user ? (
+          <button
+            type="button"
+            onClick={logout}
+            className="flex w-full items-center justify-center rounded-lg p-2 text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            aria-label={isVendor ? t("menu.signOut") : "Sign out"}
+            title={isVendor ? t("menu.signOut") : "Sign out"}
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
+        ) : null}
+      </div>
     </aside>
+  );
+}
+
+export function MobileSidebar() {
+  const { user } = useAuth();
+  const { mobileNavOpen, setMobileNavOpen } = useAppShell();
+  const { isVendor, locale } = useVendorLocale();
+  const pathname = usePathname();
+  const rawNav = user ? getSidebarNav(user) : [];
+  const sidebarNav = useLocalizedNavItems(rawNav, locale, isVendor);
+
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [pathname, setMobileNavOpen]);
+
+  if (!mobileNavOpen) return null;
+
+  return (
+    <>
+      <div
+        className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
+        onClick={() => setMobileNavOpen(false)}
+        aria-hidden
+      />
+      <aside className="fixed inset-y-0 left-0 z-50 flex w-[min(88vw,280px)] flex-col overflow-hidden bg-sidebar text-sidebar-foreground shadow-2xl shadow-black/20 md:hidden">
+        <div className="h-1 shrink-0 bg-gradient-to-r from-sidebar-brand via-primary to-sidebar-brand/40" />
+        <SidebarNav items={sidebarNav} onNavigate={() => setMobileNavOpen(false)} />
+        {user ? (
+          <div className="border-t border-sidebar-border p-3">
+            <Link
+              href="/settings/profile"
+              onClick={() => setMobileNavOpen(false)}
+              className="flex items-center gap-2.5 rounded-lg px-2 py-2 hover:bg-sidebar-accent"
+            >
+              <Avatar name={user.name} src={user.avatar} size="sm" />
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium">{user.name}</p>
+                <p className="truncate text-xs text-sidebar-foreground/50">{user.email}</p>
+              </div>
+            </Link>
+          </div>
+        ) : null}
+      </aside>
+    </>
   );
 }

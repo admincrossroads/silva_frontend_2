@@ -45,6 +45,17 @@ export const seasonCalendarApi = {
       notes?: string;
     },
   ) => api.post(`/season-calendars/${calendarId}/windows`, body).then((r) => r.data.data),
+  updateWindow: (
+    windowId: string,
+    body: {
+      operatingDiscipline?: string;
+      activity?: string;
+      weekStart?: number;
+      weekEnd?: number;
+      linkedWorkOrderId?: string | null;
+      notes?: string;
+    },
+  ) => api.patch(`/season-windows/${windowId}`, body).then((r) => r.data.data),
   issueWindow: (windowId: string) =>
     api.post(`/season-windows/${windowId}/issue`, {}).then((r) => r.data.data),
   startWindow: (windowId: string) =>

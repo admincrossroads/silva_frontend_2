@@ -5,13 +5,11 @@ import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   Building2,
-  CheckCircle2,
   ChevronLeft,
   Layers,
   Palette,
   Shield,
   Sprout,
-  Users,
 } from "lucide-react";
 import { authApi, programApi } from "@/lib/api/auth";
 import { getApiErrorMessage } from "@/lib/api/errors";
@@ -26,29 +24,25 @@ const INTRO_SLIDES = [
     id: "welcome",
     icon: Sprout,
     title: "Welcome to your workspace",
-    body: "Your organization is set up as a private tenant. Next you’ll start a Program — the shared estate where partners collaborate.",
   },
   {
     id: "roles",
     icon: Shield,
     title: "Three desks, clear boundaries",
-    body: "Silva governs plans and high-band spend. SPX manages the operating chain. Vendors execute in the field. Each desk only sees what it should.",
   },
   {
     id: "chain",
     icon: Layers,
     title: "One path from plan to payment",
-    body: "Work flows AFP → AFE → Work Order → Field Ticket → Payment Request → Settlement. No shortcuts, full audit trail.",
   },
   {
     id: "start",
     icon: Building2,
     title: "Ready to start the project",
-    body: "Create a Program, optionally invite a partner org, then set your branding. You can refine everything later from the workspace.",
   },
 ] as const;
 
-const SETUP_LABELS = ["Walkthrough", "Program", "Partners", "Branding"] as const;
+const SETUP_LABELS = ["Walkthrough", "Program", "Branding"] as const;
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -58,7 +52,6 @@ export default function OnboardingPage() {
   const [introStep, setIntroStep] = useState(0);
   const [setupStep, setSetupStep] = useState(1);
   const [programName, setProgramName] = useState("");
-  const [inviteSlug, setInviteSlug] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [tagline, setTagline] = useState("");
   const [error, setError] = useState("");
@@ -110,25 +103,6 @@ export default function OnboardingPage() {
     }
   };
 
-  const invitePartner = async () => {
-    const programId = useAuthStore.getState().activeProgram?.id;
-    if (!programId) {
-      setError("Create a program first.");
-      return;
-    }
-    if (!inviteSlug) return;
-    setBusy(true);
-    setError("");
-    try {
-      await programApi.inviteOrg(programId, { orgSlug: inviteSlug, roleInProgram: "executor" });
-      setSetupStep(3);
-    } catch (err) {
-      setError(getApiErrorMessage(err, "Invite failed"));
-    } finally {
-      setBusy(false);
-    }
-  };
-
   return (
     <div className="mx-auto max-w-xl space-y-6 px-4 py-10">
       <div>
@@ -139,7 +113,7 @@ export default function OnboardingPage() {
         <p className="mt-1 text-sm text-muted-foreground">
           {phase === "intro"
             ? `Project walkthrough · ${introStep + 1} of ${INTRO_SLIDES.length}`
-            : `Set up your project · step ${setupStep} of 3`}
+            : `Set up your project · step ${setupStep} of 2`}
         </p>
       </div>
 
@@ -172,14 +146,13 @@ export default function OnboardingPage() {
             <SlideIcon className="h-5 w-5" />
           </div>
           <h2 className="mt-5 font-display text-2xl tracking-tight">{slide.title}</h2>
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{slide.body}</p>
 
           {introStep === INTRO_SLIDES.length - 1 && (
-            <ul className="mt-5 space-y-2 text-sm text-muted-foreground">
+            <ul className="mt-5 space-y-2 text-sm">
               {[
-                { icon: Layers, text: "Create a Program for the estate" },
-                { icon: Users, text: "Invite partner organizations" },
-                { icon: Palette, text: "Set your tenant branding" },
+                { icon: Layers, text: "Create a program" },
+                { icon: Shield, text: "SPX connects execution partners" },
+                { icon: Palette, text: "Set branding" },
               ].map((item) => (
                 <li key={item.text} className="flex items-center gap-2">
                   <item.icon className="h-4 w-4 text-primary" />
@@ -237,9 +210,9 @@ export default function OnboardingPage() {
 
       {phase === "setup" && setupStep === 1 && (
         <div className="rounded-2xl border border-border/80 bg-white/80 p-6 shadow-sm">
-          <h2 className="font-display text-xl">Create a Program</h2>
+          <h2 className="font-display text-xl">Create a program</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            A Program is the shared estate engagement. Partners join it to collaborate on AFP through settlement.
+            Name your estate or portfolio program. SPX will map execution vendors to your farm areas after setup.
           </p>
           <div className="mt-5 space-y-4">
             <Input
@@ -254,7 +227,7 @@ export default function OnboardingPage() {
                 Back to walkthrough
               </Button>
               <div className="flex gap-2">
-                <Button variant="ghost" onClick={() => setSetupStep(3)}>
+                <Button variant="ghost" onClick={() => setSetupStep(2)}>
                   Skip
                 </Button>
                 <Button disabled={!programName.trim() || busy} onClick={createProgram}>
@@ -268,41 +241,7 @@ export default function OnboardingPage() {
 
       {phase === "setup" && setupStep === 2 && (
         <div className="rounded-2xl border border-border/80 bg-white/80 p-6 shadow-sm">
-          <h2 className="font-display text-xl">Invite a partner</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Optional — invite another tenant by organization slug (for example <span className="font-mono text-xs">b-agro</span>).
-          </p>
-          <div className="mt-5 space-y-4">
-            <Input
-              id="inviteSlug"
-              label="Partner org slug"
-              placeholder="partner-slug"
-              value={inviteSlug}
-              onChange={(e) => setInviteSlug(e.target.value)}
-            />
-            <div className="flex justify-between gap-2">
-              <Button variant="ghost" onClick={() => setSetupStep(1)}>
-                Back
-              </Button>
-              <div className="flex gap-2">
-                <Button variant="ghost" onClick={() => setSetupStep(3)}>
-                  Skip
-                </Button>
-                <Button disabled={!inviteSlug.trim() || busy} onClick={invitePartner}>
-                  Invite & continue
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {phase === "setup" && setupStep === 3 && (
-        <div className="rounded-2xl border border-border/80 bg-white/80 p-6 shadow-sm">
           <h2 className="font-display text-xl">Tenant branding</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            How your organization appears in the workspace shell.
-          </p>
           <div className="mt-5 space-y-4">
             <Input
               id="displayName"
@@ -317,12 +256,8 @@ export default function OnboardingPage() {
               value={tagline}
               onChange={(e) => setTagline(e.target.value)}
             />
-            <div className="flex items-start gap-2 rounded-lg bg-primary/5 px-3 py-2.5 text-sm text-muted-foreground">
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-              You’re set — open the dashboard to begin planning and execution.
-            </div>
             <div className="flex justify-between gap-2">
-              <Button variant="ghost" onClick={() => setSetupStep(2)}>
+              <Button variant="ghost" onClick={() => setSetupStep(1)}>
                 Back
               </Button>
               <Button disabled={busy} onClick={finish}>

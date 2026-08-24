@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useRole } from "@/hooks/use-role";
 
 type Member = {
   id: string;
@@ -38,6 +39,7 @@ type Invite = {
 
 export default function ProgramsSettingsPage() {
   const qc = useQueryClient();
+  const { isSilva, isSpx } = useRole();
   const [selectedId, setSelectedId] = useState<string>("");
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
@@ -96,7 +98,9 @@ export default function ProgramsSettingsPage() {
         <div>
           <h1 className="text-2xl font-bold">Programs</h1>
           <p className="text-sm text-muted-foreground">
-            Create programs, manage member orgs, and invite partners by slug.
+            {isSilva
+              ? "View programs and member organizations. SPX manages vendor onboarding and assignment."
+              : "Create programs, manage member orgs, and invite partners by slug."}
           </p>
         </div>
         <Button variant="outline" asChild>
@@ -106,23 +110,25 @@ export default function ProgramsSettingsPage() {
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Create program</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-end">
-          <Input label="Name" value={name} onChange={(e) => setName(e.target.value)} className="sm:flex-1" />
-          <Input
-            label="Slug (optional)"
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
-            className="sm:w-48"
-          />
-          <Button disabled={!name.trim() || create.isPending} onClick={() => create.mutate()}>
-            Create
-          </Button>
-        </CardContent>
-      </Card>
+      {isSpx ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Create program</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <Input label="Name" value={name} onChange={(e) => setName(e.target.value)} className="sm:flex-1" />
+            <Input
+              label="Slug (optional)"
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
+              className="sm:w-48"
+            />
+            <Button disabled={!name.trim() || create.isPending} onClick={() => create.mutate()}>
+              Create
+            </Button>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader>
@@ -152,44 +158,46 @@ export default function ProgramsSettingsPage() {
 
       {programId ? (
         <>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Invite organization</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-                <Input
-                  label="Org slug"
-                  value={inviteSlug}
-                  onChange={(e) => setInviteSlug(e.target.value)}
-                  className="sm:flex-1"
-                />
-                <NativeSelect
-                  label="Role in program"
-                  value={roleInProgram}
-                  onChange={(e) => setRoleInProgram(e.target.value)}
-                  className="sm:w-44"
-                >
-                  <option value="owner">owner</option>
-                  <option value="manager">manager</option>
-                  <option value="executor">executor</option>
-                  <option value="viewer">viewer</option>
-                </NativeSelect>
-                <Button
-                  disabled={!inviteSlug.trim() || invite.isPending}
-                  onClick={() => invite.mutate()}
-                >
-                  Invite
-                </Button>
-              </div>
-              {lastAcceptToken ? (
-                <p className="rounded-md border bg-muted/40 px-3 py-2 text-sm">
-                  Pending email invite token:{" "}
-                  <code className="break-all font-mono text-xs">{lastAcceptToken}</code>
-                </p>
-              ) : null}
-            </CardContent>
-          </Card>
+          {isSpx ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Invite organization</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                  <Input
+                    label="Org slug"
+                    value={inviteSlug}
+                    onChange={(e) => setInviteSlug(e.target.value)}
+                    className="sm:flex-1"
+                  />
+                  <NativeSelect
+                    label="Role in program"
+                    value={roleInProgram}
+                    onChange={(e) => setRoleInProgram(e.target.value)}
+                    className="sm:w-44"
+                  >
+                    <option value="owner">owner</option>
+                    <option value="manager">manager</option>
+                    <option value="executor">executor</option>
+                    <option value="viewer">viewer</option>
+                  </NativeSelect>
+                  <Button
+                    disabled={!inviteSlug.trim() || invite.isPending}
+                    onClick={() => invite.mutate()}
+                  >
+                    Invite
+                  </Button>
+                </div>
+                {lastAcceptToken ? (
+                  <p className="rounded-md border bg-muted/40 px-3 py-2 text-sm">
+                    Pending email invite token:{" "}
+                    <code className="break-all font-mono text-xs">{lastAcceptToken}</code>
+                  </p>
+                ) : null}
+              </CardContent>
+            </Card>
+          ) : null}
 
           <Card>
             <CardHeader>

@@ -15,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { PageShell, PageHeader, PageContent } from "@/components/layout/page-shell";
 
 type CoaRow = {
   id: string;
@@ -53,16 +54,12 @@ export default function CoaMappingPage() {
   });
 
   return (
-    <div className="space-y-6 max-w-4xl">
-      <div>
-        <h1 className="text-2xl font-bold">COA mapping</h1>
-        <p className="text-sm text-muted-foreground">
-          Map Coffee Field source accounts to GL accounts for journal exports.
-        </p>
-      </div>
+    <PageShell className="max-w-4xl">
+      <PageHeader title="COA mapping" />
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
+      <PageContent>
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Add mapping</CardTitle>
@@ -125,6 +122,7 @@ export default function CoaMappingPage() {
           )}
         </CardContent>
       </Card>
-    </div>
+      </PageContent>
+    </PageShell>
   );
 }

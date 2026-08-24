@@ -5,6 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useCreateAfe } from "@/hooks/use-afes";
 import { useAfps } from "@/hooks/use-afps";
+import { useSchedule3 } from "@/hooks/use-schedule3";
+import { computeBandFromThresholds } from "@/lib/utils/compute-band";
 import { BandBadge } from "@/components/badges/band-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,11 +36,11 @@ const DISCIPLINES = [
   "General Admin",
 ];
 
-function computeBand(cost: number): string {
-  if (cost <= 5000) return "A";
-  if (cost <= 20000) return "B";
-  if (cost <= 50000) return "C";
-  return "D";
+import type { Schedule3Threshold } from "@/types";
+
+function computeBand(cost: number, thresholds: Schedule3Threshold[] | undefined): string {
+  if (!thresholds?.length) return "—";
+  return computeBandFromThresholds(cost, thresholds);
 }
 
 const afeSchema = z.object({
@@ -58,6 +60,7 @@ interface AfeFormProps {
 export function AfeForm({ onSuccess, defaultValues }: AfeFormProps) {
   const createAfe = useCreateAfe();
   const { data: afps } = useAfps();
+  const { data: schedule3 = [] } = useSchedule3();
 
   const form = useForm<AfeFormValues>({
     resolver: zodResolver(afeSchema),
@@ -71,7 +74,7 @@ export function AfeForm({ onSuccess, defaultValues }: AfeFormProps) {
   });
 
   const costValue = useWatch({ control: form.control, name: "estimatedCostUsd" });
-  const currentBand = computeBand(Number(costValue) || 0);
+  const currentBand = computeBand(Number(costValue) || 0, schedule3);
 
   async function onSubmit(values: AfeFormValues) {
     await createAfe.mutateAsync(values as Record<string, unknown>);
@@ -156,7 +159,11 @@ export function AfeForm({ onSuccess, defaultValues }: AfeFormProps) {
               </FormControl>
               <div className="flex items-center gap-2 pt-1">
                 <span className="text-sm text-muted-foreground">Band:</span>
-                <BandBadge band={currentBand} />
+                {currentBand === "—" ? (
+                  <span className="text-sm text-muted-foreground">Loading thresholds…</span>
+                ) : (
+                  <BandBadge band={currentBand} thresholds={schedule3} />
+                )}
               </div>
               <FormMessage />
             </FormItem>

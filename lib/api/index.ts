@@ -1,5 +1,7 @@
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth-store";
+import { useWorkspaceStore } from "@/stores/workspace-store";
+import { shouldScopeRequest } from "@/lib/api/farm-estate-scope";
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1",
@@ -9,6 +11,14 @@ export const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = useAuthStore.getState().accessToken;
   if (token) config.headers.Authorization = `Bearer ${token}`;
+
+  if (config.method?.toLowerCase() === "get" && shouldScopeRequest(config.url)) {
+    const farmEstateId = useWorkspaceStore.getState().activeFarmEstateId;
+    if (farmEstateId) {
+      config.params = { ...(config.params ?? {}), farmEstateId };
+    }
+  }
+
   return config;
 });
 

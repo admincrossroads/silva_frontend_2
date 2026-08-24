@@ -1,32 +1,37 @@
 import type { LucideIcon } from "lucide-react";
 import {
   LayoutDashboard,
-  FileText,
+  Wallet,
+  FileCheck,
+  CalendarDays,
   ClipboardList,
   CreditCard,
   Users,
   BarChart3,
-  Settings,
-  Building2,
+  Landmark,
+  ScrollText,
   Shield,
-  User,
-  Layers,
   Bell,
+  Settings,
+  FileText,
+  MapPin,
+  ClipboardCheck,
+  Mail,
 } from "lucide-react";
 import type { RoleKey } from "@/lib/utils/constants";
 import type { User as AuthUser } from "@/types";
 
 export type NavItem = {
   label: string;
+  procoreLabel?: string;
   href?: string;
   icon: LucideIcon;
-  children?: { label: string; href: string }[];
+  children?: { label: string; procoreLabel?: string; href: string }[];
 };
 
 export type SettingsSection = {
   label: string;
   href: string;
-  description: string;
   icon: LucideIcon;
 };
 
@@ -49,18 +54,8 @@ export function canAccessSettings(user: AuthUser | null): boolean {
 export function settingsSectionsFor(user: AuthUser): SettingsSection[] {
   const role = user.role as RoleKey;
   const sections: SettingsSection[] = [
-    {
-      label: "Overview",
-      href: "/settings",
-      description: "Role-scoped administration summary.",
-      icon: LayoutDashboard,
-    },
-    {
-      label: "Profile",
-      href: "/settings/profile",
-      description: "Your account and password.",
-      icon: User,
-    },
+    { label: "Overview", href: "/settings", icon: LayoutDashboard },
+    { label: "Profile", href: "/settings/profile", icon: Settings },
   ];
 
   if (
@@ -69,12 +64,7 @@ export function settingsSectionsFor(user: AuthUser): SettingsSection[] {
     role === "silva_owner" ||
     role === "silva_country_manager"
   ) {
-    sections.push({
-      label: "Programs",
-      href: "/settings/programs",
-      description: "Create programs, invite partner orgs, accept invites.",
-      icon: Layers,
-    });
+    sections.push({ label: "Programs", href: "/settings/programs", icon: FileText });
   }
 
   if (
@@ -86,27 +76,27 @@ export function settingsSectionsFor(user: AuthUser): SettingsSection[] {
     sections.push({
       label: role === "vendor_admin" ? "Team" : "Organization",
       href: "/settings/organization",
-      description:
-        role === "vendor_admin"
-          ? "Manage vendor team members and invites."
-          : "Organization directory and membership.",
-      icon: Building2,
+      icon: Users,
     });
   }
 
+  if (role === "spx_principal" || role === "system_admin") {
+    sections.push({ label: "Registrations", href: "/settings/registrations", icon: ClipboardCheck });
+    sections.push({ label: "Contact inbox", href: "/settings/contact", icon: Mail });
+    sections.push({ label: "Farm estates", href: "/settings/farm-estates", icon: MapPin });
+  }
+
+  if (role === "spx_principal" || role === "system_admin") {
+    sections.push({ label: "Spend bands", href: "/settings/governance/bands", icon: Shield });
+  }
+
+  if (isSilvaRole(role)) {
+    sections.push({ label: "Spend bands", href: "/settings/governance/bands", icon: Shield });
+  }
+
   if (role === "spx_principal") {
-    sections.push({
-      label: "Configuration",
-      href: "/settings/config",
-      description: "Schedule 3, accountability matrix, and platform reference data.",
-      icon: Shield,
-    });
-    sections.push({
-      label: "Schedule 3 RACI",
-      href: "/settings/governance/raci",
-      description: "Full Execute / Validate / Decide / Author matrix.",
-      icon: Shield,
-    });
+    sections.push({ label: "Configuration", href: "/settings/config", icon: Shield });
+    sections.push({ label: "Schedule 3 RACI", href: "/settings/governance/raci", icon: Shield });
   }
 
   return sections;
@@ -122,6 +112,10 @@ export function canAccessSettingsRoute(pathname: string, user: AuthUser): boolea
       role === "silva_country_manager" ||
       role === "vendor_admin"
     );
+  }
+  if (pathname.startsWith("/settings/governance/bands")) {
+    const role = user.role as RoleKey;
+    return isSilvaRole(role) || role === "spx_principal" || role === "system_admin";
   }
   if (pathname.startsWith("/settings/governance")) {
     return user.role === "spx_principal" || user.role === "system_admin";
@@ -156,84 +150,152 @@ export function dashboardTitleFor(user: AuthUser): string {
   return "Dashboard";
 }
 
+/**
+ * Procore-style project-centric navigation.
+ * Labels show Procore tool name; children retain instrument routes.
+ */
 export function getSidebarNav(user: AuthUser | null): NavItem[] {
   if (!user) return [];
 
   const role = user.role as RoleKey;
-  const items: NavItem[] = [{ label: "Dashboard", href: "/dashboard", icon: LayoutDashboard }];
+  const items: NavItem[] = [
+    { label: "Dashboard", procoreLabel: "Home", href: "/dashboard", icon: LayoutDashboard },
+  ];
 
+  // Budget + Commitments (planning) — hidden from field-only vendor roles except admin
   if (!isVendorRole(role) || role === "vendor_admin") {
     items.push({
-      label: "Planning",
-      icon: FileText,
-      children: [
-        { label: "AFP Register", href: "/planning/afp" },
-        { label: "AFE Register", href: "/planning/afe" },
-      ],
+      label: "Budget",
+      procoreLabel: "Budget",
+      href: "/planning/afp",
+      icon: Wallet,
+    });
+    items.push({
+      label: "Commitments",
+      procoreLabel: "Commitments",
+      href: "/planning/afe",
+      icon: FileCheck,
     });
   }
 
-  const executionChildren: { label: string; href: string }[] = [
-    { label: "Work Orders", href: "/execution/work-orders" },
+  // Schedule + Daily Log (execution)
+  const scheduleChildren: NavItem["children"] = [
+    { label: "Work Orders", procoreLabel: "Schedule", href: "/execution/work-orders" },
+    { label: "Season Calendar", procoreLabel: "Schedule", href: "/execution/calendar" },
   ];
+  if (role === "vendor_admin") {
+    scheduleChildren.push({ label: "Work Plan", procoreLabel: "Schedule", href: "/execution/work-plans" });
+  }
+  if (isSpxRole(role)) {
+    scheduleChildren.push({ label: "Work Plan Review", procoreLabel: "Schedule", href: "/execution/work-plans" });
+  }
+  const dailyLogChildren: NavItem["children"] = [];
   if (!isSilvaRole(role)) {
-    executionChildren.push({ label: "Field Tickets", href: "/execution/field-tickets" });
-    executionChildren.push({ label: "Field forms (IFS)", href: "/execution/forms" });
+    dailyLogChildren.push({ label: "Field Tickets", procoreLabel: "Daily Log", href: "/execution/field-tickets" });
+    dailyLogChildren.push({ label: "Field Forms", procoreLabel: "Daily Log", href: "/execution/forms" });
   }
-  if (isVendorRole(role) || isSpxRole(role) || isSilvaRole(role)) {
-    executionChildren.push({ label: "Season calendar", href: "/execution/calendar" });
-  }
-  items.push({ label: "Execution", icon: ClipboardList, children: executionChildren });
 
+  items.push({
+    label: "Schedule",
+    procoreLabel: "Schedule",
+    icon: CalendarDays,
+    children: scheduleChildren,
+  });
+
+  if (dailyLogChildren.length) {
+    items.push({
+      label: "Daily Log",
+      procoreLabel: "Daily Log",
+      icon: ClipboardList,
+      children: dailyLogChildren,
+    });
+  }
+
+  // Billing
   if (isSpxRole(role) || isSilvaRole(role) || role === "vendor_admin" || role === "vendor_field_lead") {
-    const paymentChildren: { label: string; href: string }[] = [];
+    const billingChildren: NavItem["children"] = [];
     if (isSpxRole(role) || role === "vendor_admin" || role === "vendor_field_lead") {
-      paymentChildren.push({ label: "Payment Requests", href: "/payments/payment-requests" });
+      billingChildren.push({ label: "Payment Requests", procoreLabel: "Billing", href: "/payments/payment-requests" });
     }
     if (isSpxRole(role) || isSilvaRole(role)) {
-      paymentChildren.push({ label: "Settlements", href: "/payments/settlements" });
+      billingChildren.push({ label: "Settlements", procoreLabel: "Billing", href: "/payments/settlements" });
     }
-    if (paymentChildren.length > 0) {
-      items.push({ label: "Payments", icon: CreditCard, children: paymentChildren });
+    if (billingChildren.length) {
+      items.push({ label: "Billing", procoreLabel: "Billing", icon: CreditCard, children: billingChildren });
     }
   }
 
+  // Directory — Silva sees assigned vendors read-only; SPX manages the register
   if (isSilvaRole(role) || isSpxRole(role)) {
     items.push({
-      label: "Vendors",
+      label: "Directory",
+      procoreLabel: "Directory",
       icon: Users,
       children: [
-        { label: "Register", href: "/vendors" },
-        { label: "Contracts", href: "/vendors/contracts" },
+        {
+          label: isSilvaRole(role) ? "Assigned vendors" : "Vendor Register",
+          procoreLabel: "Directory",
+          href: "/vendors",
+        },
+        { label: "Contracts", procoreLabel: "Directory", href: "/vendors/contracts" },
       ],
     });
   }
 
+  // Cost Management + Financials + Reports
   if (isSilvaRole(role) || isSpxRole(role)) {
+    items.push({
+      label: "Cost Management",
+      procoreLabel: "Cost Management",
+      href: "/reports/budget-vs-actual",
+      icon: BarChart3,
+    });
+
+    if (isSpxRole(role)) {
+      const financialChildren = [
+        { label: "GL Exports", procoreLabel: "Financials", href: "/reports/gl-exports" },
+        { label: "COA Mapping", procoreLabel: "Financials", href: "/reports/coa-mapping" },
+      ];
+      if (role === "spx_principal" || role === "system_admin") {
+        financialChildren.unshift({
+          label: "Revenue Ledger",
+          procoreLabel: "Financials",
+          href: "/reports/revenue",
+        });
+      }
+      items.push({
+        label: "Financials",
+        procoreLabel: "Financials",
+        icon: Landmark,
+        children: financialChildren,
+      });
+    }
+
     const reportChildren = [
-      { label: "Weekly", href: "/reports/weekly" },
-      { label: "Monthly", href: "/reports/monthly" },
-      { label: "Quarterly", href: "/reports/quarterly" },
-      { label: "Annual", href: "/reports/annual" },
-      { label: "Budget vs Actual", href: "/reports/budget-vs-actual" },
-      { label: "Related parties", href: "/reports/disclosures" },
+      { label: "Weekly", procoreLabel: "Reports", href: "/reports/weekly" },
+      { label: "Monthly", procoreLabel: "Reports", href: "/reports/monthly" },
+      { label: "Quarterly", procoreLabel: "Reports", href: "/reports/quarterly" },
+      { label: "Annual", procoreLabel: "Reports", href: "/reports/annual" },
+      { label: "Related Parties", procoreLabel: "Reports", href: "/reports/disclosures" },
     ];
     if (isSpxRole(role)) {
-      reportChildren.push({ label: "Narrative workspace", href: "/reports/workspace" });
-      reportChildren.push({ label: "COA mapping", href: "/reports/coa-mapping" });
-      reportChildren.push({ label: "GL exports", href: "/reports/gl-exports" });
+      reportChildren.push({ label: "Narrative Workspace", procoreLabel: "Reports", href: "/reports/workspace" });
     }
+    items.push({ label: "Reports", procoreLabel: "Reports", icon: ScrollText, children: reportChildren });
+
+    const complianceChildren = [];
     if (role === "spx_principal" || role === "system_admin" || role === "silva_owner") {
-      reportChildren.push({ label: "Audit trail", href: "/reports/audit" });
+      complianceChildren.push({ label: "Audit Trail", procoreLabel: "Compliance", href: "/reports/audit" });
+    }
+    if (isSilvaRole(role)) {
+      complianceChildren.push({ label: "Spend bands", procoreLabel: "Compliance", href: "/settings/governance/bands" });
     }
     if (role === "spx_principal") {
-      reportChildren.push({ label: "Revenue Ledger", href: "/reports/revenue" });
+      complianceChildren.push({ label: "Schedule 3 RACI", procoreLabel: "Compliance", href: "/settings/governance/raci" });
     }
-    items.push({
-      label: "Reports",
-      icon: BarChart3,
-      children: reportChildren,
-    });
+    if (complianceChildren.length) {
+      items.push({ label: "Compliance", procoreLabel: "Compliance", icon: Shield, children: complianceChildren });
+    }
   }
 
   items.push({ label: "Notifications", href: "/notifications", icon: Bell });
@@ -244,6 +306,7 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
 
   items.push({
     label: role === "system_admin" || role === "spx_principal" || role === "vendor_admin" ? "Admin" : "Settings",
+    procoreLabel: "Admin",
     icon: Settings,
     children: [{ label: "Overview", href: "/settings" }, ...settingsChildren],
   });
