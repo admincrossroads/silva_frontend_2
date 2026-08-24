@@ -1,5 +1,6 @@
-export function formatCurrency(amount: number, currency = "USD") {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(amount);
+export function formatCurrency(amount: number | null | undefined, currency = "USD", fallback = "—") {
+  if (amount == null || Number.isNaN(Number(amount))) return fallback;
+  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(Number(amount));
 }
 
 export function formatDate(date: string | Date | null | undefined, fallback = "—") {

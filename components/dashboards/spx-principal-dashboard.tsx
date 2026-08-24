@@ -263,7 +263,7 @@ export function SpxPrincipalDashboard() {
             noPadding
           >
             {(newContact?.items ?? []).length ? (
-              newContact.items.map((msg) => (
+              (newContact?.items ?? []).map((msg) => (
                 <DashboardPanelRow key={msg.id} href="/settings/contact">
                   <span className="flex-1 min-w-0 truncate">{msg.subject}</span>
                   <span className="text-xs text-muted-foreground shrink-0">{msg.name}</span>
@@ -281,7 +281,7 @@ export function SpxPrincipalDashboard() {
             noPadding
           >
             {(estates ?? []).length ? (
-              estates.slice(0, 5).map((estate) => (
+              (estates ?? []).slice(0, 5).map((estate) => (
                 <DashboardPanelRow key={estate.id} href="/settings/farm-estates">
                   <span className="flex-1 truncate">{estate.name}</span>
                   <span className="text-xs text-muted-foreground shrink-0">

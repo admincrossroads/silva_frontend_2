@@ -21,12 +21,13 @@ import {
 } from "@/hooks/use-afes";
 import { getApiErrorMessage } from "@/lib/api/errors";
 
-function formatUsd(value: number) {
+function formatUsd(value: number | null | undefined) {
+  if (value == null || Number.isNaN(Number(value))) return "—";
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
     minimumFractionDigits: 0,
-  }).format(value);
+  }).format(Number(value));
 }
 
 function AfeRowActions({ afe }: { afe: Afe }) {
