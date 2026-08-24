@@ -20,6 +20,9 @@ const TRIGGER_LABELS: Record<string, string> = {
   afe_pending: "AFE pending approval",
   afe_approved: "AFE approved",
   afe_rejected: "AFE rejected",
+  bandb_objection_window_opened: "Band B objection window",
+  bandb_objection_due_soon: "Band B window closing soon",
+  bandb_objection_window_elapsed: "Band B window elapsed",
   report_generated: "Report draft generated",
   report_released: "Report released",
   workplan_submitted: "Work plan submitted",
@@ -59,6 +62,8 @@ export function notificationEntityHref(entityType: string, entityId: string): st
       return "/settings/registrations";
     case "contact_submission":
       return "/settings/contact";
+    case "vendor":
+      return `/vendors/${entityId}`;
     default:
       return null;
   }
@@ -86,7 +91,30 @@ export function notificationEntityLabel(entityType: string) {
       return "Registration";
     case "contact_submission":
       return "Contact message";
+    case "vendor":
+      return "Vendor";
     default:
       return entityType.replace(/_/g, " ");
   }
+}
+
+/** Empty-state CTAs by common trigger / role context */
+export function notificationEmptyCtas(role?: string) {
+  if (role?.startsWith("silva_")) {
+    return [
+      { href: "/planning/afe", label: "Review AFE queue" },
+      { href: "/reports/monthly", label: "Open reports" },
+    ];
+  }
+  if (role?.startsWith("vendor_")) {
+    return [
+      { href: "/execution/work-orders", label: "Open schedule" },
+      { href: "/execution/field-tickets?new=1", label: "Log a field ticket" },
+    ];
+  }
+  return [
+    { href: "/planning/afe", label: "AFE register" },
+    { href: "/vendors", label: "Vendor directory" },
+    { href: "/settings/registrations", label: "Registrations" },
+  ];
 }

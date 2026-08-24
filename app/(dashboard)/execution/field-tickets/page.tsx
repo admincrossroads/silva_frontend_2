@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   useFieldTickets,
   useCreateFieldTicket,
@@ -39,6 +40,8 @@ const STATUS_OPTIONS = [
 const BOARD_COLUMNS = ["draft", "submitted", "vendor_reviewed", "validated", "rejected"] as const;
 
 export default function FieldTicketsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [view, setView] = useState<ModuleViewMode>("board");
   const [statusFilter, setStatusFilter] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
@@ -52,6 +55,13 @@ export default function FieldTicketsPage() {
   const reviewMutation = useVendorReviewFieldTicket();
   const validateMutation = useValidateFieldTicket();
   const boardItems = fieldTickets.map(fieldTicketToBoardItem);
+
+  useEffect(() => {
+    if (searchParams.get("new") === "1") {
+      setModalOpen(true);
+      router.replace("/execution/field-tickets", { scroll: false });
+    }
+  }, [searchParams, router]);
 
   useEffect(() => {
     setOfflineDrafts(listOfflineFieldTicketDrafts());

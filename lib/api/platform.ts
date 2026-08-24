@@ -86,6 +86,9 @@ export const platformApi = {
   acknowledgeNotification: (id: string) =>
     api.post(`/notifications/${id}/acknowledge`, {}).then((r) => r.data.data),
 
+  acknowledgeAllNotifications: () =>
+    api.post("/notifications/acknowledge-all", {}).then((r) => r.data.data),
+
   deactivateUser: (id: string) =>
     api.post(`/users/${id}/deactivate`, {}).then((r) => r.data.data),
 

@@ -26,9 +26,7 @@ export function useNotifications(options?: { acknowledged?: boolean }) {
   });
 
   const acknowledgeAll = useMutation({
-    mutationFn: async (ids: string[]) => {
-      await Promise.all(ids.map((id) => platformApi.acknowledgeNotification(id)));
-    },
+    mutationFn: () => platformApi.acknowledgeAllNotifications(),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications"] }),
   });
 

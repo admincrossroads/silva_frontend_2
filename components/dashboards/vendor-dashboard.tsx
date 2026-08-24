@@ -3,11 +3,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { dashboardApi } from "@/lib/api/dashboard";
 import { KpiStatCard } from "@/components/dashboard/kpi-stat-card";
-import { DashboardPanel, DashboardPanelEmpty, DashboardPanelRow } from "@/components/dashboard/dashboard-panel";
+import { DashboardPanel } from "@/components/dashboard/dashboard-panel";
 import { ActionQueueCard } from "@/components/dashboard/action-queue-card";
 import { useVendorLocale } from "@/hooks/use-vendor-locale";
-import { dashboardTitleKeyForRole } from "@/lib/i18n/vendor-messages";
-import { ClipboardList, FileText, Wallet, Star } from "lucide-react";
+import { CalendarDays, ClipboardList, FilePlus2, FileText, Star, Wallet } from "lucide-react";
 import Link from "next/link";
 
 export function VendorDashboard() {
@@ -25,6 +24,45 @@ export function VendorDashboard() {
 
   return (
     <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-2 md:hidden">
+        {[
+          {
+            href: "/execution/field-tickets?new=1",
+            label: "Log ticket",
+            icon: FilePlus2,
+          },
+          {
+            href: "/execution/work-orders",
+            label: "My schedule",
+            icon: ClipboardList,
+          },
+          {
+            href: "/execution/calendar",
+            label: "This week",
+            icon: CalendarDays,
+          },
+          {
+            href: "/payments/payment-requests?new=1",
+            label: "Request pay",
+            icon: Wallet,
+          },
+        ].map((action) => {
+          const Icon = action.icon;
+          return (
+            <Link
+              key={action.href}
+              href={action.href}
+              className="flex items-center gap-2.5 rounded-xl border bg-card px-3 py-3 shadow-sm active:bg-muted"
+            >
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Icon className="h-4 w-4" />
+              </span>
+              <span className="text-sm font-medium">{action.label}</span>
+            </Link>
+          );
+        })}
+      </div>
+
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <KpiStatCard
           label={t("dashboard.activeWorkOrders")}

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { DataTable } from "@/components/data-table/data-table";
 import { paymentRequestColumns } from "@/components/data-table/columns/payment-request-columns";
 import { usePaymentRequests, useCreatePaymentRequest } from "@/hooks/use-payment-requests";
@@ -17,11 +18,20 @@ import { Plus } from "lucide-react";
 const BOARD_COLUMNS = [...DEFAULT_WORKFLOW, "rejected"] as const;
 
 export default function PaymentRequestsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<ModuleViewMode>("board");
   const { data = [], isLoading } = usePaymentRequests();
   const create = useCreatePaymentRequest();
   const boardItems = data.map(paymentRequestToBoardItem);
+
+  useEffect(() => {
+    if (searchParams.get("new") === "1") {
+      setOpen(true);
+      router.replace("/payments/payment-requests", { scroll: false });
+    }
+  }, [searchParams, router]);
 
   return (
     <ModulePageShell

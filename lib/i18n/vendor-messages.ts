@@ -52,7 +52,7 @@ export const vendorMessages = {
     "dashboard.verified": "verified",
     "dashboard.executionSummary": "Execution summary",
     "dashboard.workOrders": "Work orders",
-    "dashboard.noActiveWorkOrders": "No active work orders — wait for SPX to issue before starting field work.",
+    "dashboard.noActiveWorkOrders": "No active work orders wait for SPX to issue before starting field work.",
     "dashboard.openWorkOrders": "Open work orders",
     "dashboard.fieldTickets": "Field tickets",
     "dashboard.awaitingValidation": "awaiting SPX validation",
