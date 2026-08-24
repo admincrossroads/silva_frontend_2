@@ -34,14 +34,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex h-dvh max-h-dvh overflow-hidden bg-background">
           <Sidebar />
           <MobileSidebar />
-          <div className="flex min-w-0 flex-1 flex-col overflow-hidden md:pr-2">
+          <div className="flex min-w-0 flex-1 flex-col overflow-hidden md:pr-2 xl:pr-3 3xl:pr-4">
             <TopNav />
             <main
               className={`min-h-0 flex-1 overflow-x-hidden overflow-y-auto ${
                 isVendor ? "pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-0" : ""
               }`}
             >
-              <div className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-4 sm:py-5 md:px-6 md:py-7">
+              <div className="mx-auto w-full max-w-content px-3 py-4 sm:px-4 sm:py-5 md:px-6 md:py-7 xl:max-w-content-lg xl:px-8 xl:py-8 2xl:px-10 3xl:max-w-content-xl 3xl:px-12 3xl:py-10">
                 {children}
               </div>
             </main>

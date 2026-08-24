@@ -217,7 +217,10 @@ export function InteractiveSeasonTimeline({
       </div>
 
       <div className="overflow-x-auto rounded-lg border bg-muted/10 p-2 sm:p-3">
-        <div ref={trackRef} className="min-w-[640px] select-none space-y-1 sm:min-w-[800px] lg:min-w-[960px]">
+        <div
+          ref={trackRef}
+          className="min-w-[640px] select-none space-y-1 sm:min-w-[800px] lg:min-w-[960px] xl:min-w-0 2xl:min-w-full"
+        >
           {/* Week header — range selection target */}
           <div
             className={cn(

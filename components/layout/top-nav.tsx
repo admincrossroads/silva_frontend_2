@@ -18,7 +18,7 @@ export function TopNav() {
 
   return (
     <header className="sticky top-0 z-30 shrink-0 border-b bg-background/95 shadow-sm backdrop-blur-md">
-      <div className="flex h-14 items-center gap-2 px-3 sm:gap-3 sm:px-4">
+      <div className="flex h-14 items-center gap-2 px-3 sm:gap-3 sm:px-4 xl:h-16 xl:px-6 2xl:px-8">
         <Button
           variant="ghost"
           size="icon"

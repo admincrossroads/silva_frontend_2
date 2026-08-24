@@ -10,7 +10,16 @@ import { Card } from "@/components/ui/card";
 
 /** Standard page wrapper — use on every dashboard page */
 export function PageShell({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn("min-w-0 space-y-4 animate-fade-in sm:space-y-6", className)}>{children}</div>;
+  return (
+    <div
+      className={cn(
+        "min-w-0 space-y-4 animate-fade-in sm:space-y-6 xl:space-y-8",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
 }
 
 type PageHeaderProps = {
@@ -28,7 +37,9 @@ export function PageHeader({ title, description, actions, badge }: PageHeaderPro
           <h1 className="page-title">{title}</h1>
           {badge}
         </div>
-        {description ? <p className="text-sm text-muted-foreground max-w-2xl">{description}</p> : null}
+        {description ? (
+          <p className="page-description max-w-2xl xl:max-w-3xl 2xl:max-w-4xl">{description}</p>
+        ) : null}
       </div>
       {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
     </div>

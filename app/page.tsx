@@ -41,7 +41,7 @@ export default function LandingPage() {
         <HeroBackground />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[hsl(165_30%_7%)] via-transparent to-[hsl(165_30%_7%/0.35)]" />
 
-        <div className="relative z-10 mx-auto flex min-h-[100svh] max-w-6xl flex-col justify-end px-5 pb-16 pt-28 md:px-8 md:pb-24">
+        <div className="relative z-10 mx-auto flex min-h-[100svh] max-w-6xl flex-col justify-end px-5 pb-16 pt-28 md:px-8 md:pb-24 xl:max-w-7xl 2xl:max-w-[90rem] 3xl:max-w-content-xl">
           <div className="max-w-xl space-y-6 animate-[landing-rise_0.9s_ease-out] sm:max-w-2xl">
             <p className="inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.22em] text-[hsl(152_55%_72%)]">
               <Sprout className="h-3.5 w-3.5" />
@@ -120,7 +120,7 @@ export default function LandingPage() {
 
       {/* How it works */}
       <section id="how-it-works" className="scroll-mt-20 bg-[hsl(155_18%_97%)] px-5 py-20 text-[hsl(160_28%_14%)] md:px-8 md:py-28">
-        <div className="mx-auto max-w-6xl">
+        <div className="mx-auto max-w-6xl xl:max-w-7xl 2xl:max-w-[90rem] 3xl:max-w-content-xl">
           <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-primary">Simple setup</p>
           <h2 className="mt-3 font-display text-3xl tracking-tight md:text-4xl">Three desks. One estate.</h2>
           <p className="mt-4 max-w-xl text-base leading-relaxed text-[hsl(160_12%_38%)]">
@@ -168,7 +168,7 @@ export default function LandingPage() {
 
       {/* Flow */}
       <section id="flow" className="scroll-mt-20 bg-[hsl(165_26%_11%)] px-5 py-20 md:px-8 md:py-28">
-        <div className="mx-auto max-w-6xl">
+        <div className="mx-auto max-w-6xl xl:max-w-7xl 2xl:max-w-[90rem] 3xl:max-w-content-xl">
           <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[hsl(152_50%_65%)]">The flow</p>
           <h2 className="mt-3 font-display text-3xl tracking-tight text-white md:text-4xl">
             From plan to payment clearly
@@ -203,7 +203,7 @@ export default function LandingPage() {
         gradient="linear-gradient(90deg, hsl(165 30% 8% / 0.92) 0%, hsl(165 28% 10% / 0.55) 55%, hsl(165 28% 10% / 0.35) 100%)"
         backgroundPosition="center 40%"
       >
-        <div className="mx-auto grid max-w-6xl gap-10 px-5 py-20 md:grid-cols-2 md:items-center md:px-8 md:py-28">
+        <div className="mx-auto grid max-w-6xl gap-10 px-5 py-20 md:grid-cols-2 md:items-center md:px-8 md:py-28 xl:max-w-7xl 2xl:max-w-[90rem] 3xl:max-w-content-xl">
           <div>
             <p className="font-display text-3xl leading-snug text-white md:text-4xl text-balance">
               Built so everyone can move faster without stepping on each other’s desk.
@@ -230,7 +230,7 @@ export default function LandingPage() {
 
       {/* Who it's for */}
       <section className="bg-[hsl(155_18%_97%)] px-5 py-20 text-[hsl(160_28%_14%)] md:px-8 md:py-28">
-        <div className="mx-auto max-w-6xl">
+        <div className="mx-auto max-w-6xl xl:max-w-7xl 2xl:max-w-[90rem] 3xl:max-w-content-xl">
           <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-primary">Get started</p>
           <h2 className="mt-3 font-display text-3xl tracking-tight md:text-4xl">Pick your organization type</h2>
           <p className="mt-4 max-w-xl text-base leading-relaxed text-[hsl(160_12%_38%)]">
@@ -277,7 +277,7 @@ export default function LandingPage() {
 
       {/* Contact */}
       <section id="contact" className="scroll-mt-20 bg-[hsl(155_18%_97%)] px-5 py-20 text-[hsl(160_28%_14%)] md:px-8 md:py-28">
-        <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-start">
+        <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-start xl:max-w-7xl 2xl:max-w-[90rem] 3xl:max-w-content-xl">
           <div>
             <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-primary">Contact</p>
             <h2 className="mt-3 font-display text-3xl tracking-tight md:text-4xl">Talk to the platform team</h2>
@@ -348,7 +348,7 @@ export default function LandingPage() {
       </section>
 
       <footer className="border-t border-white/10 px-5 py-8 md:px-8">
-        <div className="mx-auto flex max-w-6xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mx-auto flex max-w-6xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between xl:max-w-7xl 2xl:max-w-[90rem] 3xl:max-w-content-xl">
           <div className="flex items-center gap-2.5">
             <Coffee className="h-4 w-4 text-[hsl(152_60%_65%)]" />
             <span className="font-display text-base text-white/80">Coffee Field OS</span>

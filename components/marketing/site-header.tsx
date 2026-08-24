@@ -21,7 +21,7 @@ export function SiteHeader({ signedIn, scrolled = false }: SiteHeaderProps) {
           : "bg-transparent py-5",
       )}
     >
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-5 md:px-8">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-5 md:px-8 xl:max-w-7xl 2xl:max-w-[90rem] 3xl:max-w-content-xl">
         <Link href="/" className="flex items-center gap-2.5">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[hsl(152_50%_32%/0.55)] ring-1 ring-[hsl(152_55%_55%/0.4)]">
             <Coffee className="h-4 w-4 text-[hsl(152_70%_78%)]" />

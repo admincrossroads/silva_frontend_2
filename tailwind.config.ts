@@ -10,6 +10,15 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      screens: {
+        // Ultrawide / high-res desktop (beyond default 2xl = 1536px)
+        "3xl": "1920px",
+      },
+      maxWidth: {
+        content: "80rem", // 1280 — default dashboard
+        "content-lg": "90rem", // 1440 — xl/2xl
+        "content-xl": "100rem", // 1600 — 3xl / high-res
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

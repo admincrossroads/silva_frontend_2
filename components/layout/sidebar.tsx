@@ -26,10 +26,10 @@ export function Sidebar() {
     <aside
       className={cn(
         "app-sidebar hidden md:flex flex-col shrink-0 self-start transition-all duration-300 ease-out",
-        "sticky top-2 ml-2 h-[calc(100vh-1rem)]",
+        "sticky top-2 ml-2 h-[calc(100dvh-1rem)] xl:top-3 xl:ml-3 xl:h-[calc(100dvh-1.5rem)]",
         "rounded-2xl border border-sidebar-border bg-sidebar text-sidebar-foreground shadow-xl shadow-black/10",
         "overflow-hidden",
-        sidebarCollapsed ? "w-[72px]" : "w-[264px]",
+        sidebarCollapsed ? "w-[72px] xl:w-[80px]" : "w-[264px] xl:w-[280px] 3xl:w-[300px]",
       )}
     >
       <div className="h-1 shrink-0 bg-gradient-to-r from-sidebar-brand via-primary to-sidebar-brand/40" />

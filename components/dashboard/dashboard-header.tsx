@@ -38,7 +38,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{today}</p>
-          <h1 className="font-display text-xl font-semibold tracking-tight text-foreground sm:text-2xl md:text-3xl">
+          <h1 className="font-display text-xl font-semibold tracking-tight text-foreground sm:text-2xl md:text-3xl xl:text-4xl">
             {greeting(t, isVendor)}, {user.name.split(" ")[0]}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">

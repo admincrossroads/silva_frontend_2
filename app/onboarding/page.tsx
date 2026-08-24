@@ -149,8 +149,8 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="mx-auto min-h-dvh w-full max-w-5xl px-3 py-6 sm:px-4 sm:py-10">
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,0.52fr)]">
+    <div className="mx-auto min-h-dvh w-full max-w-5xl px-3 py-6 sm:px-4 sm:py-10 xl:max-w-6xl xl:py-14 2xl:max-w-7xl 2xl:px-8">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,0.52fr)] xl:gap-10">
         <div className="min-w-0 space-y-6">
           <div>
             <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-primary">

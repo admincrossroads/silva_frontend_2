@@ -118,15 +118,15 @@
   }
 
   .page-title {
-    @apply font-display text-2xl font-semibold text-foreground tracking-tight sm:text-3xl;
+    @apply font-display text-2xl font-semibold text-foreground tracking-tight sm:text-3xl xl:text-4xl;
   }
 
   .page-description {
-    @apply text-sm text-muted-foreground leading-relaxed;
+    @apply text-sm text-muted-foreground leading-relaxed xl:text-base xl:max-w-3xl;
   }
 
   .stat-value {
-    @apply text-2xl font-bold text-foreground tracking-tight font-mono;
+    @apply text-2xl font-bold text-foreground tracking-tight font-mono xl:text-3xl;
   }
 
   .stat-label {

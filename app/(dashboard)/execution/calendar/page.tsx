@@ -262,7 +262,7 @@ export default function ExecutionCalendarPage() {
       ) : null}
 
       <PageContent>
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-3 xl:gap-8 2xl:grid-cols-[minmax(18rem,22rem)_minmax(0,1fr)]">
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Calendars</CardTitle>
@@ -299,7 +299,7 @@ export default function ExecutionCalendarPage() {
             </CardContent>
           </Card>
 
-          <div className="space-y-6 lg:col-span-2">
+          <div className="space-y-6 lg:col-span-2 2xl:col-span-1 xl:space-y-8">
             {selected ? (
               <>
                 <Card>
