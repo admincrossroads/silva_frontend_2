@@ -34,6 +34,7 @@ const TRIGGER_LABELS: Record<string, string> = {
   insurance_expiring: "Insurance expiring",
   registration_submitted: "Registration submitted",
   contact_received: "Contact message received",
+  message_received: "New message",
 };
 
 export function notificationTriggerLabel(triggerType: string) {
@@ -62,8 +63,12 @@ export function notificationEntityHref(entityType: string, entityId: string): st
       return "/settings/registrations";
     case "contact_submission":
       return "/settings/contact";
+    case "message_thread":
+      return `/messages?thread=${entityId}`;
     case "vendor":
       return `/vendors/${entityId}`;
+    case "farm_estate":
+      return `/settings/farm-estates`;
     default:
       return null;
   }
@@ -91,8 +96,12 @@ export function notificationEntityLabel(entityType: string) {
       return "Registration";
     case "contact_submission":
       return "Contact message";
+    case "message_thread":
+      return "Message";
     case "vendor":
       return "Vendor";
+    case "farm_estate":
+      return "Farm estate";
     default:
       return entityType.replace(/_/g, " ");
   }
@@ -102,7 +111,7 @@ export function notificationEntityLabel(entityType: string) {
 export function notificationEmptyCtas(role?: string) {
   if (role?.startsWith("silva_")) {
     return [
-      { href: "/planning/afe", label: "Review AFE queue" },
+      { href: "/planning/afp", label: "Review AFP" },
       { href: "/reports/monthly", label: "Open reports" },
     ];
   }

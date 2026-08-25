@@ -23,9 +23,11 @@ import { afpToBoardItem, BOARD_TRANSITIONS, boardTransitionKey } from "@/lib/ite
 import type { ModuleViewMode } from "@/lib/config/procore-modules";
 import type { BoardItem } from "@/components/items/types";
 import { useSubmitAfp, useApproveAfp } from "@/hooks/use-afps";
+import { useRole } from "@/hooks/use-role";
 
 const STATUSES = ["draft", "submitted", "approved", "closed"];
-const BOARD_COLUMNS = ["draft", "submitted", "approved", "closed"] as const;
+const SPX_BOARD_COLUMNS = ["draft", "submitted", "approved", "closed"] as const;
+const SILVA_BOARD_COLUMNS = ["draft", "approved", "closed"] as const;
 
 export default function AfpPage() {
   const [open, setOpen] = useState(false);
@@ -33,7 +35,9 @@ export default function AfpPage() {
   const [year, setYear] = useState<number | undefined>();
   const [status, setStatus] = useState<string | undefined>();
   const { has } = usePermissions();
+  const { isSilva } = useRole();
   const canCreate = has("afp.create");
+  const BOARD_COLUMNS = isSilva ? SILVA_BOARD_COLUMNS : SPX_BOARD_COLUMNS;
 
   const { data: afps = [], isLoading } = useAfps({ year, status });
   const submitAfp = useSubmitAfp();

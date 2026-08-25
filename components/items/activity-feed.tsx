@@ -179,11 +179,11 @@ export function StatusTimeline({
                 {formatWorkflowLabel(step)}
               </p>
               {active ? (
-                <p className="mt-0.5 text-xs text-primary">Current step</p>
+                <p className="mt-0.5 text-xs text-primary">In progress</p>
               ) : completed ? (
-                <p className="mt-0.5 text-xs text-muted-foreground">Complete</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">Done</p>
               ) : (
-                <p className="mt-0.5 text-xs text-muted-foreground">Pending</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">Upcoming</p>
               )}
             </div>
           </li>

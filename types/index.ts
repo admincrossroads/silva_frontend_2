@@ -112,6 +112,7 @@ export interface Afp {
   kpiTarget: string;
   notes: string | null;
   status: string;
+  createdByUserId?: string | null;
   createdAt: string;
   updatedAt: string;
 }

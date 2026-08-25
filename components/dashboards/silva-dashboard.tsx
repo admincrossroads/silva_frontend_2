@@ -2,15 +2,13 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { dashboardApi } from "@/lib/api/dashboard";
-import { formatCurrency } from "@/lib/utils/format";
-import { BAND_COLORS } from "@/lib/utils/constants";
 import { BudgetVsActualChart } from "@/components/charts/budget-vs-actual-chart";
 import { KpiStatCard } from "@/components/dashboard/kpi-stat-card";
 import { DashboardPanel, DashboardPanelEmpty, DashboardPanelRow } from "@/components/dashboard/dashboard-panel";
 import { ActionQueueCard } from "@/components/dashboard/action-queue-card";
 import { HealthBadge } from "@/components/badges/health-badge";
 import { Button } from "@/components/ui/button";
-import { FileCheck, TrendingUp, CreditCard, Wheat } from "lucide-react";
+import { Wallet, CreditCard, Wheat, ScrollText } from "lucide-react";
 import Link from "next/link";
 
 export function SilvaDashboard() {
@@ -20,34 +18,37 @@ export function SilvaDashboard() {
     queryFn: () => dashboardApi.silvaOwner(year),
   });
 
-  const bvaChartData =
-    data?.budgetVsActual?.lines?.map((line: { afpLineId: string; utilizationPercent: number }) => ({
-      discipline: line.afpLineId,
-      budget: 100,
-      actual: line.utilizationPercent,
-    })) ?? [];
+  const bvaLines = data?.budgetVsActual?.lines ?? [];
+  const bvaChartData = bvaLines.map((line: { afpLineId: string; utilizationPercent: number }) => ({
+    discipline: line.afpLineId,
+    budget: 100,
+    actual: line.utilizationPercent,
+  }));
 
-  const pending = data?.afePipeline?.pendingSilvaApprovalCount ?? 0;
+  const overBudget = bvaLines.filter(
+    (line: { health?: string }) => line.health === "over_budget" || line.health === "Over Budget",
+  ).length;
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiStatCard
-          label="AFEs pending"
-          value={String(pending)}
-          sublabel="Band C/D approvals"
-          icon={FileCheck}
-          tone={pending > 0 ? "amber" : "slate"}
+          label="Budget lines"
+          value={String(bvaLines.length)}
+          sublabel="AFP utilization"
+          icon={Wallet}
+          tone="primary"
           loading={isLoading}
-          href="/planning/afe"
+          href="/planning/afp"
         />
         <KpiStatCard
-          label="Oldest outstanding"
-          value={`${data?.afePipeline?.oldestDaysOutstanding ?? 0}d`}
-          sublabel="Days in queue"
-          icon={TrendingUp}
-          tone="blue"
+          label="Over watch"
+          value={String(overBudget)}
+          sublabel="Lines needing attention"
+          icon={ScrollText}
+          tone={overBudget > 0 ? "amber" : "slate"}
           loading={isLoading}
+          href="/reports/budget-vs-actual"
         />
         <KpiStatCard
           label="Vendor alerts"
@@ -70,35 +71,7 @@ export function SilvaDashboard() {
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <div className="xl:col-span-2 space-y-6">
-          <DashboardPanel
-            title="AFE approval queue"
-            viewAllHref="/planning/afe"
-            contentClassName="divide-y"
-            noPadding
-          >
-            {isLoading ? (
-              <DashboardPanelEmpty message="Loading queue…" />
-            ) : data?.afePipeline?.items?.length ? (
-              data.afePipeline.items.map(
-                (afe: { id: string; band: string; estimatedCostUsd: number; health?: string }) => (
-                  <DashboardPanelRow key={afe.id} href={`/planning/afe/${afe.id}`}>
-                    <span
-                      className={`badge shrink-0 ${BAND_COLORS[afe.band]?.bg ?? "bg-muted"} ${BAND_COLORS[afe.band]?.text ?? ""}`}
-                    >
-                      Band {afe.band}
-                    </span>
-                    <span className="flex-1 truncate">{afe.id}</span>
-                    <HealthBadge health={afe.health} />
-                    <span className="font-mono font-medium tabular-nums">{formatCurrency(afe.estimatedCostUsd)}</span>
-                  </DashboardPanelRow>
-                ),
-              )
-            ) : (
-              <DashboardPanelEmpty message="No AFEs pending approval" />
-            )}
-          </DashboardPanel>
-
-          <DashboardPanel title="Budget utilization">
+          <DashboardPanel title="Budget utilization" viewAllHref="/reports/budget-vs-actual">
             <div className="p-4 space-y-3">
               {isLoading ? (
                 <div className="h-[280px] animate-pulse rounded-lg bg-muted/50" />
@@ -106,7 +79,7 @@ export function SilvaDashboard() {
                 <>
                   <BudgetVsActualChart data={bvaChartData} />
                   <div className="space-y-1 border-t pt-3">
-                    {(data?.budgetVsActual?.lines ?? []).slice(0, 5).map(
+                    {bvaLines.slice(0, 5).map(
                       (line: { afpLineId: string; utilizationPercent: number; health?: string }) => (
                         <div key={line.afpLineId} className="flex items-center justify-between text-xs">
                           <span className="text-muted-foreground">{line.afpLineId}</span>
@@ -124,10 +97,28 @@ export function SilvaDashboard() {
               )}
             </div>
           </DashboardPanel>
+
+          <DashboardPanel title="AFP register" viewAllHref="/planning/afp" contentClassName="p-4">
+            <p className="text-sm text-muted-foreground">
+              Create budget lines for specific tasks (capping, processing, and more), or approve plans prepared by SPX.
+            </p>
+            <Button variant="outline" size="sm" className="mt-3" asChild>
+              <Link href="/planning/afp">Open AFP</Link>
+            </Button>
+          </DashboardPanel>
         </div>
 
         <div className="space-y-6">
           <ActionQueueCard title="Silva approval queue" />
+
+          <DashboardPanel title="Settlements">
+            <div className="p-4 flex flex-col gap-3">
+              <p className="text-sm text-muted-foreground">Authorize and track owner settlements.</p>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/payments/settlements">Open settlements</Link>
+              </Button>
+            </div>
+          </DashboardPanel>
 
           <DashboardPanel title="Released reports">
             <div className="p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

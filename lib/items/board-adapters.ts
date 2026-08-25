@@ -147,6 +147,7 @@ export const BOARD_TRANSITIONS: Record<string, Record<string, string>> = {
   },
   afp: {
     "draft:submitted": "submit",
+    "draft:approved": "approve",
     "submitted:approved": "approve",
     "approved:closed": "close",
   },

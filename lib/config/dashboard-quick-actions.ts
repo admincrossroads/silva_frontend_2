@@ -38,7 +38,7 @@ export function quickActionsFor(user: User): QuickAction[] {
 
   if (isSilvaRole(role)) {
     return [
-      { label: "Approve AFEs", href: "/planning/afe", icon: FileCheck },
+      { label: "Create AFP", href: "/planning/afp", icon: Wallet },
       { label: "Budget vs actual", href: "/reports/budget-vs-actual", icon: BarChart3 },
       { label: "Monthly reports", href: "/reports/monthly", icon: FileText },
       { label: "Assigned vendors", href: "/vendors", icon: Users },

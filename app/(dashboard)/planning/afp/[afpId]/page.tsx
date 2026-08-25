@@ -15,6 +15,8 @@ import { exportApi, downloadBlob } from "@/lib/api/exports";
 import { DetailPageHeader, PageLoading, PageShell } from "@/components/layout/page-shell";
 import { formatWorkflowLabel } from "@/lib/config/procore-modules";
 import { cn } from "@/lib/utils";
+import { useRole } from "@/hooks/use-role";
+import { useAuthStore } from "@/stores/auth-store";
 import {
   Calendar,
   Check,
@@ -26,7 +28,14 @@ import {
   Target,
 } from "lucide-react";
 
-const STATUS_STEPS = ["draft", "submitted", "approved", "closed"] as const;
+const SPX_STATUS_STEPS = ["draft", "submitted", "approved", "closed"] as const;
+const SILVA_OWNED_STATUS_STEPS = ["draft", "approved", "closed"] as const;
+
+function stepCaption(completed: boolean, current: boolean) {
+  if (current) return "In progress";
+  if (completed) return "Done";
+  return "Upcoming";
+}
 
 function formatUsd(value: number | null | undefined) {
   if (value == null || Number.isNaN(Number(value))) return "—";
@@ -72,6 +81,8 @@ export default function AfpDetailPage() {
   const { data: afp, isLoading } = useAfp(afpId);
   const submitAfp = useSubmitAfp();
   const approveAfp = useApproveAfp();
+  const { isSilva, isSpx } = useRole();
+  const userId = useAuthStore((s) => s.user?.id);
 
   if (isLoading || !afp) {
     return (
@@ -81,10 +92,19 @@ export default function AfpDetailPage() {
     );
   }
 
-  const currentStep = STATUS_STEPS.indexOf(afp.status as (typeof STATUS_STEPS)[number]);
+  const silvaOwned = Boolean(afp.createdByUserId && isSilva && afp.createdByUserId === userId);
+  const STATUS_STEPS = silvaOwned ? SILVA_OWNED_STATUS_STEPS : SPX_STATUS_STEPS;
+  const currentStep = Math.max(
+    0,
+    STATUS_STEPS.indexOf(
+      (afp.status === "active" ? "approved" : afp.status) as (typeof STATUS_STEPS)[number],
+    ),
+  );
   const isTerminal = afp.status === "closed";
-  const canSubmit = afp.status === "draft";
-  const canApprove = afp.status === "submitted";
+  const canSubmit = !silvaOwned && isSpx && afp.status === "draft";
+  const canApprove =
+    (silvaOwned && afp.status === "draft") ||
+    (isSilva && afp.status === "submitted");
 
   return (
     <PageShell>
@@ -219,11 +239,11 @@ export default function AfpDetailPage() {
                       {formatWorkflowLabel(step)}
                     </p>
                     {current ? (
-                      <p className="mt-0.5 text-xs text-primary">Current step</p>
+                      <p className="mt-0.5 text-xs text-primary">{stepCaption(false, true)}</p>
                     ) : completed ? (
-                      <p className="mt-0.5 text-xs text-muted-foreground">Complete</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">{stepCaption(true, false)}</p>
                     ) : (
-                      <p className="mt-0.5 text-xs text-muted-foreground">Pending</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">{stepCaption(false, false)}</p>
                     )}
                   </div>
                 </li>
@@ -248,7 +268,11 @@ export default function AfpDetailPage() {
                   onClick={() => approveAfp.mutate({ id: afp.id, comment: "" })}
                   disabled={approveAfp.isPending}
                 >
-                  {approveAfp.isPending ? "Approving…" : "Approve budget line"}
+                  {approveAfp.isPending
+                    ? "Approving…"
+                    : silvaOwned && afp.status === "draft"
+                      ? "Approve budget line"
+                      : "Approve budget line"}
                 </Button>
               ) : null}
             </div>

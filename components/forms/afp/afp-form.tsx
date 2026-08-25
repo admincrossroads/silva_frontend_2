@@ -28,11 +28,27 @@ import {
 const DISCIPLINES = [
   "Agronomy",
   "Processing",
+  "Capping",
   "Infrastructure",
   "Environment",
   "Social",
+  "Harvest",
   "General Admin",
   "Agronomic Operations",
+  "Other",
+];
+
+const ACTIVITY_SUGGESTIONS = [
+  "Capping",
+  "Processing",
+  "Pruning",
+  "Fertilization",
+  "Irrigation",
+  "Pest control",
+  "Harvest",
+  "Packing",
+  "Transport",
+  "Infrastructure maintenance",
 ];
 
 const afpSchema = z.object({
@@ -86,6 +102,9 @@ export function AfpForm({ onSuccess, defaultValues }: AfpFormProps) {
             {error}
           </div>
         )}
+        <p className="text-xs text-muted-foreground">
+          Add a budget line for a specific task — capping, processing, or any other activity.
+        </p>
         <FormField
           control={form.control}
           name="year"
@@ -106,7 +125,7 @@ export function AfpForm({ onSuccess, defaultValues }: AfpFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Operating Discipline</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select discipline" />
@@ -130,10 +149,19 @@ export function AfpForm({ onSuccess, defaultValues }: AfpFormProps) {
           name="activity"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Activity</FormLabel>
+              <FormLabel>Activity / task</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  {...field}
+                  list="afp-activity-suggestions"
+                  placeholder="e.g. Capping, Processing, Pruning…"
+                />
               </FormControl>
+              <datalist id="afp-activity-suggestions">
+                {ACTIVITY_SUGGESTIONS.map((a) => (
+                  <option key={a} value={a} />
+                ))}
+              </datalist>
               <FormMessage />
             </FormItem>
           )}
@@ -160,7 +188,7 @@ export function AfpForm({ onSuccess, defaultValues }: AfpFormProps) {
             <FormItem>
               <FormLabel>KPI Target</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} placeholder="e.g. 120 ha capped" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -174,7 +202,7 @@ export function AfpForm({ onSuccess, defaultValues }: AfpFormProps) {
             <FormItem>
               <FormLabel>Notes</FormLabel>
               <FormControl>
-                <Textarea {...field} />
+                <Textarea {...field} placeholder="Optional scope or site notes" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -182,7 +210,7 @@ export function AfpForm({ onSuccess, defaultValues }: AfpFormProps) {
         />
 
         <Button type="submit" disabled={createAfp.isPending} className="w-full">
-          {createAfp.isPending ? "Creating..." : "Create AFP"}
+          {createAfp.isPending ? "Creating..." : "Create AFP line"}
         </Button>
       </form>
     </Form>

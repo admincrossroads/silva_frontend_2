@@ -12,6 +12,7 @@ import {
   ScrollText,
   Shield,
   Bell,
+  MessagesSquare,
   Settings,
   FileText,
   MapPin,
@@ -162,7 +163,8 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
     { label: "Dashboard", procoreLabel: "Home", href: "/dashboard", icon: LayoutDashboard },
   ];
 
-  // Budget + Commitments (planning) — hidden from field-only vendor roles except admin
+  // Budget + Commitments (planning) — hidden from field-only vendor roles except admin;
+  // Silva governs AFP (Budget) but does not create or manage AFEs (Commitments).
   if (!isVendorRole(role) || role === "vendor_admin") {
     items.push({
       label: "Budget",
@@ -170,12 +172,14 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
       href: "/planning/afp",
       icon: Wallet,
     });
-    items.push({
-      label: "Commitments",
-      procoreLabel: "Commitments",
-      href: "/planning/afe",
-      icon: FileCheck,
-    });
+    if (!isSilvaRole(role)) {
+      items.push({
+        label: "Commitments",
+        procoreLabel: "Commitments",
+        href: "/planning/afe",
+        icon: FileCheck,
+      });
+    }
   }
 
   // Schedule + Daily Log (execution)
@@ -299,6 +303,17 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
   }
 
   items.push({ label: "Notifications", href: "/notifications", icon: Bell });
+
+  const canMessages =
+    isSpxRole(role) ||
+    isSilvaRole(role) ||
+    role === "vendor_admin" ||
+    role === "vendor_manager" ||
+    role === "vendor_supervisor" ||
+    role === "vendor_field_lead";
+  if (canMessages) {
+    items.push({ label: "Messages", href: "/messages", icon: MessagesSquare });
+  }
 
   const settingsChildren = settingsSectionsFor(user)
     .filter((section) => section.href !== "/settings")
