@@ -73,9 +73,10 @@ export const workPlansApi = {
   updateParsed: (id: string, parsedJson: Record<string, unknown>) =>
     api.patch<{ data: WorkPlanSubmission }>(`/work-plans/${id}/parsed`, { parsedJson }).then((r) => r.data.data),
 
-  uploadExcel: async (id: string, file: File) => {
+  uploadExcel: async (id: string, file: File, sectionCode: string) => {
     const buffer = await file.arrayBuffer();
     const res = await api.put<{ data: WorkPlanSubmission }>(`/work-plans/${id}/upload`, buffer, {
+      params: { sectionCode },
       headers: { "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" },
     });
     return res.data.data;

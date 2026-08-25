@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { FileSpreadsheet, Keyboard, CheckCircle2, Upload } from "lucide-react";
 import {
   useWorkPlan,
   useSubmitWorkPlan,
@@ -15,14 +16,15 @@ import {
 } from "@/hooks/use-work-plans";
 import { useFarmEstates } from "@/hooks/use-farm-estates";
 import { useRole } from "@/hooks/use-role";
+import { getApiErrorMessage } from "@/lib/api/errors";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageShell, PageLoading } from "@/components/layout/page-shell";
 import { WorkPlanBuilder } from "@/components/work-plan/work-plan-builder";
 import { WorkPlanSetupForm } from "@/components/work-plan/work-plan-setup-form";
+import { cn } from "@/lib/utils";
 import type { ParsedWorkPlan } from "@/lib/work-plan/builder";
 
 type ParsedCategory = {
@@ -34,15 +36,31 @@ type ParsedCategory = {
 
 type ParsedPlan = ParsedWorkPlan & {
   categories?: ParsedCategory[];
-  sections?: Array<{ sectionLabel: string; activities: Array<{ id: string; nameEn: string; annualCostEtb: number }> }>;
+  matchedSheets?: string[];
+  workbookSheets?: string[];
+  sections?: Array<{
+    sectionCode?: string;
+    sectionLabel: string;
+    activities: Array<{
+      id: string;
+      nameEn: string;
+      annualMandays?: number | null;
+      annualCostEtb?: number | null;
+      schedule?: Array<{ month: number; quantity?: number }>;
+    }>;
+  }>;
 };
+
+type BuildMode = "choose" | "form" | "excel" | "summary";
 
 export default function WorkPlanDetailPage() {
   const { id } = useParams<{ id: string }>();
   const fileRef = useRef<HTMLInputElement>(null);
   const [reviewNotes, setReviewNotes] = useState("");
-  const [inputTab, setInputTab] = useState<"form" | "excel" | "summary">("form");
-  const { isVendorAdmin, isSpx } = useRole();
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadFileName, setUploadFileName] = useState<string | null>(null);
+  const [uploadSectionCode, setUploadSectionCode] = useState("");
+  const { canManageWorkPlan, isSpx } = useRole();
   const { data: plan, isLoading } = useWorkPlan(id);
   const { data: template, isLoading: templateLoading } = useWorkPlanTemplate();
   const { data: estates = [], isLoading: estatesLoading } = useFarmEstates({ status: "active" });
@@ -53,6 +71,19 @@ export default function WorkPlanDetailPage() {
   const updatePlan = useUpdateWorkPlan();
   const updateMeta = useUpdateWorkPlanMeta();
 
+  const parsed = (plan?.parsedJson || {}) as ParsedPlan;
+  const hasActivities = (parsed.categories?.length || parsed.sections?.length || 0) > 0;
+  const [mode, setMode] = useState<BuildMode>("choose");
+
+  useEffect(() => {
+    if (!plan) return;
+    if (parsed.inputMethod === "excel" && hasActivities) setMode("summary");
+    else if (hasActivities) setMode("form");
+    else setMode("choose");
+    // Only when opening a plan
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plan?.id]);
+
   if (isLoading || !plan) {
     return (
       <PageShell>
@@ -61,17 +92,33 @@ export default function WorkPlanDetailPage() {
     );
   }
 
-  const parsed = (plan.parsedJson || {}) as ParsedPlan;
-  const canEdit = isVendorAdmin && ["draft", "revision_requested"].includes(plan.status);
-  const canSubmit =
-    canEdit &&
-    Boolean(plan.farmEstateId) &&
-    (parsed.categories?.length || parsed.sections?.length || 0) > 0;
+  const canEdit = canManageWorkPlan && ["draft", "revision_requested"].includes(plan.status);
+  const canSubmit = canEdit && Boolean(plan.farmEstateId) && hasActivities;
   const canReview = isSpx && plan.status === "submitted";
   const farmBlockCodes =
     plan.farmEstate?.blocks?.map((b) => b.code) ??
     estates.find((e) => e.id === plan.farmEstateId)?.blocks.map((b) => b.code) ??
     [];
+
+  const onUploadFile = (file: File) => {
+    if (!uploadSectionCode) {
+      setUploadError("Select which operation this Excel is for before uploading.");
+      return;
+    }
+    setUploadError(null);
+    setUploadFileName(file.name);
+    uploadPlan.mutate(
+      { id: plan.id, file, sectionCode: uploadSectionCode },
+      {
+        onSuccess: () => {
+          setMode("summary");
+        },
+        onError: (err) => {
+          setUploadError(getApiErrorMessage(err, "Could not read this Excel file."));
+        },
+      },
+    );
+  };
 
   return (
     <PageShell>
@@ -80,9 +127,7 @@ export default function WorkPlanDetailPage() {
           ← Work plans
         </Link>
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-bold tracking-tight">
-            {plan.farmName || "Annual work plan"}
-          </h1>
+          <h1 className="text-2xl font-bold tracking-tight">{plan.farmName || "Annual work plan"}</h1>
           <Badge variant="outline" className="capitalize">
             {plan.status.replace(/_/g, " ")}
           </Badge>
@@ -126,55 +171,102 @@ export default function WorkPlanDetailPage() {
         </Card>
       ) : null}
 
+      {/* Step 1 — farm details */}
       <Card className="mb-6 p-5">
-        <h2 className="text-sm font-semibold">Plan details</h2>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Farm name, total area, budget year, and FX rate apply to the whole submission.
-        </p>
-        <div className="mt-4">
-          <WorkPlanSetupForm
-            estates={estates}
-            estatesLoading={estatesLoading}
-            template={template}
-            readOnly={!canEdit}
-            isPending={updateMeta.isPending}
-            initial={{
-              farmEstateId: plan.farmEstateId ?? undefined,
-              farmName: plan.farmName ?? plan.farmEstate?.name ?? undefined,
-              totalAreaHa: plan.totalAreaHa ?? undefined,
-              budgetYearLabel: plan.budgetYearLabel,
-              budgetYearGc: plan.budgetYearGc,
-              fxEtbPerUsd: String(plan.fxEtbPerUsd),
-            }}
-            onSubmit={(values) => {
-              updateMeta.mutate({
-                id: plan.id,
-                farmEstateId: values.farmEstateId,
-                totalAreaHa: values.totalAreaHa ? Number(values.totalAreaHa) : null,
-                budgetYearLabel: values.budgetYearLabel,
-                budgetYearGc: values.budgetYearGc,
-                fxEtbPerUsd: Number(values.fxEtbPerUsd) || 130,
-              });
-            }}
-          />
+        <div className="flex items-start gap-3">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+            1
+          </span>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-sm font-semibold">Farm & budget year</h2>
+            <div className="mt-4">
+              <WorkPlanSetupForm
+                estates={estates}
+                estatesLoading={estatesLoading}
+                template={template}
+                readOnly={!canEdit}
+                isPending={updateMeta.isPending}
+                initial={{
+                  farmEstateId: plan.farmEstateId ?? undefined,
+                  farmName: plan.farmName ?? plan.farmEstate?.name ?? undefined,
+                  totalAreaHa: plan.totalAreaHa ?? undefined,
+                  budgetYearLabel: plan.budgetYearLabel,
+                  budgetYearGc: plan.budgetYearGc,
+                  fxEtbPerUsd: String(plan.fxEtbPerUsd),
+                }}
+                onSubmit={(values) => {
+                  updateMeta.mutate({
+                    id: plan.id,
+                    farmEstateId: values.farmEstateId,
+                    totalAreaHa: values.totalAreaHa ? Number(values.totalAreaHa) : null,
+                    budgetYearLabel: values.budgetYearLabel,
+                    budgetYearGc: values.budgetYearGc,
+                    fxEtbPerUsd: Number(values.fxEtbPerUsd) || 130,
+                  });
+                }}
+              />
+            </div>
+          </div>
         </div>
       </Card>
 
-      <Tabs
-        value={inputTab}
-        onValueChange={(v) => setInputTab(v as "form" | "excel" | "summary")}
-        className="mb-6"
-      >
-        <TabsList>
-          <TabsTrigger value="form">Build in app</TabsTrigger>
-          <TabsTrigger value="excel">Upload Excel</TabsTrigger>
-          <TabsTrigger value="summary">Summary</TabsTrigger>
-        </TabsList>
+      {/* Step 2 — choose path */}
+      <Card className="mb-6 p-5">
+        <div className="flex items-start gap-3">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+            2
+          </span>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-sm font-semibold">Activities</h2>
 
-        <TabsContent value="form">
-          {inputTab === "form" && (templateLoading || !template ? (
-            <Card className="p-8 text-center text-sm text-muted-foreground">Loading activity catalog…</Card>
-          ) : template ? (
+            {canEdit ? (
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => setMode("form")}
+                  className={cn(
+                    "rounded-xl border p-4 text-left transition-colors hover:border-primary/40 hover:bg-primary/5",
+                    mode === "form" && "border-primary bg-primary/5 ring-1 ring-primary/30",
+                  )}
+                >
+                  <Keyboard className="mb-2 h-5 w-5 text-primary" />
+                  <p className="text-sm font-semibold">Build in app</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMode("excel")}
+                  className={cn(
+                    "rounded-xl border p-4 text-left transition-colors hover:border-primary/40 hover:bg-primary/5",
+                    mode === "excel" && "border-primary bg-primary/5 ring-1 ring-primary/30",
+                  )}
+                >
+                  <FileSpreadsheet className="mb-2 h-5 w-5 text-primary" />
+                  <p className="text-sm font-semibold">Upload Excel</p>
+                </button>
+              </div>
+            ) : null}
+
+            {hasActivities ? (
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <Badge variant="secondary" className="gap-1 font-normal">
+                  <CheckCircle2 className="h-3 w-3" />
+                  {(parsed.sections || []).length} section(s) ·{" "}
+                  {(parsed.grandTotalEtb ?? 0).toLocaleString()} ETB
+                </Badge>
+                <Button type="button" size="sm" variant="ghost" onClick={() => setMode("summary")}>
+                  Summary
+                </Button>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </Card>
+
+      {mode === "form" ? (
+        <div className="mb-6">
+          {templateLoading || !template ? (
+            <Card className="p-8 text-center text-sm text-muted-foreground">Loading…</Card>
+          ) : (
             <WorkPlanBuilder
               key={`${plan.id}-${plan.updatedAt}-${plan.farmEstateId}`}
               template={template}
@@ -184,73 +276,118 @@ export default function WorkPlanDetailPage() {
               readOnly={!canEdit}
               isSaving={updatePlan.isPending}
               onSave={(next) => {
-                updatePlan.mutate({
-                  id: plan.id,
-                  parsedJson: {
-                    ...next,
-                    farmName: plan.farmName,
-                    totalAreaHa: plan.totalAreaHa,
-                    budgetYearLabel: plan.budgetYearLabel,
-                    budgetYearGc: plan.budgetYearGc,
-                    fxEtbPerUsd: Number(plan.fxEtbPerUsd),
+                updatePlan.mutate(
+                  {
+                    id: plan.id,
+                    parsedJson: {
+                      ...next,
+                      farmName: plan.farmName,
+                      totalAreaHa: plan.totalAreaHa,
+                      budgetYearLabel: plan.budgetYearLabel,
+                      budgetYearGc: plan.budgetYearGc,
+                      fxEtbPerUsd: Number(plan.fxEtbPerUsd),
+                    },
                   },
-                });
+                  { onSuccess: () => setMode("summary") },
+                );
               }}
             />
-          ) : null)}
-        </TabsContent>
+          )}
+        </div>
+      ) : null}
 
-        <TabsContent value="excel">
-          <Card className="p-5">
-            <h2 className="text-sm font-semibold">Upload Excel work plan</h2>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Use the B-Agro Chetu Farm workbook: Summary, Monthly, Nursery, Young Coffee, Mature Coffee,
-              Infilling, Harvest, Materials, Salary.
-            </p>
-            {canEdit ? (
-              <div className="mt-4 flex flex-wrap gap-2">
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept=".xlsx,.xls"
-                  className="hidden"
+      {mode === "excel" ? (
+        <Card className="mb-6 p-5">
+          <h2 className="mb-4 text-sm font-semibold">Upload Excel</h2>
+          {canEdit ? (
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="upload-section" className="mb-1.5 block text-sm font-medium">
+                  Operation
+                </label>
+                <select
+                  id="upload-section"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={uploadSectionCode}
                   onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    uploadPlan.mutate(
-                      { id: plan.id, file },
-                      {
-                        onSuccess: () => setInputTab("summary"),
-                      },
-                    );
+                    setUploadSectionCode(e.target.value);
+                    setUploadError(null);
                   }}
-                />
-                <Button variant="outline" disabled={uploadPlan.isPending} onClick={() => fileRef.current?.click()}>
+                >
+                  <option value="">Select operation…</option>
+                  <option value="nursery">I. Nursery Operations</option>
+                  <option value="young_coffee">II. Young Coffee Care</option>
+                  <option value="matured_coffee">III. Mature Coffee Main Care</option>
+                  <option value="infilling">IV. Infilling Operations</option>
+                  <option value="harvest">V &amp; VI. Harvest &amp; Processing</option>
+                  <option value="materials">Materials</option>
+                  <option value="salary">Salary &amp; Admin</option>
+                </select>
+                <p className="mt-1.5 text-xs text-muted-foreground">
+                  Choose the operation that matches this file so Young Coffee is not imported as Nursery.
+                </p>
+              </div>
+
+              <input
+                ref={fileRef}
+                type="file"
+                accept=".xlsx,.xls"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = "";
+                  if (file) onUploadFile(file);
+                }}
+              />
+              <div
+                className={cn(
+                  "flex flex-col items-center justify-center rounded-xl border border-dashed bg-muted/20 px-6 py-10 text-center",
+                  !uploadSectionCode && "opacity-60",
+                )}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  if (!uploadSectionCode) {
+                    setUploadError("Select which operation this Excel is for before uploading.");
+                    return;
+                  }
+                  const file = e.dataTransfer.files?.[0];
+                  if (file) onUploadFile(file);
+                }}
+              >
+                <Upload className="mb-2 h-8 w-8 text-muted-foreground" />
+                <Button
+                  variant="outline"
+                  disabled={uploadPlan.isPending || !uploadSectionCode}
+                  onClick={() => fileRef.current?.click()}
+                >
                   {uploadPlan.isPending ? "Uploading…" : "Choose Excel file"}
                 </Button>
+                {uploadFileName ? (
+                  <p className="mt-2 text-xs text-muted-foreground">{uploadFileName}</p>
+                ) : null}
               </div>
-            ) : (
-              <p className="mt-4 text-sm text-muted-foreground">
-                Plan was submitted via {parsed.inputMethod === "excel" ? "Excel upload" : "form builder"}.
-              </p>
-            )}
-          </Card>
-        </TabsContent>
 
-        <TabsContent value="summary">
+              {uploadError ? (
+                <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  {uploadError}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+        </Card>
+      ) : null}
+
+      {mode === "summary" || (mode === "choose" && hasActivities) ? (
+        <div className="mb-6">
           <SummaryPanels parsed={parsed} plan={plan} />
-        </TabsContent>
-      </Tabs>
+        </div>
+      ) : null}
 
       {canEdit ? (
         <Card className="mb-6 p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h2 className="text-sm font-semibold">Submit to SPX</h2>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Save your plan draft, review the summary, then submit for SPX acceptance.
-              </p>
-            </div>
+            <h2 className="text-sm font-semibold">Submit to SPX</h2>
             {canSubmit ? (
               <Button disabled={submitPlan.isPending} onClick={() => submitPlan.mutate(plan.id)}>
                 {submitPlan.isPending ? "Submitting…" : "Submit to SPX"}
@@ -266,25 +403,31 @@ export default function WorkPlanDetailPage() {
 
       {plan.status === "accepted" ? (
         <Card className="mt-6 p-5">
-          <p className="text-sm text-foreground">
-            Promoted to AFP budget register.{" "}
-            <Link href="/planning/afp" className="text-primary hover:underline">
-              View budget lines →
-            </Link>
-          </p>
+          <Link href="/planning/afp" className="text-sm text-primary hover:underline">
+            View budget lines →
+          </Link>
         </Card>
-      ) : null}
-
-      {isSpx && plan.status === "submitted" ? (
-        <p className="mt-4 text-xs text-muted-foreground">
-          Review category totals and activity sections above before accepting.
-        </p>
       ) : null}
     </PageShell>
   );
 }
 
-function SummaryPanels({ parsed, plan }: { parsed: ParsedPlan; plan?: { farmName?: string | null; totalAreaHa?: number | null; budgetYearLabel?: string } }) {
+function SummaryPanels({
+  parsed,
+  plan,
+}: {
+  parsed: ParsedPlan;
+  plan?: { farmName?: string | null; totalAreaHa?: number | null; budgetYearLabel?: string };
+}) {
+  const sectionRows = (parsed.sections || []).map((s) => {
+    const md = s.activities.reduce((sum, a) => sum + (a.annualMandays || 0), 0);
+    const cost = s.activities.reduce((sum, a) => sum + (a.annualCostEtb || 0), 0);
+    const withMonths = s.activities.filter((a) =>
+      (a.schedule || []).some((r) => (r.quantity || 0) > 0),
+    ).length;
+    return { ...s, md, cost, withMonths };
+  });
+
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       <Card className="p-5">
@@ -299,6 +442,10 @@ function SummaryPanels({ parsed, plan }: { parsed: ParsedPlan; plan?: { farmName
             <dd className="font-medium">{plan?.budgetYearLabel || "—"}</dd>
           </div>
           <div className="flex justify-between gap-2">
+            <dt className="text-muted-foreground">Source</dt>
+            <dd className="font-medium capitalize">{parsed.inputMethod || parsed.source || "—"}</dd>
+          </div>
+          <div className="flex justify-between gap-2">
             <dt className="text-muted-foreground">Total area</dt>
             <dd className="font-medium tabular-nums">
               {plan?.totalAreaHa ?? parsed.totalAreaHa ?? "—"}
@@ -306,13 +453,25 @@ function SummaryPanels({ parsed, plan }: { parsed: ParsedPlan; plan?: { farmName
             </dd>
           </div>
         </dl>
-        <h2 className="mt-6 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Category summary</h2>
+        <h2 className="mt-6 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Category summary
+        </h2>
         <p className="mt-1 text-2xl font-semibold tabular-nums">
-          {(parsed.grandTotalEtb ?? 0).toLocaleString()} ETB
+          {(parsed.grandTotalEtb ?? sectionRows.reduce((s, r) => s + r.cost, 0)).toLocaleString()} ETB
         </p>
         <ul className="mt-4 space-y-2 text-sm">
-          {(parsed.categories || []).filter((c) => c.budgetEtb > 0).length === 0 ? (
-            <li className="text-muted-foreground">No categories yet — build in app or upload Excel.</li>
+          {sectionRows.length === 0 && !(parsed.categories || []).some((c) => c.budgetEtb > 0) ? (
+            <li className="text-muted-foreground">—</li>
+          ) : sectionRows.length > 0 ? (
+            sectionRows.map((s) => (
+              <li
+                key={s.sectionCode || s.sectionLabel}
+                className="flex justify-between gap-2 border-b pb-2 last:border-0"
+              >
+                <span className="min-w-0 truncate">{s.sectionLabel}</span>
+                <span className="shrink-0 tabular-nums font-medium">{s.cost.toLocaleString()} ETB</span>
+              </li>
+            ))
           ) : (
             (parsed.categories || [])
               .filter((c) => c.budgetEtb > 0)
@@ -329,13 +488,15 @@ function SummaryPanels({ parsed, plan }: { parsed: ParsedPlan; plan?: { farmName
       <Card className="p-5">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Activity sections</h2>
         <ul className="mt-4 space-y-3 text-sm">
-          {(parsed.sections || []).length === 0 ? (
-            <li className="text-muted-foreground">No activity sections saved yet.</li>
+          {sectionRows.length === 0 ? (
+            <li className="text-muted-foreground">—</li>
           ) : (
-            (parsed.sections || []).map((s) => (
-              <li key={s.sectionLabel}>
+            sectionRows.map((s) => (
+              <li key={s.sectionCode || s.sectionLabel}>
                 <p className="font-medium">{s.sectionLabel}</p>
-                <p className="text-muted-foreground">{s.activities.length} activities</p>
+                <p className="text-muted-foreground">
+                  {s.activities.length} · {s.md.toLocaleString()} MD · {s.cost.toLocaleString()} ETB
+                </p>
               </li>
             ))
           )}

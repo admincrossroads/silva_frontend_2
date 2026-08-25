@@ -142,7 +142,7 @@ export function WorkPlanSetupForm({
 
       {selectedEstate && !readOnly ? (
         <p className="text-xs text-muted-foreground">
-          {selectedEstate.blocks.length} blocks configured
+          {selectedEstate.blocks.length} blocks
           {selectedEstate.vendors.length
             ? ` · ${selectedEstate.vendors.map((v) => v.name).join(", ")}`
             : null}

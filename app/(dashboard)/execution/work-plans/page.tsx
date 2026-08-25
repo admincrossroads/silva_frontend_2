@@ -22,7 +22,7 @@ export default function WorkPlansPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const { isVendorAdmin, isSpx } = useRole();
+  const { isSpx, canManageWorkPlan } = useRole();
   const { data: plans = [], isLoading } = useWorkPlans();
   const { data: template } = useWorkPlanTemplate();
   const { data: estates = [], isLoading: estatesLoading } = useFarmEstates({ status: "active" });
@@ -51,10 +51,9 @@ export default function WorkPlansPage() {
       <FarmAreaScopeBanner />
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Annual work plan</h1>
-          
+          <h1 className="text-2xl font-bold tracking-tight">Annual work plans</h1>
         </div>
-        {isVendorAdmin ? (
+        {canManageWorkPlan ? (
           <Button disabled={createPlan.isPending} onClick={() => setModalOpen(true)}>
             New work plan
           </Button>
@@ -90,7 +89,7 @@ export default function WorkPlansPage() {
               <tr>
                 <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
                   No work plan submissions yet.
-                  {isVendorAdmin ? " Click New work plan to start." : null}
+                  {canManageWorkPlan ? " Click New work plan to start." : null}
                 </td>
               </tr>
             ) : (
@@ -129,7 +128,6 @@ export default function WorkPlansPage() {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         title="New annual work plan"
-        description="Select the farm and budget year before building activities or uploading Excel."
       >
         <WorkPlanSetupForm
           estates={estates}

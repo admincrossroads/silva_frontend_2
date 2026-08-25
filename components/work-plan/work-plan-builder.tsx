@@ -47,16 +47,8 @@ export function WorkPlanBuilder({ template, parsed, fx, farmBlocks, readOnly, on
   return (
     <Card className="overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b bg-muted/20 px-5 py-4">
-        <div>
-          <h2 className="text-sm font-semibold">Build annual plan</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            Start blank: pick blocks and farm area, then enable sections and activities. Or use Upload Excel.
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="text-xs text-muted-foreground">Plan total</p>
-          <p className="text-lg font-semibold tabular-nums">{grandTotal.toLocaleString()} ETB</p>
-        </div>
+        <h2 className="text-sm font-semibold">Build annual plan</h2>
+        <p className="text-lg font-semibold tabular-nums">{grandTotal.toLocaleString()} ETB</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="p-5">
@@ -88,13 +80,8 @@ export function WorkPlanBuilder({ template, parsed, fx, farmBlocks, readOnly, on
 
       {!readOnly ? (
         <div className="flex flex-wrap items-center justify-end gap-3 border-t px-5 py-4">
-          {grandTotal <= 0 ? (
-            <p className="mr-auto text-xs text-muted-foreground">
-              Enable at least one section with activities to save.
-            </p>
-          ) : null}
           <Button
-            disabled={isSaving}
+            disabled={isSaving || grandTotal <= 0}
             onClick={() => onSave(buildParsedFromSections(sections, fx, "form"))}
           >
             {isSaving ? "Saving…" : "Save plan draft"}

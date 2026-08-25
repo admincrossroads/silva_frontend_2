@@ -117,10 +117,11 @@ export function useUpdateWorkPlan() {
 export function useUploadWorkPlan() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, file }: { id: string; file: File }) => workPlansApi.uploadExcel(id, file),
+    mutationFn: ({ id, file, sectionCode }: { id: string; file: File; sectionCode: string }) =>
+      workPlansApi.uploadExcel(id, file, sectionCode),
     meta: {
       successMessage: "Excel uploaded",
-      successDescription: "Activities imported into the work plan.",
+      successDescription: "Activities imported into the selected operation.",
       errorMessage: "Could not upload Excel file",
     },
     onSuccess: (_, { id }) => {

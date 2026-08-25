@@ -103,7 +103,7 @@ export function AfpForm({ onSuccess, defaultValues }: AfpFormProps) {
           </div>
         )}
         <p className="text-xs text-muted-foreground">
-          Add a budget line for a specific task — capping, processing, or any other activity.
+          {/* Add a budget line for a specific task — capping, processing, or any other activity. */}
         </p>
         <FormField
           control={form.control}

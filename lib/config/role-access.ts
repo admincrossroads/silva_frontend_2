@@ -187,7 +187,12 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
     { label: "Work Orders", procoreLabel: "Schedule", href: "/execution/work-orders" },
     { label: "Season Calendar", procoreLabel: "Schedule", href: "/execution/calendar" },
   ];
-  if (role === "vendor_admin") {
+  if (
+    role === "vendor_admin" ||
+    role === "vendor_manager" ||
+    role === "vendor_supervisor" ||
+    role === "vendor_field_lead"
+  ) {
     scheduleChildren.push({ label: "Work Plan", procoreLabel: "Schedule", href: "/execution/work-plans" });
   }
   if (isSpxRole(role)) {
