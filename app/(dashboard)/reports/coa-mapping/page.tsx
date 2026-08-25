@@ -43,6 +43,7 @@ export default function CoaMappingPage() {
         glAccount,
         description: description || undefined,
       }),
+    meta: { successMessage: "COA mapping created", errorMessage: "Could not create mapping" },
     onSuccess: () => {
       setSourceAccount("");
       setGlAccount("");

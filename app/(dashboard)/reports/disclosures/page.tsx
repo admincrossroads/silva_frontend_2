@@ -51,6 +51,7 @@ export default function DisclosuresPage() {
         period: form.period,
         notes: form.notes || undefined,
       }),
+    meta: { successMessage: "Disclosure created", errorMessage: "Could not create disclosure" },
     onSuccess: () => {
       setForm(empty);
       setError("");
@@ -67,6 +68,7 @@ export default function DisclosuresPage() {
         period: form.period,
         notes: form.notes || null,
       }),
+    meta: { successMessage: "Disclosure updated", errorMessage: "Could not update disclosure" },
     onSuccess: () => {
       setEditingId(null);
       setForm(empty);

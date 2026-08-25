@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { authApi } from "@/lib/api/auth";
+import { toast } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,8 +42,10 @@ function ResetPasswordInner() {
       setError("");
       await authApi.resetPassword(token, data.password);
       setDone(true);
+      toast.success("Password reset");
     } catch (err: any) {
       setError(err.response?.data?.message || "Reset failed");
+      toast.error(err, "Could not reset password");
     }
   };
 

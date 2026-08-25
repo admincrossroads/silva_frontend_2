@@ -9,6 +9,7 @@ import { Building2, KeyRound, Layers, Shield, User } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { authApi } from "@/lib/api/auth";
 import { getApiErrorMessage } from "@/lib/api/errors";
+import { toast } from "@/lib/toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -185,8 +186,10 @@ export default function ProfilePage() {
                 await authApi.updateProfile(user.id, { name: values.name });
                 await refreshSession();
                 setProfileMsg("Profile saved.");
+                toast.success("Profile saved");
               } catch (err) {
                 setProfileErr(getApiErrorMessage(err, "Could not save profile"));
+                toast.error(err, "Could not save profile");
               }
             })}
             className="space-y-4"
@@ -243,8 +246,10 @@ export default function ProfilePage() {
                 await authApi.changePassword(values.currentPassword, values.newPassword);
                 password.reset();
                 setPasswordMsg("Password updated.");
+                toast.success("Password updated");
               } catch (err) {
                 setPasswordErr(getApiErrorMessage(err, "Could not update password"));
+                toast.error(err, "Could not update password");
               }
             })}
             className="space-y-4"

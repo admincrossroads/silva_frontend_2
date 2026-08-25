@@ -112,6 +112,7 @@ export default function ExecutionFormsPage() {
         payload,
       });
     },
+    meta: { successMessage: "Form created", errorMessage: "Could not create form" },
     onSuccess: (row) => {
       setError("");
       setSelectedId(row.id);
@@ -122,16 +123,19 @@ export default function ExecutionFormsPage() {
 
   const submit = useMutation({
     mutationFn: (id: string) => ifsFormApi.submit(id),
+    meta: { successMessage: "Form submitted", errorMessage: "Submit failed" },
     onSuccess: invalidate,
     onError: (err) => setError(getApiErrorMessage(err, "Submit failed")),
   });
   const validateForm = useMutation({
     mutationFn: (id: string) => ifsFormApi.validate(id),
+    meta: { successMessage: "Form validated", errorMessage: "Validate failed" },
     onSuccess: invalidate,
     onError: (err) => setError(getApiErrorMessage(err, "Validate failed")),
   });
   const reject = useMutation({
     mutationFn: (id: string) => ifsFormApi.reject(id, "Needs correction before acceptance"),
+    meta: { successMessage: "Form rejected", errorMessage: "Reject failed" },
     onSuccess: invalidate,
     onError: (err) => setError(getApiErrorMessage(err, "Reject failed")),
   });

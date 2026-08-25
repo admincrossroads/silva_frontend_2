@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { authApi } from "@/lib/api/auth";
+import { toast } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,8 +33,10 @@ export default function ForgotPasswordPage() {
       setError("");
       await authApi.forgotPassword(data.email);
       setSent(true);
+      toast.success("Reset link sent", "Check your email if an account exists.");
     } catch (err: any) {
       setError(err.response?.data?.message || "Something went wrong");
+      toast.error(err, "Could not send reset link");
     }
   };
 

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { registrationApi } from "@/lib/api/registration";
 import { authApi } from "@/lib/api/auth";
 import { getApiErrorMessage } from "@/lib/api/errors";
+import { useActivateAccount } from "@/hooks/use-registration";
 import { useAuthStore } from "@/stores/auth-store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,12 +16,12 @@ export default function ActivatePage() {
   const params = useSearchParams();
   const token = params.get("token") || "";
   const { setTokens, setSession } = useAuthStore();
+  const activate = useActivateAccount();
   const [info, setInfo] = useState<{ orgName: string; contactName: string; contactEmail: string } | null>(null);
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -50,9 +51,8 @@ export default function ActivatePage() {
       setError("Passwords do not match.");
       return;
     }
-    setBusy(true);
     try {
-      const res = await registrationApi.activate({ token, password, name: name.trim() });
+      const res = await activate.mutateAsync({ token, password, name: name.trim() });
       setTokens(res.accessToken, res.refreshToken);
       const me = await authApi.me();
       setSession(me.user, me.permissions, {
@@ -63,8 +63,6 @@ export default function ActivatePage() {
       router.push(me.activeProgram ? "/dashboard" : "/onboarding");
     } catch (err) {
       setError(getApiErrorMessage(err, "Activation failed."));
-    } finally {
-      setBusy(false);
     }
   };
 
@@ -101,8 +99,8 @@ export default function ActivatePage() {
         <Input id="name" label="Your name" value={name} onChange={(e) => setName(e.target.value)} required />
         <Input id="password" label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
         <Input id="confirm" label="Confirm password" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required />
-        <Button type="submit" className="w-full" disabled={busy}>
-          {busy ? "Activating…" : "Activate & sign in"}
+        <Button type="submit" className="w-full" disabled={activate.isPending}>
+          {activate.isPending ? "Activating…" : "Activate & sign in"}
         </Button>
       </form>
     </div>

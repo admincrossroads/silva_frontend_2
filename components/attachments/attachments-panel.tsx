@@ -60,6 +60,7 @@ export function AttachmentsPanel({ entityType, entityId, canUpload = false }: Pr
         storageKey: signed.storageKey,
       });
     },
+    meta: { successMessage: "File uploaded", errorMessage: "Upload failed" },
     onSuccess: () => {
       setError("");
       invalidate();
@@ -72,11 +73,13 @@ export function AttachmentsPanel({ entityType, entityId, canUpload = false }: Pr
       const att = await platformApi.getAttachment(id);
       window.open(att.downloadUrl, "_blank", "noopener,noreferrer");
     },
+    meta: { successMessage: "Download started", errorMessage: "Download failed" },
     onError: (err) => setError(getApiErrorMessage(err, "Download failed")),
   });
 
   const remove = useMutation({
     mutationFn: (id: string) => platformApi.deleteAttachment(id),
+    meta: { successMessage: "File removed", errorMessage: "Delete failed" },
     onSuccess: () => {
       setError("");
       invalidate();

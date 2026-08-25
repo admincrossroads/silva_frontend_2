@@ -69,6 +69,7 @@ export default function ProgramsSettingsPage() {
 
   const create = useMutation({
     mutationFn: () => programApi.create({ name, slug: slug || undefined }),
+    meta: { successMessage: "Program created", errorMessage: "Could not create program" },
     onSuccess: (p) => {
       setName("");
       setSlug("");
@@ -82,6 +83,7 @@ export default function ProgramsSettingsPage() {
   const invite = useMutation({
     mutationFn: () =>
       programApi.inviteOrg(programId, { orgSlug: inviteSlug, roleInProgram }),
+    meta: { successMessage: "Invite sent", errorMessage: "Invite failed" },
     onSuccess: (res) => {
       setInviteSlug("");
       setError("");

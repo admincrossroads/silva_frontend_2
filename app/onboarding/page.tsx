@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { authApi, programApi } from "@/lib/api/auth";
 import { getApiErrorMessage } from "@/lib/api/errors";
+import { toast } from "@/lib/toast";
 import { useAuth } from "@/hooks/use-auth";
 import { useAuthStore } from "@/stores/auth-store";
 import { WorkspaceLoader } from "@/components/layout/workspace-loader";
@@ -122,9 +123,11 @@ export default function OnboardingPage() {
         branding: { tagline },
       });
       await refreshSession();
+      toast.success("Branding saved");
       router.push("/dashboard");
     } catch (err) {
       setError(getApiErrorMessage(err, "Could not save branding"));
+      toast.error(err, "Could not save branding");
     } finally {
       setBusy(false);
     }
@@ -141,9 +144,11 @@ export default function OnboardingPage() {
         activeProgram: me.activeProgram,
         programs: me.programs,
       });
+      toast.success("Program created");
       setSetupStep(2);
     } catch (err) {
       setError(getApiErrorMessage(err, "Could not create program"));
+      toast.error(err, "Could not create program");
     } finally {
       setBusy(false);
     }

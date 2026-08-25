@@ -40,6 +40,7 @@ export default function RaciPage() {
   const save = useMutation({
     mutationFn: ({ discipline, body }: { discipline: string; body: Record<string, string> }) =>
       platformApi.patchAccountability(discipline, body),
+    meta: { successMessage: "RACI row saved", errorMessage: "Could not update row" },
     onSuccess: (_d, vars) => {
       setError("");
       setEdits((prev) => {
@@ -54,6 +55,7 @@ export default function RaciPage() {
 
   const create = useMutation({
     mutationFn: () => platformApi.createAccountability(draft),
+    meta: { successMessage: "Discipline added", errorMessage: "Could not add discipline" },
     onSuccess: () => {
       setDraft(emptyDraft);
       setError("");
