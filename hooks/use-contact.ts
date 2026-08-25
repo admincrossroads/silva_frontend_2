@@ -4,6 +4,11 @@ import { contactApi, type ContactSubmitDto } from "@/lib/api/contact";
 export function useSubmitContact() {
   return useMutation({
     mutationFn: (dto: ContactSubmitDto) => contactApi.submit(dto),
+    meta: {
+      successMessage: "Message sent",
+      successDescription: "We'll get back to you soon.",
+      errorMessage: "Could not send message",
+    },
   });
 }
 
@@ -18,6 +23,7 @@ export function useMarkContactRead() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => contactApi.markRead(id),
+    meta: { successMessage: "Marked as read", errorMessage: "Could not update message" },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["contact-submissions"] }),
   });
 }

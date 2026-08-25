@@ -41,6 +41,7 @@ export default function WorkPlansPage() {
       setModalOpen(false);
       router.push(`/execution/work-plans/${row.id}`);
     } catch (err) {
+      // Hook already toasts; keep inline for modal context
       setError(getApiErrorMessage(err, "Could not create work plan. Select a program in Settings if needed."));
     }
   };
@@ -120,7 +121,7 @@ export default function WorkPlansPage() {
 
       {isSpx ? (
         <p className="mt-4 text-xs text-muted-foreground">
-          Submitted plans appear in your dashboard action queue for review and promotion.
+          {/* Submitted plans appear in your dashboard action queue for review and promotion. */}
         </p>
       ) : null}
 

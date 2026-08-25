@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowDown, ArrowRight, Coffee, ShieldCheck, Sprout, Users } from "lucide-react";
+import { ArrowDown, ArrowRight, ShieldCheck, Sprout, Users } from "lucide-react";
 import { SiteHeader, useLandingScroll } from "@/components/marketing/site-header";
 import { HeroBackground } from "@/components/marketing/hero-background";
 import { ParallaxSection } from "@/components/marketing/parallax-section";
 import { ContactForm } from "@/components/marketing/contact-form";
+import { BrandLogo, SpxFarmMark } from "@/components/brand/spx-farm-logo";
+import { siteConfig } from "@/lib/config/site";
 import { useAuthStore } from "@/stores/auth-store";
 import { Button } from "@/components/ui/button";
 
@@ -34,31 +36,42 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[hsl(165_28%_8%)] text-[hsl(150_18%_96%)]">
-      <SiteHeader signedIn={signedIn} scrolled={scrolled} />
+      <SiteHeader signedIn={signedIn} scrolled={scrolled} showLogo={scrolled} />
 
       {/* Hero */}
       <section className="relative min-h-[100svh] overflow-hidden">
         <HeroBackground />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[hsl(165_30%_7%)] via-transparent to-[hsl(165_30%_7%/0.35)]" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[hsl(165_30%_6%/0.55)] via-transparent to-[hsl(165_30%_6%/0.28)]" />
 
-        <div className="relative z-10 mx-auto flex min-h-[100svh] max-w-6xl flex-col justify-end px-5 pb-16 pt-28 md:px-8 md:pb-24 xl:max-w-7xl 2xl:max-w-[90rem] 3xl:max-w-content-xl">
-          <div className="max-w-xl space-y-6 animate-[landing-rise_0.9s_ease-out] sm:max-w-2xl">
-            <p className="inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.22em] text-[hsl(152_55%_72%)]">
-              <Sprout className="h-3.5 w-3.5" />
-              For coffee estate teams
+        <div className="relative z-10 mx-auto flex min-h-[100svh] max-w-6xl flex-col justify-end px-5 pb-10 pt-28 md:px-8 md:pb-14 xl:max-w-7xl xl:px-10 2xl:max-w-[90rem] 2xl:px-12 2xl:pb-16 3xl:max-w-content-xl 3xl:px-16">
+          <div className="w-full max-w-lg animate-[landing-rise_0.9s_ease-out] [text-shadow:0_1px_12px_rgba(0,0,0,0.35)] sm:max-w-xl xl:max-w-2xl 2xl:max-w-3xl">
+            {/* Brand */}
+            <div className="flex items-center gap-3.5 sm:gap-4 xl:gap-5">
+              <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[hsl(152_50%_32%/0.55)] text-[hsl(152_70%_78%)] ring-1 ring-[hsl(152_55%_55%/0.4)] sm:h-12 sm:w-12 sm:rounded-2xl xl:h-14 xl:w-14 2xl:h-16 2xl:w-16">
+                <SpxFarmMark className="h-5 w-5 sm:h-6 sm:w-6 xl:h-7 xl:w-7 2xl:h-8 2xl:w-8" />
+              </span>
+              <div className="min-w-0">
+                <h1 className="font-display text-[2.15rem] font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl xl:text-6xl 2xl:text-[4.25rem] 3xl:text-7xl">
+                  {siteConfig.name}
+                </h1>
+                <p className="mt-1.5 text-[10px] font-medium uppercase tracking-[0.22em] text-white/70 sm:mt-2 sm:text-[11px] xl:text-xs 2xl:tracking-[0.24em]">
+                  {siteConfig.tagline}
+                </p>
+              </div>
+            </div>
+
+            {/* Support */}
+            <p className="mt-6 max-w-md text-[15px] leading-relaxed text-white/88 sm:mt-7 sm:text-base xl:mt-8 xl:max-w-lg xl:text-lg xl:leading-relaxed 2xl:max-w-xl 2xl:text-xl">
+              Plan the season, authorize spend, and settle work owners, managers, and field crews each see only
+              what they should.
             </p>
-            <h1 className="font-display text-[2.85rem] leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl text-balance">
-              Coffee Field OS
-            </h1>
-            <p className="max-w-md text-base leading-relaxed text-white/78 sm:text-lg">
-              Plan the season, authorize spend, and settle work with owners, managers, and field crews each seeing
-              only what they should.
-            </p>
-            <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:items-center">
+
+            {/* CTAs */}
+            <div className="mt-7 flex flex-col gap-2.5 sm:mt-8 sm:flex-row sm:items-center sm:gap-3 xl:mt-9 xl:gap-3.5">
               {signedIn ? (
                 <Button
                   size="lg"
-                  className="h-12 rounded-xl bg-primary px-7 text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary/90"
+                  className="h-11 rounded-xl bg-primary px-6 text-[15px] text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary/90 sm:h-12 sm:px-7 xl:h-[3.25rem] xl:px-8 xl:text-base 2xl:h-14 2xl:px-9"
                   onClick={() => router.push("/dashboard")}
                 >
                   Open workspace
@@ -69,7 +82,7 @@ export default function LandingPage() {
                   <Button
                     asChild
                     size="lg"
-                    className="h-12 rounded-xl bg-primary px-7 text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary/90"
+                    className="h-11 rounded-xl bg-primary px-6 text-[15px] text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary/90 sm:h-12 sm:px-7 xl:h-[3.25rem] xl:px-8 xl:text-base 2xl:h-14 2xl:px-9"
                   >
                     <Link href="/login">
                       Sign in to workspace
@@ -80,41 +93,45 @@ export default function LandingPage() {
                     asChild
                     size="lg"
                     variant="outline"
-                    className="h-12 rounded-xl border-white/35 bg-white/5 text-white backdrop-blur-sm hover:bg-white/15 hover:text-white"
+                    className="h-11 rounded-xl border-white/30 bg-white/5 px-6 text-[15px] text-white backdrop-blur-sm hover:bg-white/12 hover:text-white sm:h-12 sm:px-7 xl:h-[3.25rem] xl:px-8 xl:text-base 2xl:h-14 2xl:px-9"
                   >
                     <Link href="/register">Apply for access</Link>
                   </Button>
                 </>
               )}
             </div>
-            {!signedIn && (
-              <p className="text-xs text-white/45">
-                Demo on sign in: <span className="text-white/70">principal@spx.example</span> · Password123!
-              </p>
-            )}
+
           </div>
 
-          <a
-            href="#how-it-works"
-            className="mt-14 inline-flex w-fit items-center gap-2 text-sm text-white/55 transition hover:text-white"
-          >
-            See how it works
-            <ArrowDown className="h-4 w-4 animate-bounce" />
-          </a>
+          {/* Kept at the bottom of the screen */}
+          <div className="mt-10 flex w-full max-w-lg flex-col gap-3 border-t border-white/10 pt-5 sm:mt-12 sm:max-w-xl sm:flex-row sm:items-center sm:justify-between sm:gap-6 md:mt-14 xl:max-w-2xl 2xl:max-w-3xl">
+            <a
+              href="#how-it-works"
+              className="inline-flex w-fit items-center gap-2 text-sm text-white/70 transition hover:text-white xl:text-[15px]"
+            >
+              See how it works
+              <ArrowDown className="h-3.5 w-3.5 animate-bounce" />
+            </a>
 
-          {!signedIn && (
-            <div id="journey" className="mt-10 flex max-w-lg flex-wrap items-center gap-2 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-xs text-white/55 backdrop-blur-sm sm:gap-3 sm:text-sm">
-              <span className="font-medium text-white/80">Your path</span>
-              <span className="hidden text-white/30 sm:inline">·</span>
-              <span>Home</span>
-              <ArrowRight className="h-3 w-3 text-white/35" />
-              <Link href="/login" className="font-medium text-[hsl(152_60%_72%)] hover:text-white">
-                Sign in
-              </Link>
-              <ArrowRight className="h-3 w-3 text-white/35" />
-              <span className="text-white/70">Dashboard</span>
-            </div>
-          )}
+            {!signedIn ? (
+              <p
+                id="journey"
+                className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] tracking-wide text-white/55 sm:text-xs xl:text-sm"
+              >
+                <span className="font-medium text-white/75">Your path</span>
+                <span className="text-white/35" aria-hidden>
+                  ·
+                </span>
+                <span>Home</span>
+                <ArrowRight className="h-3 w-3 text-white/35" aria-hidden />
+                <Link href="/login" className="font-medium text-[hsl(152_55%_72%)] transition hover:text-white">
+                  Sign in
+                </Link>
+                <ArrowRight className="h-3 w-3 text-white/35" aria-hidden />
+                <span>Dashboard</span>
+              </p>
+            ) : null}
+          </div>
         </div>
       </section>
 
@@ -124,8 +141,8 @@ export default function LandingPage() {
           <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-primary">Simple setup</p>
           <h2 className="mt-3 font-display text-3xl tracking-tight md:text-4xl">Three desks. One estate.</h2>
           <p className="mt-4 max-w-xl text-base leading-relaxed text-[hsl(160_12%_38%)]">
-            SPX operates the platform. Asset owners and vendors apply for access; SPX reviews each application,
-            activates approved workspaces, and maps partners to shared programs.
+            Asset owners and vendors apply for access. Applications are reviewed, workspaces are activated, and
+            partners are mapped to shared programs.
           </p>
 
           <div className="mt-12 grid gap-6 md:grid-cols-3">
@@ -234,7 +251,7 @@ export default function LandingPage() {
           <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-primary">Get started</p>
           <h2 className="mt-3 font-display text-3xl tracking-tight md:text-4xl">Pick your organization type</h2>
           <p className="mt-4 max-w-xl text-base leading-relaxed text-[hsl(160_12%_38%)]">
-            Apply as an asset owner or execution vendor. SPX reviews your profile, contacts you, then activates your workspace.
+            Apply as an asset owner or execution vendor. After review, your workspace is activated and you can sign in.
           </p>
 
           <div className="mt-10 divide-y divide-[hsl(150_14%_86%)] overflow-hidden rounded-2xl bg-white ring-1 ring-[hsl(150_14%_86%)]">
@@ -269,9 +286,6 @@ export default function LandingPage() {
               </Link>
             ))}
           </div>
-          <p className="mt-4 text-sm text-[hsl(160_12%_40%)]">
-            SPX platform staff sign in with administrator accounts there is no public SPX registration.
-          </p>
         </div>
       </section>
 
@@ -282,8 +296,8 @@ export default function LandingPage() {
             <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-primary">Contact</p>
             <h2 className="mt-3 font-display text-3xl tracking-tight md:text-4xl">Talk to the platform team</h2>
             <p className="mt-4 max-w-md text-base leading-relaxed text-[hsl(160_12%_38%)]">
-              Questions about onboarding, partnerships, or how Coffee Field OS fits your estate? Send a message and
-              SPX will follow up by email.
+              Questions about onboarding, partnerships, or how {siteConfig.name} fits your estate? Send a message and
+              the team will follow up by email.
             </p>
             <p className="mt-6 text-sm text-[hsl(160_12%_40%)]">
               Ready to join?{" "}
@@ -311,7 +325,7 @@ export default function LandingPage() {
             Ready when your estate is
           </h2>
           <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-white/60">
-            Apply as an asset owner or execution vendor. SPX reviews your application and activates your workspace.
+            Apply as an asset owner or execution vendor. After review, your workspace is activated.
           </p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             {signedIn ? (
@@ -350,8 +364,7 @@ export default function LandingPage() {
       <footer className="border-t border-white/10 px-5 py-8 md:px-8">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between xl:max-w-7xl 2xl:max-w-[90rem] 3xl:max-w-content-xl">
           <div className="flex items-center gap-2.5">
-            <Coffee className="h-4 w-4 text-[hsl(152_60%_65%)]" />
-            <span className="font-display text-base text-white/80">Coffee Field OS</span>
+            <BrandLogo size="sm" withWordmark showTagline={false} tone="inverse" />
           </div>
           <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-white/45">
             <a href="#how-it-works" className="transition hover:text-white/80">

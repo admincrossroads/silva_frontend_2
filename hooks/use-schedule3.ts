@@ -25,6 +25,7 @@ export function usePatchSchedule3Band() {
       silvaAuthority?: string;
       effectiveYear?: number;
     }) => platformApi.patchSchedule3(band, dto),
+    meta: { successMessage: "Schedule 3 band updated", errorMessage: "Could not update band" },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["schedule3"] }),
   });
 }

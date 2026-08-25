@@ -65,6 +65,7 @@ export default function OrganizationPage() {
         role: inviteRole,
       });
     },
+    meta: { successMessage: "Invite sent", errorMessage: "Invite failed" },
     onSuccess: () => {
       setInviteOpen(false);
       setEmail("");

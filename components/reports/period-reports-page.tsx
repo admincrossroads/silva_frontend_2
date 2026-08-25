@@ -43,6 +43,7 @@ export function PeriodReportsPage({ type, generate }: PeriodReportsPageProps) {
 
   const generateMutation = useMutation({
     mutationFn: generate,
+    meta: { successMessage: "Report generated", errorMessage: "Could not generate report" },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["reports"] }),
   });
 

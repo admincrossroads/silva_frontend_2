@@ -11,6 +11,7 @@ import { ThemeToggle } from "./theme-toggle";
 import { LanguageToggle } from "./language-toggle";
 import { useAppShell } from "./app-shell-context";
 import { useActiveFarmEstate } from "@/hooks/use-active-farm-estate";
+import { siteConfig } from "@/lib/config/site";
 
 export function TopNav() {
   const { setMobileNavOpen } = useAppShell();
@@ -35,7 +36,7 @@ export function TopNav() {
 
         <div className="min-w-0 flex-1 md:hidden">
           <p className="truncate text-sm font-medium text-foreground">
-            {activeFarmEstate?.name || "Coffee Field OS"}
+            {activeFarmEstate?.name || siteConfig.name}
           </p>
         </div>
 

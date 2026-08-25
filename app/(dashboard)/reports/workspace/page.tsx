@@ -39,6 +39,7 @@ export default function NarrativeWorkspacePage() {
   const saveNarrative = useMutation({
     mutationFn: ({ id, narrative }: { id: string; narrative: string }) =>
       reportApi.patchNarrative(id, narrative),
+    meta: { successMessage: "Narrative saved", errorMessage: "Could not save narrative" },
     onSuccess: () => {
       setError("");
       qc.invalidateQueries({ queryKey: ["reports"] });
@@ -48,6 +49,7 @@ export default function NarrativeWorkspacePage() {
 
   const release = useMutation({
     mutationFn: (id: string) => reportApi.release(id),
+    meta: { successMessage: "Report released", errorMessage: "Could not release report" },
     onSuccess: () => {
       setError("");
       setActiveId("");

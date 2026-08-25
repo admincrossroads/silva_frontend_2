@@ -1,3 +1,5 @@
+import { siteConfig } from "@/lib/config/site";
+
 export type WorkPlanActivityTemplate = {
   id: string;
   nameEn: string;
@@ -164,7 +166,7 @@ export function buildParsedFromSections(
   );
 
   return {
-    source: inputMethod === "form" ? "Coffee Field OS form builder" : "Excel upload",
+    source: inputMethod === "form" ? `${siteConfig.name} form builder` : "Excel upload",
     inputMethod,
     fxEtbPerUsd: fx,
     sections: activeSections,

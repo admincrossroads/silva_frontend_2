@@ -22,11 +22,13 @@ export function useNotifications(options?: { acknowledged?: boolean }) {
 
   const acknowledge = useMutation({
     mutationFn: (id: string) => platformApi.acknowledgeNotification(id),
+    meta: { successMessage: "Notification acknowledged", errorMessage: "Could not acknowledge" },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications"] }),
   });
 
   const acknowledgeAll = useMutation({
     mutationFn: () => platformApi.acknowledgeAllNotifications(),
+    meta: { successMessage: "All notifications acknowledged", errorMessage: "Could not acknowledge all" },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications"] }),
   });
 

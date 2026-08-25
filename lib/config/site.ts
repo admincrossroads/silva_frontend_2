@@ -1,4 +1,8 @@
 export const siteConfig = {
-  name: "Coffee Field OS",
-  description: "Farm management system for Shecha Estate, Kaffa Zone, Ethiopia",
+  name: "Farm OS",
+  shortName: "Farm OS",
+  company: "SPX Africa",
+  tagline: "by SPX Africa",
+  description:
+    "Plan, authorize, execute, and settle coffee estate work across owners, managers, and field crews.",
 };

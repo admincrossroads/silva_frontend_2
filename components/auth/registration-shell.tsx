@@ -1,16 +1,15 @@
 import Link from "next/link";
-import { Coffee, Check } from "lucide-react";
+import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BrandLogo } from "@/components/brand/spx-farm-logo";
+import { siteConfig } from "@/lib/config/site";
 
 export function RegistrationHeader({ right }: { right?: React.ReactNode }) {
   return (
     <header className="border-b border-[hsl(150_14%_86%)] bg-white/90 backdrop-blur-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-        <Link href="/" className="flex items-center gap-2.5 transition-opacity hover:opacity-90">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15 text-primary ring-1 ring-primary/25">
-            <Coffee className="h-4 w-4" />
-          </span>
-          <span className="font-display text-lg tracking-tight">Coffee Field OS</span>
+        <Link href="/" className="flex items-center gap-2.5 transition-opacity hover:opacity-90" aria-label={`${siteConfig.name} home`}>
+          <BrandLogo size="md" withWordmark showTagline={false} />
         </Link>
         {right ?? (
           <Link href="/login" className="text-sm font-medium text-primary hover:underline">

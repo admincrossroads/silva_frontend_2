@@ -9,13 +9,14 @@ import {
   Layers,
   Palette,
   Shield,
-  Sprout,
 } from "lucide-react";
 import { authApi, programApi } from "@/lib/api/auth";
 import { getApiErrorMessage } from "@/lib/api/errors";
 import { useAuth } from "@/hooks/use-auth";
 import { useAuthStore } from "@/stores/auth-store";
 import { WorkspaceLoader } from "@/components/layout/workspace-loader";
+import { BrandLogo, SpxFarmMark } from "@/components/brand/spx-farm-logo";
+import { siteConfig } from "@/lib/config/site";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -23,9 +24,9 @@ import { cn } from "@/lib/utils";
 const INTRO_SLIDES = [
   {
     id: "welcome",
-    icon: Sprout,
+    icon: SpxFarmMark,
     title: "Welcome to your workspace",
-    subtitle: "Coffee Field OS connects planning, approvals, field execution, and payment settlement.",
+    subtitle: `${siteConfig.name} connects planning, approvals, field execution, and payment settlement.`,
     bullets: [
       "Silva governs — approves annual plans and large spend",
       "SPX manages — validates field work and releases reports",
@@ -65,7 +66,7 @@ const INTRO_SLIDES = [
       "You can change these later in Settings",
     ],
   },
-] as const;
+];
 
 const SETUP_LABELS = ["Walkthrough", "Program", "Branding"] as const;
 const WIZARD_STEPS = [
@@ -153,6 +154,7 @@ export default function OnboardingPage() {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,0.52fr)] xl:gap-10">
         <div className="min-w-0 space-y-6">
           <div>
+            <BrandLogo size="sm" withWordmark showTagline={false} className="mb-4" />
             <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-primary">
               Getting started
             </p>

@@ -100,6 +100,7 @@ export default function RevenueLedgerPage() {
         invoiceDate: form.invoiceDate,
         paymentStatus: form.paymentStatus,
       }),
+    meta: { successMessage: "Revenue entry created", errorMessage: "Could not create entry" },
     onSuccess: () => {
       setError("");
       setModalOpen(false);
@@ -117,6 +118,7 @@ export default function RevenueLedgerPage() {
         amountEtb: form.amountEtb ? Number(form.amountEtb) : undefined,
         paymentStatus: form.paymentStatus,
       }),
+    meta: { successMessage: "Revenue entry updated", errorMessage: "Could not update entry" },
     onSuccess: () => {
       setError("");
       setModalOpen(false);

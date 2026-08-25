@@ -11,8 +11,8 @@ export default function RegisterPage() {
           <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-primary">Step 1 of 1 · Choose path</p>
           <h1 className="mt-3 font-display text-4xl tracking-tight sm:text-5xl">Apply for platform access</h1>
           <p className="mt-4 text-base leading-relaxed text-[hsl(160_12%_38%)]">
-            Coffee Field OS is operated by SPX. Select your organization type to begin a guided registration. SPX
-            reviews each application and activates approved workspaces.
+            Select your organization type to begin a guided registration. Applications are reviewed and approved
+            workspaces are activated.
           </p>
         </div>
 
@@ -51,10 +51,6 @@ export default function RegisterPage() {
             </span>
           </Link>
         </div>
-
-        <p className="mt-8 text-sm text-[hsl(160_12%_40%)]">
-          SPX platform staff sign in with administrator accounts there is no public SPX registration.
-        </p>
       </main>
     </>
   );

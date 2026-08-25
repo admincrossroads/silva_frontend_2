@@ -13,6 +13,7 @@ export function useAddItemComment(entityType: string, entityId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (content: string) => itemActivityApi.addComment(entityType, entityId, content),
+    meta: { successMessage: "Comment added", errorMessage: "Could not add comment" },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["item-activity", entityType, entityId] }),
   });
 }

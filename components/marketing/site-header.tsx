@@ -2,16 +2,23 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Coffee } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BrandLogo } from "@/components/brand/spx-farm-logo";
+import { siteConfig } from "@/lib/config/site";
 import { cn } from "@/lib/utils";
 
 type SiteHeaderProps = {
   signedIn: boolean;
+  /** True once the user has scrolled past the hero */
   scrolled?: boolean;
+  /**
+   * When false, hide the Farm OS mark/wordmark (hero already shows the brand).
+   * Defaults to true so non-landing uses always show the logo.
+   */
+  showLogo?: boolean;
 };
 
-export function SiteHeader({ signedIn, scrolled = false }: SiteHeaderProps) {
+export function SiteHeader({ signedIn, scrolled = false, showLogo = true }: SiteHeaderProps) {
   return (
     <header
       className={cn(
@@ -22,11 +29,19 @@ export function SiteHeader({ signedIn, scrolled = false }: SiteHeaderProps) {
       )}
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between px-5 md:px-8 xl:max-w-7xl 2xl:max-w-[90rem] 3xl:max-w-content-xl">
-        <Link href="/" className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[hsl(152_50%_32%/0.55)] ring-1 ring-[hsl(152_55%_55%/0.4)]">
-            <Coffee className="h-4 w-4 text-[hsl(152_70%_78%)]" />
-          </span>
-          <span className="font-display text-lg tracking-tight text-white sm:text-xl">Coffee Field OS</span>
+        <Link
+          href="/"
+          aria-label={`${siteConfig.name} home`}
+          aria-hidden={!showLogo}
+          tabIndex={showLogo ? undefined : -1}
+          className={cn(
+            "transition-all duration-300",
+            showLogo
+              ? "translate-y-0 opacity-100"
+              : "pointer-events-none -translate-y-1 opacity-0",
+          )}
+        >
+          <BrandLogo size="md" withWordmark showTagline={false} tone="inverse" />
         </Link>
         <nav className="flex items-center gap-1">
           <a
@@ -72,13 +87,23 @@ export function SiteHeader({ signedIn, scrolled = false }: SiteHeaderProps) {
   );
 }
 
+/** True after the user scrolls past most of the landing hero */
 export function useLandingScroll() {
   const [scrolled, setScrolled] = useState(false);
+
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const update = () => {
+      const threshold = Math.max(120, window.innerHeight * 0.65);
+      setScrolled(window.scrollY > threshold);
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
   }, []);
+
   return scrolled;
 }

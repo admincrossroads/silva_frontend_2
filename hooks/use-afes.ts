@@ -36,6 +36,7 @@ export function useCreateAfe() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (dto: Record<string, unknown>) => afeApi.create(dto),
+    meta: { successMessage: "AFE created", errorMessage: "Could not create AFE" },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["afes"] }),
   });
 }
@@ -43,8 +44,8 @@ export function useCreateAfe() {
 export function useSubmitAfe() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, comment }: { id: string; comment: string }) =>
-      afeApi.submit(id, comment),
+    mutationFn: ({ id, comment }: { id: string; comment: string }) => afeApi.submit(id, comment),
+    meta: { successMessage: "AFE submitted", errorMessage: "Could not submit AFE" },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["afes"] }),
   });
 }
@@ -52,8 +53,8 @@ export function useSubmitAfe() {
 export function useValidateAfe() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, comment }: { id: string; comment: string }) =>
-      afeApi.validate(id, comment),
+    mutationFn: ({ id, comment }: { id: string; comment: string }) => afeApi.validate(id, comment),
+    meta: { successMessage: "AFE validated", errorMessage: "Could not validate AFE" },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["afes"] }),
   });
 }
@@ -61,8 +62,8 @@ export function useValidateAfe() {
 export function useApproveAfe() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, comment }: { id: string; comment: string }) =>
-      afeApi.approve(id, comment),
+    mutationFn: ({ id, comment }: { id: string; comment: string }) => afeApi.approve(id, comment),
+    meta: { successMessage: "AFE approved", errorMessage: "Could not approve AFE" },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["afes"] }),
   });
 }
@@ -70,8 +71,8 @@ export function useApproveAfe() {
 export function useRejectAfe() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, reason }: { id: string; reason: string }) =>
-      afeApi.reject(id, reason),
+    mutationFn: ({ id, reason }: { id: string; reason: string }) => afeApi.reject(id, reason),
+    meta: { successMessage: "AFE rejected", errorMessage: "Could not reject AFE" },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["afes"] }),
   });
 }

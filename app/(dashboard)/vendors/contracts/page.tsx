@@ -110,6 +110,7 @@ export default function VendorContractsPage() {
         contractStart: form.contractStart,
         contractEnd: form.contractEnd,
       }),
+    meta: { successMessage: "Contract created", errorMessage: "Could not create contract" },
     onSuccess: () => {
       setForm(EMPTY_FORM);
       setError("");
@@ -122,6 +123,7 @@ export default function VendorContractsPage() {
   const patchStatus = useMutation({
     mutationFn: ({ id, tenderStatus }: { id: string; tenderStatus: string }) =>
       vendorApi.updateContract(id, { tenderStatus }),
+    meta: { successMessage: "Tender status updated", errorMessage: "Could not update tender status" },
     onSuccess: () => {
       setError("");
       qc.invalidateQueries({ queryKey: ["vendor-contracts"] });

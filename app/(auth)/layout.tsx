@@ -1,11 +1,12 @@
+import { BrandLogo } from "@/components/brand/spx-farm-logo";
+import { AuthMobileHeader } from "@/components/auth/auth-card";
 import Link from "next/link";
-import { Coffee } from "lucide-react";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-dvh bg-muted/20 lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
       {/* Brand panel — desktop */}
-      <section className="relative hidden min-h-dvh flex-col justify-between overflow-hidden bg-[hsl(165_32%_10%)] p-8 text-[hsl(150_20%_94%)] lg:flex xl:p-14">
+      <section className="relative hidden min-h-dvh flex-col overflow-hidden bg-[hsl(165_32%_10%)] p-8 text-[hsl(150_20%_94%)] lg:flex xl:p-14">
         <div
           className="pointer-events-none absolute inset-0 opacity-90"
           style={{
@@ -21,17 +22,11 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           }}
         />
 
-        <Link href="/" className="relative z-10 flex items-center gap-3 transition-opacity hover:opacity-90">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/25 ring-1 ring-primary/40">
-            <Coffee className="h-5 w-5 text-[hsl(152_70%_72%)]" />
-          </div>
-          <div className="min-w-0">
-            <p className="font-display text-2xl tracking-tight text-white">Coffee Field OS</p>
-            <p className="text-xs uppercase tracking-[0.22em] text-white/45">Multi-tenant field OS</p>
-          </div>
+        <Link href="/" className="relative z-10 transition-opacity hover:opacity-90">
+          <BrandLogo size="lg" withWordmark tone="inverse" />
         </Link>
 
-        <div className="relative z-10 max-w-md space-y-6">
+        <div className="relative z-10 my-auto max-w-md space-y-6 py-10">
           <div className="space-y-2">
             <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[hsl(152_50%_65%)]">
               The instrument chain
@@ -55,13 +50,14 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             ))}
           </ol>
         </div>
-
-        <p className="relative z-10 text-xs text-white/40">Coffee Field OS</p>
       </section>
 
-      {/* Form panel */}
+      {/* Form panel — mobile header outside the centered card */}
       <section className="flex min-h-dvh flex-col">
-        <div className="flex flex-1 items-center justify-center p-4 sm:p-6 lg:p-10">{children}</div>
+        <AuthMobileHeader />
+        <div className="flex flex-1 flex-col justify-center px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
+          <div className="mx-auto w-full max-w-[440px]">{children}</div>
+        </div>
       </section>
     </div>
   );

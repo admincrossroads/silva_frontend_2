@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ImageIcon, Palette } from "lucide-react";
+import { Palette } from "lucide-react";
 import { authApi } from "@/lib/api/auth";
 import { getApiErrorMessage } from "@/lib/api/errors";
 import { useAuth } from "@/hooks/use-auth";
@@ -11,6 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { SpxFarmMark } from "@/components/brand/spx-farm-logo";
+import { toast } from "@/lib/toast";
 import type { TenantBranding } from "@/types";
 
 const COLOR_PRESETS = ["#166534", "#1d4ed8", "#7c3aed", "#b45309", "#be123c", "#0f766e"];
@@ -41,7 +43,6 @@ export function OrganizationBrandingForm() {
     brandingFromTenant(tenant?.displayName, tenant?.branding),
   );
   const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -77,7 +78,6 @@ export function OrganizationBrandingForm() {
   const handleSave = async () => {
     setSaving(true);
     setError("");
-    setMessage("");
     try {
       const updated = await authApi.updateTenantBranding({
         displayName: form.displayName.trim() || tenant?.displayName,
@@ -91,9 +91,11 @@ export function OrganizationBrandingForm() {
       await refreshSession();
       const isDark = document.documentElement.classList.contains("dark");
       applyWorkspaceTheme(form.primaryColor, isDark);
-      setMessage("Organization settings saved.");
+      toast.success("Organization settings saved");
     } catch (err) {
-      setError(getApiErrorMessage(err, "Could not save organization settings"));
+      const msg = getApiErrorMessage(err, "Could not save organization settings");
+      setError(msg);
+      toast.error(err, "Could not save organization settings");
     } finally {
       setSaving(false);
     }
@@ -197,8 +199,8 @@ export function OrganizationBrandingForm() {
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={form.logoUrl} alt="" className="h-7 w-7 rounded-lg object-cover" />
                       ) : (
-                        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/20">
-                          <ImageIcon className="h-3.5 w-3.5 text-sidebar-brand" />
+                        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/20 text-sidebar-brand">
+                          <SpxFarmMark className="h-3.5 w-3.5" />
                         </span>
                       )}
                       <div className="min-w-0">
@@ -224,7 +226,7 @@ export function OrganizationBrandingForm() {
                       />
                     ) : (
                       <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15 text-primary">
-                        <ImageIcon className="h-5 w-5" />
+                        <SpxFarmMark className="h-5 w-5" />
                       </span>
                     )}
                     <div className="min-w-0">
@@ -249,11 +251,6 @@ export function OrganizationBrandingForm() {
         {error ? (
           <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {error}
-          </p>
-        ) : null}
-        {message ? (
-          <p className="rounded-md border border-primary/20 bg-primary/5 px-3 py-2 text-sm text-primary">
-            {message}
           </p>
         ) : null}
 

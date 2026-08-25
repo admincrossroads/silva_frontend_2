@@ -3,9 +3,13 @@
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
-/** Soft overlay — keep images visible (not a solid green wash). */
+/** Soft wash — enough contrast for copy, photos stay visible */
 const HERO_GRADIENT =
-  "linear-gradient(160deg, hsl(165 34% 7% / 0.55) 0%, hsl(165 28% 10% / 0.28) 42%, hsl(155 30% 8% / 0.62) 100%)";
+  "linear-gradient(105deg, hsl(165 34% 6% / 0.58) 0%, hsl(165 30% 8% / 0.32) 42%, hsl(165 28% 10% / 0.12) 72%, transparent 100%), linear-gradient(180deg, hsl(165 32% 6% / 0.28) 0%, transparent 40%, hsl(165 30% 5% / 0.48) 100%)";
+
+/** Light vignette on the photo plane */
+const HERO_SHADOW =
+  "radial-gradient(ellipse 80% 65% at 20% 72%, hsl(165 40% 4% / 0.28) 0%, transparent 55%)";
 
 /** Coffee farm / plantation / beans — not café lifestyle shots */
 const HERO_IMAGES = [
@@ -65,17 +69,26 @@ export function HeroBackground() {
             className={cn(
               "absolute inset-0 scale-105 bg-cover bg-no-repeat transition-[opacity,filter,transform] ease-in-out",
               isActive
-                ? "opacity-100 blur-[2.5px] animate-[landing-drift_40s_ease-in-out_infinite_alternate]"
+                ? "opacity-100 blur-[1.5px] animate-[landing-drift_40s_ease-in-out_infinite_alternate]"
                 : "opacity-0 blur-xl scale-110",
             )}
             style={{
-              backgroundImage: `${HERO_GRADIENT}, url(${image.src})`,
+              backgroundImage: `${HERO_GRADIENT}, ${HERO_SHADOW}, url(${image.src})`,
               backgroundPosition: image.position,
               transitionDuration: `${FADE_MS}ms`,
             }}
           />
         );
       })}
+      {/* Light left/bottom shadow for text contrast */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(90deg, hsl(165 35% 4% / 0.28) 0%, transparent 48%), linear-gradient(to top, hsl(165 32% 4% / 0.4) 0%, transparent 42%)",
+          boxShadow: "inset 0 0 80px 16px hsl(165 40% 3% / 0.2)",
+        }}
+      />
     </div>
   );
 }

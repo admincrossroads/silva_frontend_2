@@ -127,6 +127,7 @@ export default function ExecutionCalendarPage() {
         name: calName || `${year} operating calendar`,
         notes: calNotes || undefined,
       }),
+    meta: { successMessage: "Calendar created", errorMessage: "Could not create calendar" },
     onSuccess: (row) => {
       setSelectedId(row.id);
       setCalName("");
@@ -153,6 +154,7 @@ export default function ExecutionCalendarPage() {
       }
       return seasonCalendarApi.addWindow(selected!.id, body);
     },
+    meta: { successMessage: "Window saved", errorMessage: "Could not save window" },
     onSuccess: () => {
       setWindowModalOpen(false);
       setEditingWindow(null);
@@ -165,6 +167,7 @@ export default function ExecutionCalendarPage() {
 
   const issue = useMutation({
     mutationFn: (id: string) => seasonCalendarApi.issueWindow(id),
+    meta: { successMessage: "Window issued", errorMessage: "Issue failed" },
     onSuccess: () => {
       setError("");
       invalidate();
@@ -173,6 +176,7 @@ export default function ExecutionCalendarPage() {
   });
   const start = useMutation({
     mutationFn: (id: string) => seasonCalendarApi.startWindow(id),
+    meta: { successMessage: "Window started", errorMessage: "Start failed" },
     onSuccess: () => {
       setError("");
       invalidate();
@@ -181,6 +185,7 @@ export default function ExecutionCalendarPage() {
   });
   const complete = useMutation({
     mutationFn: (id: string) => seasonCalendarApi.completeWindow(id),
+    meta: { successMessage: "Window completed", errorMessage: "Complete failed" },
     onSuccess: () => {
       setError("");
       invalidate();
@@ -191,6 +196,7 @@ export default function ExecutionCalendarPage() {
   const resizeWindow = useMutation({
     mutationFn: ({ id, weekStart, weekEnd }: { id: string; weekStart: number; weekEnd: number }) =>
       seasonCalendarApi.updateWindow(id, { weekStart, weekEnd }),
+    meta: { successMessage: "Window dates updated", errorMessage: "Could not update window dates" },
     onSuccess: () => {
       setError("");
       invalidate();

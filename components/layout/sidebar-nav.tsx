@@ -3,11 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, Coffee, PanelLeft, PanelLeftClose } from "lucide-react";
+import { ChevronDown, PanelLeft, PanelLeftClose } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { NavItem } from "@/lib/config/role-access";
 import { useAuth } from "@/hooks/use-auth";
 import { useActiveFarmEstate } from "@/hooks/use-active-farm-estate";
+import { BrandLogo, SpxFarmMark } from "@/components/brand/spx-farm-logo";
+import { siteConfig } from "@/lib/config/site";
 
 type SidebarNavProps = {
   items: NavItem[];
@@ -58,13 +60,11 @@ export function SidebarNav({
                 className="h-9 w-9 shrink-0 rounded-xl object-cover ring-1 ring-sidebar-border"
               />
             ) : (
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/20 ring-1 ring-primary/30">
-                <Coffee className="h-4 w-4 text-sidebar-brand" />
-              </span>
+              <BrandLogo size="md" tone="sidebar" />
             )}
             <span className="min-w-0">
               <span className="block truncate text-sm font-semibold text-sidebar-foreground">
-                {tenant?.displayName || "Coffee Field OS"}
+                {tenant?.displayName || siteConfig.name}
               </span>
               <span className="block truncate text-[10px] uppercase tracking-widest text-sidebar-foreground/45">
                 {activeFarmEstate?.name || activeProgram?.name || "Workspace"}
@@ -81,8 +81,8 @@ export function SidebarNav({
               // eslint-disable-next-line @next/next/no-img-element
               <img src={logoUrl} alt="" className="h-full w-full object-cover" />
             ) : (
-              <span className="flex h-full w-full items-center justify-center bg-primary/20">
-                <Coffee className="h-4 w-4 text-sidebar-brand" />
+              <span className="flex h-full w-full items-center justify-center bg-primary/20 text-sidebar-brand">
+                <SpxFarmMark className="h-4 w-4" />
               </span>
             )}
           </Link>

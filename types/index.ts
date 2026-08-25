@@ -50,6 +50,8 @@ export interface LoginResponse {
   refreshToken: string;
   expiresIn: number;
   user: User;
+  /** Full workspace session — preferred so the client can skip a second /auth/me call */
+  me?: AuthMe;
 }
 
 export interface BudgetVsActualRow {

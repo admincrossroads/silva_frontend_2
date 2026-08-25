@@ -15,7 +15,6 @@ import {
 } from "@/hooks/use-work-plans";
 import { useFarmEstates } from "@/hooks/use-farm-estates";
 import { useRole } from "@/hooks/use-role";
-import { getApiErrorMessage } from "@/lib/api/errors";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,8 +42,6 @@ export default function WorkPlanDetailPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [reviewNotes, setReviewNotes] = useState("");
   const [inputTab, setInputTab] = useState<"form" | "excel" | "summary">("form");
-  const [actionError, setActionError] = useState<string | null>(null);
-  const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const { isVendorAdmin, isSpx } = useRole();
   const { data: plan, isLoading } = useWorkPlan(id);
   const { data: template, isLoading: templateLoading } = useWorkPlanTemplate();
@@ -101,17 +98,6 @@ export default function WorkPlanDetailPage() {
         ) : null}
       </div>
 
-      {actionError ? (
-        <p className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {actionError}
-        </p>
-      ) : null}
-      {saveMessage ? (
-        <p className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
-          {saveMessage}
-        </p>
-      ) : null}
-
       {canReview ? (
         <Card className="mb-6 p-5">
           <h2 className="text-sm font-semibold">SPX review</h2>
@@ -161,23 +147,14 @@ export default function WorkPlanDetailPage() {
               fxEtbPerUsd: String(plan.fxEtbPerUsd),
             }}
             onSubmit={(values) => {
-              setActionError(null);
-              setSaveMessage(null);
-              updateMeta.mutate(
-                {
-                  id: plan.id,
-                  farmEstateId: values.farmEstateId,
-                  totalAreaHa: values.totalAreaHa ? Number(values.totalAreaHa) : null,
-                  budgetYearLabel: values.budgetYearLabel,
-                  budgetYearGc: values.budgetYearGc,
-                  fxEtbPerUsd: Number(values.fxEtbPerUsd) || 130,
-                },
-                {
-                  onSuccess: () => setSaveMessage("Plan details saved."),
-                  onError: (err) =>
-                    setActionError(getApiErrorMessage(err, "Could not save plan details.")),
-                },
-              );
+              updateMeta.mutate({
+                id: plan.id,
+                farmEstateId: values.farmEstateId,
+                totalAreaHa: values.totalAreaHa ? Number(values.totalAreaHa) : null,
+                budgetYearLabel: values.budgetYearLabel,
+                budgetYearGc: values.budgetYearGc,
+                fxEtbPerUsd: Number(values.fxEtbPerUsd) || 130,
+              });
             }}
           />
         </div>
@@ -207,26 +184,17 @@ export default function WorkPlanDetailPage() {
               readOnly={!canEdit}
               isSaving={updatePlan.isPending}
               onSave={(next) => {
-                setActionError(null);
-                setSaveMessage(null);
-                updatePlan.mutate(
-                  {
-                    id: plan.id,
-                    parsedJson: {
-                      ...next,
-                      farmName: plan.farmName,
-                      totalAreaHa: plan.totalAreaHa,
-                      budgetYearLabel: plan.budgetYearLabel,
-                      budgetYearGc: plan.budgetYearGc,
-                      fxEtbPerUsd: Number(plan.fxEtbPerUsd),
-                    },
+                updatePlan.mutate({
+                  id: plan.id,
+                  parsedJson: {
+                    ...next,
+                    farmName: plan.farmName,
+                    totalAreaHa: plan.totalAreaHa,
+                    budgetYearLabel: plan.budgetYearLabel,
+                    budgetYearGc: plan.budgetYearGc,
+                    fxEtbPerUsd: Number(plan.fxEtbPerUsd),
                   },
-                  {
-                    onSuccess: () => setSaveMessage("Plan draft saved."),
-                    onError: (err) =>
-                      setActionError(getApiErrorMessage(err, "Could not save plan draft.")),
-                  },
-                );
+                });
               }}
             />
           ) : null)}
@@ -249,16 +217,10 @@ export default function WorkPlanDetailPage() {
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
-                    setActionError(null);
                     uploadPlan.mutate(
                       { id: plan.id, file },
                       {
-                        onSuccess: () => {
-                          setSaveMessage("Excel file imported.");
-                          setInputTab("summary");
-                        },
-                        onError: (err) =>
-                          setActionError(getApiErrorMessage(err, "Excel upload failed.")),
+                        onSuccess: () => setInputTab("summary"),
                       },
                     );
                   }}
@@ -290,16 +252,7 @@ export default function WorkPlanDetailPage() {
               </p>
             </div>
             {canSubmit ? (
-              <Button
-                disabled={submitPlan.isPending}
-                onClick={() => {
-                  setActionError(null);
-                  submitPlan.mutate(plan.id, {
-                    onError: (err) =>
-                      setActionError(getApiErrorMessage(err, "Could not submit work plan.")),
-                  });
-                }}
-              >
+              <Button disabled={submitPlan.isPending} onClick={() => submitPlan.mutate(plan.id)}>
                 {submitPlan.isPending ? "Submitting…" : "Submit to SPX"}
               </Button>
             ) : (

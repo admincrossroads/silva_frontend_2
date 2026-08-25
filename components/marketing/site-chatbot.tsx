@@ -1,15 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { MessageCircle, Send, X, Bot } from "lucide-react";
+import { Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BrandLogo, SpxFarmMark } from "@/components/brand/spx-farm-logo";
+import { siteConfig } from "@/lib/config/site";
 import { cn } from "@/lib/utils";
 
 type ChatMessage = { role: "bot" | "user"; text: string };
 
 const STARTER: ChatMessage = {
   role: "bot",
-  text: "Hi — I’m the Coffee Field OS assistant. Ask about registration, roles, the plan→settle flow, or how to get access.",
+  text: `Hi — I’m the ${siteConfig.name} assistant. Ask about registration, roles, the plan→settle flow, or how to get access.`,
 };
 
 const QUICK_PROMPTS = [
@@ -23,28 +25,28 @@ function replyFor(input: string): string {
   const q = input.toLowerCase();
 
   if (/(register|apply|access|sign.?up)/.test(q)) {
-    return "Use Apply for access on the home page. Choose Asset owner or Execution vendor, complete the application, then SPX reviews it and sends an activation link.";
+    return "Use Apply for access on the home page. Choose Asset owner or Execution vendor, complete the application, then wait for review and an activation link.";
   }
   if (/(owner|silva|asset|govern)/.test(q)) {
     return "Asset owners approve plans and higher-band spend, and read released reports. They do not see raw field tickets or platform revenue.";
   }
   if (/(vendor|execute|field|crew)/.test(q)) {
-    return "Vendors capture field work, submit tickets, and request payment against authorized work orders. SPX validates before anything reaches the owner.";
+    return "Vendors capture field work, submit tickets, and request payment against authorized work orders. Program managers validate before anything reaches the owner.";
   }
   if (/(flow|plan|authorize|settle|afe|afp|ticket)/.test(q)) {
     return "The chain is Plan → Authorize → Assign → Record → Request → Settle. Each step stays in one workspace with role firewalls between desks.";
   }
   if (/(login|sign.?in|password|demo)/.test(q)) {
-    return "Go to Sign in from the header. After SPX activates your workspace, use the email from your application and the password you set on activation.";
+    return "Go to Sign in from the header. After your workspace is activated, use the email from your application and the password you set on activation.";
   }
   if (/(contact|support|help|email)/.test(q)) {
-    return "Scroll to Contact on the landing page and send a message. The platform team reads submissions in the SPX contact inbox.";
+    return "Scroll to Contact on the landing page and send a message. The platform team will follow up by email.";
   }
   if (/(cookie|privacy)/.test(q)) {
     return "We use essential cookies for sign-in sessions and optional analytics cookies only if you accept them on the cookie banner.";
   }
   if (/(spx|manager|program)/.test(q)) {
-    return "Program managers (SPX) operate the platform: review registrations, issue authorizations, oversee vendors, and release reports to asset owners.";
+    return "Program managers operate the platform: review registrations, issue authorizations, oversee vendors, and release reports to asset owners.";
   }
 
   return "I can help with registration, roles (owner / manager / vendor), the plan-to-settle flow, sign-in, or contacting the team. Try one of the quick questions below.";
@@ -76,12 +78,10 @@ export function SiteChatbot() {
       {open ? (
         <div className="flex h-[min(28rem,70vh)] w-[min(22rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-[hsl(150_14%_82%)] bg-white shadow-[0_20px_50px_-20px_rgba(10,40,30,0.45)]">
           <div className="flex items-center justify-between gap-2 bg-[hsl(165_32%_14%)] px-4 py-3 text-white">
-            <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[hsl(152_48%_32%)]">
-                <Bot className="h-4 w-4" />
-              </span>
+            <div className="flex items-center gap-2.5">
+              <BrandLogo size="sm" tone="inverse" />
               <div>
-                <p className="text-sm font-semibold">Field OS Assistant</p>
+                <p className="text-sm font-semibold">{siteConfig.name} Assistant</p>
                 <p className="text-[11px] text-white/60">Usually replies instantly</p>
               </div>
             </div>
@@ -155,7 +155,7 @@ export function SiteChatbot() {
         aria-label={open ? "Close assistant" : "Open assistant"}
         className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition hover:bg-primary/90"
       >
-        {open ? <X className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
+        {open ? <X className="h-5 w-5" /> : <SpxFarmMark className="h-6 w-6" />}
       </button>
     </div>
   );

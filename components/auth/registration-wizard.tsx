@@ -16,6 +16,7 @@ import {
 } from "@/components/auth/registration-shell";
 import { getApiErrorMessage } from "@/lib/api/errors";
 import { useSubmitRegistration } from "@/hooks/use-registration";
+import { siteConfig } from "@/lib/config/site";
 import type { RegistrationOrgType, RegistrationSubmitDto } from "@/lib/api/registration";
 
 type FormState = RegistrationSubmitDto;
@@ -212,7 +213,7 @@ export function RegistrationWizard({ orgType }: Props) {
                     {orgType === "silva" && form.assetInterests ? <ReviewRow label="Assets" value={form.assetInterests} /> : null}
                     {orgType === "vendor" && form.servicesProvided ? <ReviewRow label="Services" value={form.servicesProvided} /> : null}
                     <p className="border-t pt-4 text-xs leading-relaxed text-muted-foreground">
-                      By submitting, you request access to Coffee Field OS. SPX will contact you before activating your workspace.
+                      By submitting, you request access to {siteConfig.name}. The team will contact you before activating your workspace.
                     </p>
                   </dl>
                 ) : null}

@@ -28,6 +28,7 @@ export function useCreateVendor() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (dto: Record<string, unknown>) => vendorApi.create(dto),
+    meta: { successMessage: "Vendor created", errorMessage: "Could not create vendor" },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["vendors"] }),
   });
 }
@@ -37,6 +38,7 @@ export function usePatchVendor() {
   return useMutation({
     mutationFn: ({ id, dto }: { id: string; dto: Record<string, unknown> }) =>
       vendorApi.update(id, dto),
+    meta: { successMessage: "Vendor updated", errorMessage: "Could not update vendor" },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["vendors"] }),
   });
 }

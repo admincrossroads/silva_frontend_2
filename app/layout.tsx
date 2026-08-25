@@ -1,12 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import { QueryProvider } from "@/lib/query-provider";
 import { SiteChrome } from "@/components/marketing/site-chrome";
+import { AppToaster } from "@/components/ui/toaster";
+import { siteConfig } from "@/lib/config/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Coffee Field OS",
-  description:
-    "Multi-tenant coffee estate field operations — asset owners govern, program managers operate, vendors execute",
+  title: siteConfig.name,
+  description: siteConfig.description,
 };
 
 export const viewport: Viewport = {
@@ -44,6 +45,7 @@ export default function RootLayout({
         <QueryProvider>
           {children}
           <SiteChrome />
+          <AppToaster />
         </QueryProvider>
       </body>
     </html>

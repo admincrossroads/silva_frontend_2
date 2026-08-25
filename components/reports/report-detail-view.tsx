@@ -48,11 +48,13 @@ export function ReportDetailView({ report, backHref, backLabel }: ReportDetailVi
 
   const saveNarrative = useMutation({
     mutationFn: () => reportApi.patchNarrative(report.id, narrative),
+    meta: { successMessage: "Narrative saved", errorMessage: "Could not save narrative" },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["reports"] }),
   });
 
   const release = useMutation({
     mutationFn: () => reportApi.release(report.id),
+    meta: { successMessage: "Report released", errorMessage: "Could not release report" },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["reports"] }),
   });
 

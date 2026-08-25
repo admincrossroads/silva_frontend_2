@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/auth-store";
 import { authApi } from "@/lib/api/auth";
@@ -19,14 +19,24 @@ export function useAuth() {
     logout,
   } = useAuthStore();
   const router = useRouter();
+  const [hydrated, setHydrated] = useState(() => useAuthStore.persist.hasHydrated());
 
   useEffect(() => {
-    if (!accessToken) return;
+    const unsub = useAuthStore.persist.onFinishHydration(() => setHydrated(true));
+    setHydrated(useAuthStore.persist.hasHydrated());
+    return unsub;
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated || !accessToken) return;
+    // Session already restored from storage or set at login — skip blocking /me
     if (user && permissions.length > 0 && tenant) return;
 
+    let cancelled = false;
     authApi
       .me()
       .then((data: AuthMe) => {
+        if (cancelled) return;
         setSession(data.user, data.permissions, {
           tenant: data.tenant,
           activeProgram: data.activeProgram,
@@ -34,12 +44,17 @@ export function useAuth() {
         });
       })
       .catch(() => {
+        if (cancelled) return;
         logout();
         router.push("/login");
       });
-  }, [accessToken, user, permissions.length, tenant, setSession, logout, router]);
+    return () => {
+      cancelled = true;
+    };
+  }, [hydrated, accessToken, user, permissions.length, tenant, setSession, logout, router]);
 
-  const loading = !!accessToken && (!user || permissions.length === 0);
+  const loading =
+    !hydrated || (!!accessToken && (!user || permissions.length === 0 || !tenant));
 
   return {
     user,

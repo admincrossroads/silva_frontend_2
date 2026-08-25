@@ -28,6 +28,7 @@ export function useCreateSettlement() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (dto: Record<string, unknown>) => settlementApi.create(dto),
+    meta: { successMessage: "Settlement created", errorMessage: "Could not create settlement" },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["settlements"] }),
   });
 }
@@ -36,6 +37,7 @@ export function useAuthorizeSettlement() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => settlementApi.authorize(id),
+    meta: { successMessage: "Settlement authorized", errorMessage: "Could not authorize settlement" },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["settlements"] }),
   });
 }
@@ -44,6 +46,7 @@ export function useMarkSettled() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => settlementApi.markSettled(id),
+    meta: { successMessage: "Marked as paid", errorMessage: "Could not mark settlement paid" },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["settlements"] }),
   });
 }

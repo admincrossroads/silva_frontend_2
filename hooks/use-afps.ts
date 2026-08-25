@@ -28,6 +28,7 @@ export function useCreateAfp() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (dto: Record<string, unknown>) => afpApi.create(dto),
+    meta: { successMessage: "AFP line created", errorMessage: "Could not create AFP line" },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["afps"] }),
   });
 }
@@ -35,8 +36,8 @@ export function useCreateAfp() {
 export function useSubmitAfp() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, comment }: { id: string; comment: string }) =>
-      afpApi.submit(id, comment),
+    mutationFn: ({ id, comment }: { id: string; comment: string }) => afpApi.submit(id, comment),
+    meta: { successMessage: "AFP submitted", errorMessage: "Could not submit AFP" },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["afps"] }),
   });
 }
@@ -44,8 +45,8 @@ export function useSubmitAfp() {
 export function useApproveAfp() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, comment }: { id: string; comment: string }) =>
-      afpApi.approve(id, comment),
+    mutationFn: ({ id, comment }: { id: string; comment: string }) => afpApi.approve(id, comment),
+    meta: { successMessage: "AFP approved", errorMessage: "Could not approve AFP" },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["afps"] }),
   });
 }

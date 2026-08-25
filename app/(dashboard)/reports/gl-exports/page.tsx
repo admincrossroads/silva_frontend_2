@@ -57,6 +57,7 @@ export default function GlExportsPage() {
 
   const generate = useMutation({
     mutationFn: () => platformApi.generateGlExport({ period }),
+    meta: { successMessage: "GL export generated", errorMessage: "Could not generate export" },
     onSuccess: (row) => {
       setPeriod("");
       setError("");
@@ -68,6 +69,7 @@ export default function GlExportsPage() {
 
   const silvaDrop = useMutation({
     mutationFn: () => exportApi.silvaGlDrop(period),
+    meta: { successMessage: "Silva GL drop complete", errorMessage: "Silva GL drop failed" },
     onSuccess: (row) => {
       setError("");
       setSelectedId(row.exportId);
@@ -78,6 +80,7 @@ export default function GlExportsPage() {
 
   const boardPack = useMutation({
     mutationFn: () => exportApi.boardPackPdf(period || "current"),
+    meta: { successMessage: "Download started", errorMessage: "Board pack export failed" },
     onSuccess: (blob) => downloadBlob(blob, `board-pack-${period || "current"}.pdf`),
     onError: (err) => setError(getApiErrorMessage(err, "Board pack export failed")),
   });
