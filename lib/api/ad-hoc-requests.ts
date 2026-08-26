@@ -2,6 +2,7 @@ import api from "./index";
 
 export type AdHocRequestStatus = "draft" | "submitted" | "converted" | "dismissed";
 export type AdHocUrgency = "low" | "normal" | "high" | "emergency";
+export type AdHocOrigin = "silva_request" | "vendor_request";
 
 export type AdHocRequest = {
   id: string;
@@ -14,6 +15,8 @@ export type AdHocRequest = {
   farmEstateId: string | null;
   suggestedAfpLineId: string | null;
   status: AdHocRequestStatus;
+  origin?: AdHocOrigin;
+  vendorId?: string | null;
   requestedByUserId: string;
   reviewedByUserId: string | null;
   reviewedAt: string | null;
@@ -25,6 +28,7 @@ export type AdHocRequest = {
   requestedBy?: { id: string; name: string; email: string };
   reviewedBy?: { id: string; name: string };
   farmEstate?: { id: string; name: string };
+  vendor?: { id: string; name: string };
   suggestedAfpLine?: {
     id: string;
     activity: string;
@@ -36,8 +40,13 @@ export type AdHocRequest = {
 };
 
 export const adHocRequestsApi = {
-  findAll: (params?: { status?: string; urgency?: string; page?: number; pageSize?: number }) =>
-    api.get("/ad-hoc-requests", { params }).then((r) => r.data.data as AdHocRequest[]),
+  findAll: (params?: {
+    status?: string;
+    urgency?: string;
+    origin?: string;
+    page?: number;
+    pageSize?: number;
+  }) => api.get("/ad-hoc-requests", { params }).then((r) => r.data.data as AdHocRequest[]),
 
   findById: (id: string) =>
     api.get(`/ad-hoc-requests/${id}`).then((r) => r.data.data as AdHocRequest),

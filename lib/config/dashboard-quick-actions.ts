@@ -46,12 +46,16 @@ export function quickActionsFor(user: User): QuickAction[] {
   }
 
   if (isVendorRole(role)) {
-    return [
+    const actions: QuickAction[] = [
       { label: "Field forms", href: "/execution/forms", icon: LayoutDashboard },
       { label: "New ticket", href: "/execution/field-tickets", icon: PlusCircle },
       { label: "Work orders", href: "/execution/work-orders", icon: ClipboardList },
       { label: "Payments", href: "/payments/payment-requests", icon: Wallet },
     ];
+    if (role !== "vendor_worker") {
+      actions.unshift({ label: "Request ad-hoc", href: "/planning/intake", icon: PlusCircle });
+    }
+    return actions;
   }
 
   return [{ label: "Programs", href: "/settings/programs", icon: Users }];

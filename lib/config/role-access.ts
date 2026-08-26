@@ -180,14 +180,22 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
         icon: FileCheck,
       });
     }
-    if (isSilvaRole(role) || isSpxRole(role)) {
-      items.push({
-        label: "Ad-hoc intake",
-        procoreLabel: "Budget",
-        href: "/planning/intake",
-        icon: ClipboardCheck,
-      });
-    }
+  }
+
+  if (
+    isSilvaRole(role) ||
+    isSpxRole(role) ||
+    role === "vendor_admin" ||
+    role === "vendor_manager" ||
+    role === "vendor_supervisor" ||
+    role === "vendor_field_lead"
+  ) {
+    items.push({
+      label: "Ad-hoc intake",
+      procoreLabel: "Budget",
+      href: "/planning/intake",
+      icon: ClipboardCheck,
+    });
   }
 
   // Schedule + Daily Log (execution)

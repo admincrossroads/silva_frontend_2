@@ -4,6 +4,7 @@ import { adHocRequestsApi, type AdHocRequest } from "@/lib/api/ad-hoc-requests";
 interface AdHocFilters {
   status?: string;
   urgency?: string;
+  origin?: string;
   page?: number;
   pageSize?: number;
 }

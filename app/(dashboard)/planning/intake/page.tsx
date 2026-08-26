@@ -91,15 +91,25 @@ function urgencyLabel(u: string) {
 
 export default function AdHocIntakePage() {
   const router = useRouter();
-  const { isSilva, isSpx } = useRole();
+  const { isSilva, isSpx, isVendor, role } = useRole();
+  const canRequest =
+    isSilva ||
+    role === "vendor_admin" ||
+    role === "vendor_manager" ||
+    role === "vendor_supervisor" ||
+    role === "vendor_field_lead";
   const [status, setStatus] = useState<string | undefined>(isSpx ? "submitted" : undefined);
+  const [originFilter, setOriginFilter] = useState<string | undefined>(undefined);
   const [createOpen, setCreateOpen] = useState(false);
   const [convertTarget, setConvertTarget] = useState<AdHocRequest | null>(null);
   const [dismissTarget, setDismissTarget] = useState<AdHocRequest | null>(null);
   const [dismissNotes, setDismissNotes] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
 
-  const { data: requests = [], isLoading } = useAdHocRequests({ status });
+  const { data: requests = [], isLoading } = useAdHocRequests({
+    status,
+    ...(isSpx && originFilter ? { origin: originFilter } : {}),
+  });
   const { data: afps = [] } = useAfps();
   const { data: estates = [] } = useFarmEstates({ status: "active" });
   const createRequest = useCreateAdHocRequest();
@@ -199,8 +209,11 @@ export default function AdHocIntakePage() {
     if (isSilva) {
       return "Request work outside the annual plan. SPX will triage and convert to an AFE.";
     }
-    return "Triage owner requests that were not in the annual work plan / AFP.";
-  }, [isSilva]);
+    if (isVendor) {
+      return "Request unexpected field work for SPX to triage and convert to an AFE.";
+    }
+    return "Triage Silva and vendor requests that were not in the annual work plan / AFP.";
+  }, [isSilva, isVendor]);
 
   return (
     <PageShell>
@@ -208,7 +221,7 @@ export default function AdHocIntakePage() {
         title="Ad-hoc intake"
         description={subtitle}
         actions={
-          isSilva ? (
+          canRequest ? (
             <Button onClick={() => setCreateOpen(true)}>
               <Plus className="mr-2 h-4 w-4" /> Request ad-hoc work
             </Button>
@@ -229,6 +242,21 @@ export default function AdHocIntakePage() {
             ))}
           </SelectContent>
         </Select>
+        {isSpx ? (
+          <Select
+            value={originFilter ?? "all"}
+            onValueChange={(v) => setOriginFilter(v === "all" ? undefined : v)}
+          >
+            <SelectTrigger className="w-44">
+              <SelectValue placeholder="Source" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All sources</SelectItem>
+              <SelectItem value="silva_request">Silva</SelectItem>
+              <SelectItem value="vendor_request">Vendor</SelectItem>
+            </SelectContent>
+          </Select>
+        ) : null}
       </PageFilters>
       <PageContent>
       <div className="rounded-lg border bg-card">
@@ -236,7 +264,7 @@ export default function AdHocIntakePage() {
           <div className="p-8 text-sm text-muted-foreground">Loading…</div>
         ) : requests.length === 0 ? (
           <div className="p-8 text-sm text-muted-foreground">
-            {isSilva
+            {canRequest
               ? "No ad-hoc requests yet. Use “Request ad-hoc work” for unexpected needs."
               : "No ad-hoc requests in this filter."}
           </div>
@@ -249,6 +277,12 @@ export default function AdHocIntakePage() {
                     <p className="font-medium">{row.title}</p>
                     {statusBadge(row.status)}
                     <Badge variant="outline">{urgencyLabel(row.urgency)}</Badge>
+                    {isSpx && row.origin === "vendor_request" ? (
+                      <Badge variant="secondary">{row.vendor?.name || "Vendor"}</Badge>
+                    ) : null}
+                    {isSpx && row.origin === "silva_request" ? (
+                      <Badge variant="outline">Silva</Badge>
+                    ) : null}
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {row.operatingDiscipline}
@@ -298,7 +332,9 @@ export default function AdHocIntakePage() {
         <Form {...createForm}>
           <form onSubmit={createForm.handleSubmit(onCreate)} className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              For work not in the annual plan. SPX will review and open an AFE through the normal path.
+              {isVendor
+                ? "For unexpected field work outside issued work orders. SPX will review and open an AFE."
+                : "For work not in the annual plan. SPX will review and open an AFE through the normal path."}
             </p>
             <FormField
               control={createForm.control}

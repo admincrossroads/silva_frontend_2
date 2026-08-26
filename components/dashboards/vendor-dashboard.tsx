@@ -27,6 +27,11 @@ export function VendorDashboard() {
       <div className="grid grid-cols-2 gap-2 md:hidden">
         {[
           {
+            href: "/planning/intake",
+            label: "Ad-hoc",
+            icon: ClipboardList,
+          },
+          {
             href: "/execution/field-tickets?new=1",
             label: "Log ticket",
             icon: FilePlus2,
@@ -40,11 +45,6 @@ export function VendorDashboard() {
             href: "/execution/calendar",
             label: "This week",
             icon: CalendarDays,
-          },
-          {
-            href: "/payments/payment-requests?new=1",
-            label: "Request pay",
-            icon: Wallet,
           },
         ].map((action) => {
           const Icon = action.icon;

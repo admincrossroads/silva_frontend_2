@@ -177,36 +177,36 @@ export default function LoginPage() {
             )}
           </Button>
         </form>
-
-        <div className="mt-5 border-t border-border/60 pt-4">
-          <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-muted-foreground/80">
-            Demo accounts
-          </p>
-          <div className="space-y-2.5">
-            {DEMO_ACCOUNTS.map((group) => (
-              <div key={group.group}>
-                <p className="mb-0.5 text-[10px] text-muted-foreground/70">{group.group}</p>
-                <ul className="flex flex-wrap gap-x-2 gap-y-0.5">
-                  {group.emails.map((email) => (
-                    <li key={email}>
-                      <button
-                        type="button"
-                        className="text-[10px] leading-tight text-muted-foreground/90 underline-offset-2 hover:text-foreground hover:underline"
-                        onClick={() => {
-                          setValue("email", email, { shouldValidate: true });
-                          setValue("password", "Password123!", { shouldValidate: true });
-                        }}
-                      >
-                        {email}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
       </AuthCard>
+
+      <div className="mt-4 px-1">
+        <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-muted-foreground/80">
+          Demo accounts
+        </p>
+        <div className="space-y-2.5">
+          {DEMO_ACCOUNTS.map((group) => (
+            <div key={group.group}>
+              <p className="mb-0.5 text-[10px] text-muted-foreground/70">{group.group}</p>
+              <ul className="flex flex-wrap gap-x-2 gap-y-0.5">
+                {group.emails.map((email) => (
+                  <li key={email}>
+                    <button
+                      type="button"
+                      className="text-[10px] leading-tight text-muted-foreground/90 underline-offset-2 hover:text-foreground hover:underline"
+                      onClick={() => {
+                        setValue("email", email, { shouldValidate: true });
+                        setValue("password", "Password123!", { shouldValidate: true });
+                      }}
+                    >
+                      {email}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

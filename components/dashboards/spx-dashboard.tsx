@@ -29,7 +29,7 @@ export function SpxDashboard() {
         <KpiStatCard
           label="Ad-hoc intake"
           value="Open"
-          sublabel="Owner requests outside AFP"
+          sublabel="Silva & vendor requests"
           icon={ClipboardList}
           tone="amber"
           href="/planning/intake"
