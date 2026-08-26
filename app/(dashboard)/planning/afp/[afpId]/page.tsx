@@ -13,6 +13,8 @@ import { AfpSchedulePanel } from "@/components/work-plan/afp-schedule-panel";
 import { ActivityFeed } from "@/components/items/activity-feed";
 import { exportApi, downloadBlob } from "@/lib/api/exports";
 import { DetailPageHeader, PageLoading, PageShell } from "@/components/layout/page-shell";
+import { StartMessageButton } from "@/components/messages/start-message-button";
+import { EntityMessagesPanel } from "@/components/messages/entity-messages-panel";
 import { formatWorkflowLabel } from "@/lib/config/procore-modules";
 import { cn } from "@/lib/utils";
 import { useRole } from "@/hooks/use-role";
@@ -118,16 +120,19 @@ export default function AfpDetailPage() {
           </>
         }
         actions={
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={async () => {
-              const blob = await exportApi.afpPdf(afp.id);
-              downloadBlob(blob, `${afp.id}.pdf`);
-            }}
-          >
-            Export PDF
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <StartMessageButton entityType="afp_line" entityId={afp.id} label={afp.activity} />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                const blob = await exportApi.afpPdf(afp.id);
+                downloadBlob(blob, `${afp.id}.pdf`);
+              }}
+            >
+              Export PDF
+            </Button>
+          </div>
         }
       />
 
@@ -183,6 +188,7 @@ export default function AfpDetailPage() {
           ) : null}
 
           <ActivityFeed entityType="afp_line" entityId={afp.id} />
+          <EntityMessagesPanel entityType="afp_line" entityId={afp.id} title={afp.activity} />
 
           <ActivityCatalogPanel afpLineId={afp.id} />
           <AfpSchedulePanel afpLineId={afp.id} />

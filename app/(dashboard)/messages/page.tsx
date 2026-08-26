@@ -73,11 +73,15 @@ function MessagesPageInner() {
   const searchParams = useSearchParams();
   const { user, isSpx, isVendor, isSilva } = useRole();
   const threadFromUrl = searchParams.get("thread");
+  const composeFromUrl = searchParams.get("compose") === "1";
+  const entityTypeFromUrl = searchParams.get("entityType") || "";
+  const entityIdFromUrl = searchParams.get("entityId") || "";
+  const subjectFromUrl = searchParams.get("subject") || "";
 
   const [typeFilter, setTypeFilter] = useState<"all" | MessageCounterpartyType>("all");
   const [statusFilter, setStatusFilter] = useState<"open" | "archived">("open");
   const [selectedId, setSelectedId] = useState<string | null>(threadFromUrl);
-  const [composeOpen, setComposeOpen] = useState(false);
+  const [composeOpen, setComposeOpen] = useState(composeFromUrl);
   const [draftBody, setDraftBody] = useState("");
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -104,6 +108,10 @@ function MessagesPageInner() {
   useEffect(() => {
     if (threadFromUrl) setSelectedId(threadFromUrl);
   }, [threadFromUrl]);
+
+  useEffect(() => {
+    if (composeFromUrl) setComposeOpen(true);
+  }, [composeFromUrl, entityTypeFromUrl, entityIdFromUrl, subjectFromUrl]);
 
   useEffect(() => {
     if (!selectedId && threads.length && !threadFromUrl) {
@@ -437,13 +445,24 @@ function MessagesPageInner() {
 
       <NewConversationModal
         open={composeOpen}
-        onClose={() => setComposeOpen(false)}
+        onClose={() => {
+          setComposeOpen(false);
+          if (composeFromUrl) {
+            router.replace("/messages", { scroll: false });
+          }
+        }}
         isSpx={isSpx}
         isVendor={isVendor}
         isSilva={isSilva}
         createThread={createThread}
+        initialEntityType={entityTypeFromUrl}
+        initialEntityId={entityIdFromUrl}
+        initialSubject={subjectFromUrl}
         onCreated={(id) => {
           setComposeOpen(false);
+          if (composeFromUrl) {
+            router.replace(`/messages?thread=${id}`, { scroll: false });
+          }
           selectThread(id);
           void threadsQuery.refetch();
         }}
@@ -460,6 +479,9 @@ function NewConversationModal({
   isSilva,
   createThread,
   onCreated,
+  initialEntityType = "",
+  initialEntityId = "",
+  initialSubject = "",
 }: {
   open: boolean;
   onClose: () => void;
@@ -468,6 +490,9 @@ function NewConversationModal({
   isSilva: boolean;
   createThread: ReturnType<typeof useCreateMessageThread>;
   onCreated: (threadId: string) => void;
+  initialEntityType?: string;
+  initialEntityId?: string;
+  initialSubject?: string;
 }) {
   const [counterpartyType, setCounterpartyType] = useState<MessageCounterpartyType>("vendor");
   const [orgId, setOrgId] = useState("");
@@ -489,8 +514,13 @@ function NewConversationModal({
       setEntityId("");
       setFiles([]);
       setCounterpartyType(isSilva ? "asset_owner" : "vendor");
+      return;
     }
-  }, [open, isSilva]);
+    setSubject(initialSubject);
+    setEntityType(initialEntityType);
+    setEntityId(initialEntityId);
+    setCounterpartyType(isSilva ? "asset_owner" : "vendor");
+  }, [open, isSilva, initialSubject, initialEntityType, initialEntityId]);
 
   const submit = async () => {
     const dto = {
@@ -567,7 +597,9 @@ function NewConversationModal({
               <option value="afp_line">AFP</option>
               <option value="afe">AFE</option>
               <option value="work_order">Work order</option>
+              <option value="field_ticket">Field ticket</option>
               <option value="work_plan_submission">Work plan</option>
+              <option value="ad_hoc_request">Ad-hoc request</option>
               <option value="farm_estate">Farm estate</option>
               <option value="payment_request">Payment request</option>
               <option value="owner_settlement">Settlement</option>

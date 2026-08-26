@@ -38,6 +38,7 @@ import {
   useDismissAdHocRequest,
 } from "@/hooks/use-ad-hoc-requests";
 import type { AdHocRequest } from "@/lib/api/ad-hoc-requests";
+import { StartMessageButton } from "@/components/messages/start-message-button";
 import { formatCurrency } from "@/lib/utils/format";
 import { getApiErrorMessage } from "@/lib/api/errors";
 
@@ -275,6 +276,7 @@ export default function AdHocIntakePage() {
                 </div>
 
                 <div className="flex shrink-0 flex-wrap gap-2">
+                  <StartMessageButton entityType="ad_hoc_request" entityId={row.id} label={row.title} />
                   {isSpx && row.status === "submitted" ? (
                     <>
                       <Button size="sm" onClick={() => openConvert(row)}>

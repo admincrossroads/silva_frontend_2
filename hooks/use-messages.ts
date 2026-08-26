@@ -11,13 +11,15 @@ import {
 export function useMessageThreads(params?: {
   counterpartyType?: MessageCounterpartyType;
   status?: string;
+  entityType?: string;
+  entityId?: string;
   enabled?: boolean;
 }) {
   const { enabled = true, ...filters } = params || {};
   return useQuery({
     queryKey: ["messages", "threads", filters],
     queryFn: () => messagesApi.listThreads(filters),
-    enabled,
+    enabled: enabled && (!filters.entityType || Boolean(filters.entityId)),
     refetchInterval: 15_000,
   });
 }

@@ -7,6 +7,7 @@ import { KpiStatCard } from "@/components/dashboard/kpi-stat-card";
 import { DashboardPanel, DashboardPanelEmpty } from "@/components/dashboard/dashboard-panel";
 import { ActionQueueCard } from "@/components/dashboard/action-queue-card";
 import { HealthBadge } from "@/components/badges/health-badge";
+import { EstateMapHero } from "@/components/dashboards/estate-map-hero";
 import { Button } from "@/components/ui/button";
 import { Wallet, CreditCard, Wheat, ScrollText } from "lucide-react";
 import Link from "next/link";
@@ -31,6 +32,12 @@ export function SilvaDashboard() {
 
   return (
     <div className="space-y-6">
+      {isLoading ? (
+        <div className="h-[320px] animate-pulse rounded-2xl bg-muted/50" />
+      ) : (
+        <EstateMapHero map={data?.estateMap} />
+      )}
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiStatCard
           label="Budget lines"

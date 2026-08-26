@@ -11,6 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/badges/status-badge";
 import { Button } from "@/components/ui/button";
 import { AttachmentsPanel } from "@/components/attachments/attachments-panel";
+import { EntityMessagesPanel } from "@/components/messages/entity-messages-panel";
+import { StartMessageButton } from "@/components/messages/start-message-button";
 import { formatCurrency, formatDate } from "@/lib/utils/format";
 import { ArrowLeft } from "lucide-react";
 
@@ -36,7 +38,10 @@ export default function PaymentRequestDetailPage() {
           <h1 className="text-2xl font-bold">Payment Request</h1>
           <p className="font-mono text-sm text-muted-foreground">{pr.id}</p>
         </div>
-        <StatusBadge status={pr.status} />
+        <div className="flex items-center gap-2">
+          <StartMessageButton entityType="payment_request" entityId={pr.id} label={pr.id} />
+          <StatusBadge status={pr.status} />
+        </div>
       </div>
 
       <Card className="p-4 bg-muted/40">
@@ -99,6 +104,7 @@ export default function PaymentRequestDetailPage() {
         entityId={pr.id}
         canUpload={pr.status === "draft"}
       />
+      <EntityMessagesPanel entityType="payment_request" entityId={pr.id} title={pr.id} />
     </div>
   );
 }

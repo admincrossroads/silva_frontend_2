@@ -22,6 +22,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { PageShell, PageLoading } from "@/components/layout/page-shell";
+import { StartMessageButton } from "@/components/messages/start-message-button";
+import { EntityMessagesPanel } from "@/components/messages/entity-messages-panel";
 import { WorkPlanBuilder } from "@/components/work-plan/work-plan-builder";
 import { WorkPlanSetupForm } from "@/components/work-plan/work-plan-setup-form";
 import { cn } from "@/lib/utils";
@@ -132,11 +134,18 @@ export default function WorkPlanDetailPage() {
         <Link href="/execution/work-plans" className="text-sm text-muted-foreground hover:text-foreground">
           ← Work plans
         </Link>
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-bold tracking-tight">{plan.farmName || "Annual work plan"}</h1>
-          <Badge variant="outline" className="capitalize">
-            {plan.status.replace(/_/g, " ")}
-          </Badge>
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-2xl font-bold tracking-tight">{plan.farmName || "Annual work plan"}</h1>
+            <Badge variant="outline" className="capitalize">
+              {plan.status.replace(/_/g, " ")}
+            </Badge>
+          </div>
+          <StartMessageButton
+            entityType="work_plan_submission"
+            entityId={plan.id}
+            label={plan.farmName || "Work plan"}
+          />
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
           {plan.budgetYearLabel} · {plan.vendor?.name} · FX {plan.fxEtbPerUsd} ETB/USD
@@ -428,6 +437,14 @@ export default function WorkPlanDetailPage() {
           </Link>
         </Card>
       ) : null}
+
+      <div className="mt-6">
+        <EntityMessagesPanel
+          entityType="work_plan_submission"
+          entityId={plan.id}
+          title={plan.farmName || "Work plan"}
+        />
+      </div>
     </PageShell>
   );
 }

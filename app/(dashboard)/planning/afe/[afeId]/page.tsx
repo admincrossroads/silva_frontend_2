@@ -16,6 +16,8 @@ import { Badge } from "@/components/ui/badge";
 import { AttachmentsPanel } from "@/components/attachments/attachments-panel";
 import { ActivityFeed, InfoRow, StatusTimeline } from "@/components/items/activity-feed";
 import { DetailPageHeader, PageLoading, PageShell } from "@/components/layout/page-shell";
+import { StartMessageButton } from "@/components/messages/start-message-button";
+import { EntityMessagesPanel } from "@/components/messages/entity-messages-panel";
 import {
   AlertCircle,
   Calendar,
@@ -68,6 +70,7 @@ export default function AfeDetailPage() {
             {afe.planningMode === "ad_hoc" ? <Badge variant="secondary">Ad-hoc</Badge> : null}
           </>
         }
+        actions={<StartMessageButton entityType="afe" entityId={afe.id} label={afe.description} />}
       />
 
       <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary/8 via-background to-background">
@@ -107,6 +110,7 @@ export default function AfeDetailPage() {
           </Card>
 
           <ActivityFeed entityType="afe" entityId={afe.id} />
+          <EntityMessagesPanel entityType="afe" entityId={afe.id} title={afe.description} />
         </div>
 
         <Card className="p-5 lg:sticky lg:top-20 lg:self-start">

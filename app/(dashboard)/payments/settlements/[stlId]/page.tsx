@@ -9,6 +9,8 @@ import { Card } from "@/components/ui/card";
 import { AttachmentsPanel } from "@/components/attachments/attachments-panel";
 import { ActivityFeed, InfoRow, StatusTimeline } from "@/components/items/activity-feed";
 import { DetailPageHeader, PageLoading, PageShell } from "@/components/layout/page-shell";
+import { StartMessageButton } from "@/components/messages/start-message-button";
+import { EntityMessagesPanel } from "@/components/messages/entity-messages-panel";
 import { formatOptionalNumber } from "@/lib/utils/format";
 import { usePermissions } from "@/hooks/use-permissions";
 import { SETTLEMENT_COLUMNS } from "@/lib/items/board-adapters";
@@ -47,6 +49,7 @@ export default function SettlementDetailPage() {
             <StatusBadge status={stl.status} />
           </>
         }
+        actions={<StartMessageButton entityType="owner_settlement" entityId={stl.id} label={stl.payee} />}
       />
 
       <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary/8 via-background to-background">
@@ -83,6 +86,7 @@ export default function SettlementDetailPage() {
           </Card>
 
           <ActivityFeed entityType="owner_settlement" entityId={stl.id} />
+          <EntityMessagesPanel entityType="owner_settlement" entityId={stl.id} title={stl.payee} />
           <AttachmentsPanel
             entityType="owner_settlement"
             entityId={stl.id}

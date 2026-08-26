@@ -15,6 +15,8 @@ import { Card } from "@/components/ui/card";
 import { AttachmentsPanel } from "@/components/attachments/attachments-panel";
 import { ActivityFeed, InfoRow, StatusTimeline } from "@/components/items/activity-feed";
 import { DetailPageHeader, PageLoading, PageShell } from "@/components/layout/page-shell";
+import { StartMessageButton } from "@/components/messages/start-message-button";
+import { EntityMessagesPanel } from "@/components/messages/entity-messages-panel";
 import { WO_WORKFLOW } from "@/lib/config/procore-modules";
 import { useRole } from "@/hooks/use-role";
 import { CalendarDays, FileText, Layers, User, Wrench } from "lucide-react";
@@ -52,6 +54,7 @@ export default function WorkOrderDetailPage() {
             <StatusBadge status={wo.status} />
           </>
         }
+        actions={<StartMessageButton entityType="work_order" entityId={wo.id} label={wo.activity} />}
       />
 
       <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary/8 via-background to-background">
@@ -85,6 +88,7 @@ export default function WorkOrderDetailPage() {
           </Card>
 
           <ActivityFeed entityType="work_order" entityId={wo.id} />
+          <EntityMessagesPanel entityType="work_order" entityId={wo.id} title={wo.activity} />
           <AttachmentsPanel
             entityType="work_order"
             entityId={wo.id}

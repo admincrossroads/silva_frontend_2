@@ -17,6 +17,8 @@ import { Card } from "@/components/ui/card";
 import { AttachmentsPanel } from "@/components/attachments/attachments-panel";
 import { ActivityFeed, InfoRow, StatusTimeline } from "@/components/items/activity-feed";
 import { DetailPageHeader, PageLoading, PageShell } from "@/components/layout/page-shell";
+import { StartMessageButton } from "@/components/messages/start-message-button";
+import { EntityMessagesPanel } from "@/components/messages/entity-messages-panel";
 import { Calendar, ClipboardList, FileText, MapPin, Users, Wrench } from "lucide-react";
 
 const FT_STEPS = ["draft", "submitted", "vendor_reviewed", "validated"] as const;
@@ -60,6 +62,7 @@ export default function FieldTicketDetailPage() {
             <StatusBadge status={ft.status} />
           </>
         }
+        actions={<StartMessageButton entityType="field_ticket" entityId={ft.id} label={ft.activityRecorded} />}
       />
 
       <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary/8 via-background to-background">
@@ -107,6 +110,7 @@ export default function FieldTicketDetailPage() {
           ) : null}
 
           <ActivityFeed entityType="field_ticket" entityId={ft.id} />
+          <EntityMessagesPanel entityType="field_ticket" entityId={ft.id} title={ft.activityRecorded} />
           <AttachmentsPanel entityType="field_ticket" entityId={ft.id} canUpload={ft.status === "draft"} />
         </div>
 

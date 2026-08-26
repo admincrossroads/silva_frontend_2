@@ -68,8 +68,12 @@ export const messagesApi = {
       .get<{ data: MessageCounterparty[] }>("/messages/counterparties", { params: { type } })
       .then((r) => r.data.data),
 
-  listThreads: (params?: { counterpartyType?: MessageCounterpartyType; status?: string }) =>
-    api.get<{ data: MessageThread[] }>("/messages/threads", { params }).then((r) => r.data.data),
+  listThreads: (params?: {
+    counterpartyType?: MessageCounterpartyType;
+    status?: string;
+    entityType?: string;
+    entityId?: string;
+  }) => api.get<{ data: MessageThread[] }>("/messages/threads", { params }).then((r) => r.data.data),
 
   createThread: (dto: CreateThreadDto) =>
     api.post<{ data: MessageThread }>("/messages/threads", dto).then((r) => r.data.data),
