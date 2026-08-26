@@ -35,7 +35,7 @@ export function useSubmitWorkPlan() {
     mutationFn: workPlansApi.submit,
     meta: {
       successMessage: "Work plan submitted",
-      successDescription: "SPX will review and accept or request changes.",
+      successDescription: "Plan marked submitted. You can still promote it to AFP.",
       errorMessage: "Could not submit work plan",
     },
     onSuccess: (_, id) => {

@@ -14,8 +14,8 @@ export default function ActivityCatalogPage() {
     <div className="space-y-5">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Activity catalog</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          B-Agro field activity norms — populated when SPX accepts an annual work plan submission.
+        <p className="mt-1 text-sm text-muted-foreground">
+          Field activity norms — populated when SPX accepts an annual work plan.
         </p>
       </div>
 
@@ -43,7 +43,7 @@ export default function ActivityCatalogPage() {
               ) : items.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
-                    No activities yet. Accept a B-Agro work plan submission to populate the catalog.
+                    No activities yet. Accept a work plan (SPX) to populate the catalog.
                   </td>
                 </tr>
               ) : (

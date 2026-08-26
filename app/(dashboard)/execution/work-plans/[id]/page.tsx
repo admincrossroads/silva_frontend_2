@@ -94,6 +94,12 @@ export default function WorkPlanDetailPage() {
 
   const canEdit = canManageWorkPlan && ["draft", "revision_requested"].includes(plan.status);
   const canSubmit = canEdit && Boolean(plan.farmEstateId) && hasActivities;
+  // SPX manages plans end-to-end — promote from draft when activities are ready
+  const canPromote =
+    isSpx &&
+    ["draft", "revision_requested", "submitted"].includes(plan.status) &&
+    Boolean(plan.farmEstateId) &&
+    hasActivities;
   const canReview = isSpx && plan.status === "submitted";
   const farmBlockCodes =
     plan.farmEstate?.blocks?.map((b) => b.code) ??
@@ -143,30 +149,35 @@ export default function WorkPlanDetailPage() {
         ) : null}
       </div>
 
-      {canReview ? (
+      {canReview || canPromote ? (
         <Card className="mb-6 p-5">
-          <h2 className="text-sm font-semibold">SPX review</h2>
+          <h2 className="text-sm font-semibold">Promote to AFP</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            SPX owns the annual work plan. Accept promotes activities into AFP lines and the activity catalog.
+          </p>
           <Textarea
-            label="Review notes"
+            label="Notes"
             className="mt-3"
             value={reviewNotes}
             onChange={(e) => setReviewNotes(e.target.value)}
-            placeholder="Optional notes for vendor"
+            placeholder="Optional notes"
           />
-          <div className="mt-4 flex gap-2">
+          <div className="mt-4 flex flex-wrap gap-2">
             <Button
-              disabled={acceptPlan.isPending}
+              disabled={acceptPlan.isPending || !canPromote}
               onClick={() => acceptPlan.mutate({ id: plan.id, notes: reviewNotes || undefined })}
             >
               {acceptPlan.isPending ? "Promoting…" : "Accept & promote to AFP"}
             </Button>
-            <Button
-              variant="destructive"
-              disabled={rejectPlan.isPending}
-              onClick={() => rejectPlan.mutate({ id: plan.id, notes: reviewNotes || "Rejected." })}
-            >
-              Reject
-            </Button>
+            {canReview ? (
+              <Button
+                variant="destructive"
+                disabled={rejectPlan.isPending}
+                onClick={() => rejectPlan.mutate({ id: plan.id, notes: reviewNotes || "Rejected." })}
+              >
+                Reject
+              </Button>
+            ) : null}
           </div>
         </Card>
       ) : null}
@@ -387,10 +398,19 @@ export default function WorkPlanDetailPage() {
       {canEdit ? (
         <Card className="mb-6 p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-sm font-semibold">Submit to SPX</h2>
+            <div>
+              <h2 className="text-sm font-semibold">Finalize plan</h2>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Optional: mark as submitted, or promote directly when ready.
+              </p>
+            </div>
             {canSubmit ? (
-              <Button disabled={submitPlan.isPending} onClick={() => submitPlan.mutate(plan.id)}>
-                {submitPlan.isPending ? "Submitting…" : "Submit to SPX"}
+              <Button
+                variant="outline"
+                disabled={submitPlan.isPending}
+                onClick={() => submitPlan.mutate(plan.id)}
+              >
+                {submitPlan.isPending ? "Saving…" : "Mark as submitted"}
               </Button>
             ) : (
               <Button disabled variant="outline">

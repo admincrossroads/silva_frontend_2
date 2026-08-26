@@ -308,7 +308,6 @@ function CreateEstateModal({
         onClose();
       }}
       title="New farm estate"
-      description="Assign the asset owner, execution vendors, and blocks for this farm area."
     >
       <form
         className="space-y-4"

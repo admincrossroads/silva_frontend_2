@@ -46,9 +46,10 @@ export const VENDOR_ROLES: RoleKey[] = [
   "vendor_field_lead",
   "vendor_worker",
 ];
-export const VENDOR_WORK_PLAN_ROLES: RoleKey[] = [
-  "vendor_admin",
-  "vendor_manager",
-  "vendor_supervisor",
-  "vendor_field_lead",
+/** SPX owns annual work plan create / edit / promote */
+export const SPX_WORK_PLAN_ROLES: RoleKey[] = [
+  "spx_principal",
+  "spx_account_handler",
+  "spx_field_supervisor",
+  "system_admin",
 ];
