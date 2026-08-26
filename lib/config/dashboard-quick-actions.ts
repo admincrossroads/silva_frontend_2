@@ -29,19 +29,19 @@ export function quickActionsFor(user: User): QuickAction[] {
 
   if (isSpxRole(role)) {
     return [
+      { label: "Ad-hoc intake", href: "/planning/intake", icon: ClipboardList },
       { label: "AFE register", href: "/planning/afe", icon: FileCheck },
       { label: "Work orders", href: "/execution/work-orders", icon: ClipboardList },
       { label: "Field tickets", href: "/execution/field-tickets", icon: FileText },
-      { label: "Reports", href: "/reports/workspace", icon: BarChart3 },
     ];
   }
 
   if (isSilvaRole(role)) {
     return [
-      { label: "Create AFP", href: "/planning/afp", icon: Wallet },
+      { label: "Request ad-hoc", href: "/planning/intake", icon: PlusCircle },
+      { label: "Review AFP", href: "/planning/afp", icon: Wallet },
       { label: "Budget vs actual", href: "/reports/budget-vs-actual", icon: BarChart3 },
       { label: "Monthly reports", href: "/reports/monthly", icon: FileText },
-      { label: "Assigned vendors", href: "/vendors", icon: Users },
     ];
   }
 

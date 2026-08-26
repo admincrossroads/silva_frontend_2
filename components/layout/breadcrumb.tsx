@@ -16,6 +16,7 @@ const LABELS: Record<string, string> = {
   onboarding: "Project Setup",
   afp: "Budget (AFP)",
   afe: "Commitments (AFE)",
+  intake: "Ad-hoc intake",
   "work-orders": "Schedule",
   "field-tickets": "Daily Log",
   forms: "Daily Log · Forms",

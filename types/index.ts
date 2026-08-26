@@ -119,11 +119,12 @@ export interface Afp {
 
 export interface Afe {
   id: string;
-  afpLineId: string;
+  afpLineId: string | null;
   operatingDiscipline: string;
   description: string;
   estimatedCostUsd: number;
   band: string;
+  planningMode?: "planned" | "ad_hoc" | string;
   status: string;
   silvaApprovalRequired: boolean;
   createdAt: string;

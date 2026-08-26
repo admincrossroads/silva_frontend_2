@@ -36,7 +36,7 @@ export default function AfpPage() {
   const [status, setStatus] = useState<string | undefined>();
   const { has } = usePermissions();
   const { isSilva } = useRole();
-  const canCreate = has("afp.create");
+  const canCreate = !isSilva && has("afp.create");
   const BOARD_COLUMNS = isSilva ? SILVA_BOARD_COLUMNS : SPX_BOARD_COLUMNS;
 
   const { data: afps = [], isLoading } = useAfps({ year, status });

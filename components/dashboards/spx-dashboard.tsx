@@ -6,7 +6,7 @@ import { KpiStatCard } from "@/components/dashboard/kpi-stat-card";
 import { DashboardPanel, DashboardPanelEmpty, DashboardPanelRow } from "@/components/dashboard/dashboard-panel";
 import { ActionQueueCard } from "@/components/dashboard/action-queue-card";
 import { HealthBadge } from "@/components/badges/health-badge";
-import { ClipboardList, FileText, CreditCard, AlertTriangle } from "lucide-react";
+import { ClipboardList, FileText, AlertTriangle } from "lucide-react";
 import { usePermissions } from "@/hooks/use-permissions";
 import { formatCurrency } from "@/lib/utils/format";
 
@@ -27,6 +27,14 @@ export function SpxDashboard() {
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiStatCard
+          label="Ad-hoc intake"
+          value="Open"
+          sublabel="Owner requests outside AFP"
+          icon={ClipboardList}
+          tone="amber"
+          href="/planning/intake"
+        />
+        <KpiStatCard
           label="Silva AFE queue"
           value={String(pendingAfe)}
           sublabel={pendingAfe ? "Awaiting Silva decision" : "Queue clear"}
@@ -43,15 +51,6 @@ export function SpxDashboard() {
           tone="amber"
           loading={isLoading}
           href="/execution/field-tickets"
-        />
-        <KpiStatCard
-          label="Monthly report"
-          value={data?.reportWorkspace?.monthlyStatus ?? "None"}
-          sublabel={data?.reportWorkspace?.needsNarrative ? "Narrative required" : "Report workspace"}
-          icon={CreditCard}
-          tone="primary"
-          loading={isLoading}
-          href="/reports/workspace"
         />
         <KpiStatCard
           label="Exceptions"

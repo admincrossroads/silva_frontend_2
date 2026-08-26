@@ -65,6 +65,7 @@ export default function AfeDetailPage() {
             <Badge variant="outline" className="font-mono text-[10px] font-normal">{afe.id}</Badge>
             <BandBadge band={afe.band} />
             <StatusBadge status={afe.status} />
+            {afe.planningMode === "ad_hoc" ? <Badge variant="secondary">Ad-hoc</Badge> : null}
           </>
         }
       />
@@ -93,10 +94,15 @@ export default function AfeDetailPage() {
             <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <InfoRow icon={Layers} label="Discipline" value={afe.operatingDiscipline} />
               <InfoRow icon={FileCheck} label="Band" value={`Band ${afe.band}`} />
+              <InfoRow
+                icon={FileText}
+                label="Planning"
+                value={afe.planningMode === "ad_hoc" ? "Ad-hoc (outside annual plan)" : "Planned"}
+              />
               <InfoRow icon={FileText} label="Description" value={afe.description} className="sm:col-span-2" />
               <InfoRow icon={DollarSign} label="Estimated cost" value={formatUsd(afe.estimatedCostUsd)} />
               <InfoRow icon={Shield} label="Silva approval" value={afe.silvaApprovalRequired ? "Required" : "Not required"} />
-              <InfoRow icon={Calendar} label="AFP line" value={afe.afpLineId} className="sm:col-span-2" />
+              <InfoRow icon={Calendar} label="AFP line" value={afe.afpLineId || "— (standalone)"} className="sm:col-span-2" />
             </dl>
           </Card>
 

@@ -4,12 +4,14 @@ import { useQuery } from "@tanstack/react-query";
 import { dashboardApi } from "@/lib/api/dashboard";
 import { BudgetVsActualChart } from "@/components/charts/budget-vs-actual-chart";
 import { KpiStatCard } from "@/components/dashboard/kpi-stat-card";
-import { DashboardPanel, DashboardPanelEmpty, DashboardPanelRow } from "@/components/dashboard/dashboard-panel";
+import { DashboardPanel, DashboardPanelEmpty } from "@/components/dashboard/dashboard-panel";
 import { ActionQueueCard } from "@/components/dashboard/action-queue-card";
 import { HealthBadge } from "@/components/badges/health-badge";
+import { FarmEstateMap } from "@/components/maps/farm-estate-map";
 import { Button } from "@/components/ui/button";
 import { Wallet, CreditCard, Wheat, ScrollText } from "lucide-react";
 import Link from "next/link";
+import { useActiveFarmEstate } from "@/hooks/use-active-farm-estate";
 
 export function SilvaDashboard() {
   const year = new Date().getUTCFullYear();
@@ -17,6 +19,7 @@ export function SilvaDashboard() {
     queryKey: ["dashboard", "silva-owner", year],
     queryFn: () => dashboardApi.silvaOwner(year),
   });
+  const { activeFarmEstate, estates, isLoading: estatesLoading } = useActiveFarmEstate();
 
   const bvaLines = data?.budgetVsActual?.lines ?? [];
   const bvaChartData = bvaLines.map((line: { afpLineId: string; utilizationPercent: number }) => ({
@@ -28,6 +31,8 @@ export function SilvaDashboard() {
   const overBudget = bvaLines.filter(
     (line: { health?: string }) => line.health === "over_budget" || line.health === "Over Budget",
   ).length;
+
+  const totalAreaHa = estates.reduce((sum, e) => sum + (Number(e.totalAreaHa) || 0), 0);
 
   return (
     <div className="space-y-6">
@@ -69,6 +74,24 @@ export function SilvaDashboard() {
         />
       </div>
 
+      <DashboardPanel title="Farm area" contentClassName="p-0">
+        <div className="space-y-3 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
+            <p>
+              {estates.length
+                ? `${estates.length} estate${estates.length === 1 ? "" : "s"}${
+                    totalAreaHa > 0 ? ` · ${totalAreaHa.toLocaleString()} ha total` : ""
+                  }`
+                : "Program farm estates"}
+            </p>
+            {activeFarmEstate ? (
+              <span className="text-xs">Showing {activeFarmEstate.name}</span>
+            ) : null}
+          </div>
+          <FarmEstateMap estate={activeFarmEstate} loading={estatesLoading} heightClassName="h-[320px]" />
+        </div>
+      </DashboardPanel>
+
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <div className="xl:col-span-2 space-y-6">
           <DashboardPanel title="Budget utilization" viewAllHref="/reports/budget-vs-actual">
@@ -100,10 +123,19 @@ export function SilvaDashboard() {
 
           <DashboardPanel title="AFP register" viewAllHref="/planning/afp" contentClassName="p-4">
             <p className="text-sm text-muted-foreground">
-              Create budget lines for specific tasks (capping, processing, and more), or approve plans prepared by SPX.
+              Review and approve annual budget lines prepared by SPX.
             </p>
             <Button variant="outline" size="sm" className="mt-3" asChild>
               <Link href="/planning/afp">Open AFP</Link>
+            </Button>
+          </DashboardPanel>
+
+          <DashboardPanel title="Ad-hoc work" viewAllHref="/planning/intake" contentClassName="p-4">
+            <p className="text-sm text-muted-foreground">
+              Need work that was not in the annual plan? Submit an ad-hoc request for SPX to convert into an AFE.
+            </p>
+            <Button variant="outline" size="sm" className="mt-3" asChild>
+              <Link href="/planning/intake">Request ad-hoc work</Link>
             </Button>
           </DashboardPanel>
         </div>

@@ -35,6 +35,9 @@ const TRIGGER_LABELS: Record<string, string> = {
   registration_submitted: "Registration submitted",
   contact_received: "Contact message received",
   message_received: "New message",
+  adhoc_submitted: "Ad-hoc request submitted",
+  adhoc_dismissed: "Ad-hoc request dismissed",
+  adhoc_converted: "Ad-hoc converted to AFE",
 };
 
 export function notificationTriggerLabel(triggerType: string) {
@@ -69,6 +72,8 @@ export function notificationEntityHref(entityType: string, entityId: string): st
       return `/vendors/${entityId}`;
     case "farm_estate":
       return `/settings/farm-estates`;
+    case "ad_hoc_request":
+      return `/planning/intake`;
     default:
       return null;
   }
@@ -102,6 +107,8 @@ export function notificationEntityLabel(entityType: string) {
       return "Vendor";
     case "farm_estate":
       return "Farm estate";
+    case "ad_hoc_request":
+      return "Ad-hoc request";
     default:
       return entityType.replace(/_/g, " ");
   }

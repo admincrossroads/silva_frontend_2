@@ -16,7 +16,6 @@ import { DetailPageHeader, PageLoading, PageShell } from "@/components/layout/pa
 import { formatWorkflowLabel } from "@/lib/config/procore-modules";
 import { cn } from "@/lib/utils";
 import { useRole } from "@/hooks/use-role";
-import { useAuthStore } from "@/stores/auth-store";
 import {
   Calendar,
   Check,
@@ -29,7 +28,6 @@ import {
 } from "lucide-react";
 
 const SPX_STATUS_STEPS = ["draft", "submitted", "approved", "closed"] as const;
-const SILVA_OWNED_STATUS_STEPS = ["draft", "approved", "closed"] as const;
 
 function stepCaption(completed: boolean, current: boolean) {
   if (current) return "In progress";
@@ -82,7 +80,6 @@ export default function AfpDetailPage() {
   const submitAfp = useSubmitAfp();
   const approveAfp = useApproveAfp();
   const { isSilva, isSpx } = useRole();
-  const userId = useAuthStore((s) => s.user?.id);
 
   if (isLoading || !afp) {
     return (
@@ -92,8 +89,7 @@ export default function AfpDetailPage() {
     );
   }
 
-  const silvaOwned = Boolean(afp.createdByUserId && isSilva && afp.createdByUserId === userId);
-  const STATUS_STEPS = silvaOwned ? SILVA_OWNED_STATUS_STEPS : SPX_STATUS_STEPS;
+  const STATUS_STEPS = SPX_STATUS_STEPS;
   const currentStep = Math.max(
     0,
     STATUS_STEPS.indexOf(
@@ -101,10 +97,8 @@ export default function AfpDetailPage() {
     ),
   );
   const isTerminal = afp.status === "closed";
-  const canSubmit = !silvaOwned && isSpx && afp.status === "draft";
-  const canApprove =
-    (silvaOwned && afp.status === "draft") ||
-    (isSilva && afp.status === "submitted");
+  const canSubmit = isSpx && afp.status === "draft";
+  const canApprove = isSilva && afp.status === "submitted";
 
   return (
     <PageShell>
@@ -268,11 +262,7 @@ export default function AfpDetailPage() {
                   onClick={() => approveAfp.mutate({ id: afp.id, comment: "" })}
                   disabled={approveAfp.isPending}
                 >
-                  {approveAfp.isPending
-                    ? "Approving…"
-                    : silvaOwned && afp.status === "draft"
-                      ? "Approve budget line"
-                      : "Approve budget line"}
+                  {approveAfp.isPending ? "Approving…" : "Approve budget line"}
                 </Button>
               ) : null}
             </div>

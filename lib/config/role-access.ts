@@ -164,7 +164,7 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
   ];
 
   // Budget + Commitments (planning) — hidden from field-only vendor roles except admin;
-  // Silva governs AFP (Budget) but does not create or manage AFEs (Commitments).
+  // Silva governs AFP (Budget) — approve only; SPX creates and submits.
   if (!isVendorRole(role) || role === "vendor_admin") {
     items.push({
       label: "Budget",
@@ -178,6 +178,14 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
         procoreLabel: "Commitments",
         href: "/planning/afe",
         icon: FileCheck,
+      });
+    }
+    if (isSilvaRole(role) || isSpxRole(role)) {
+      items.push({
+        label: "Ad-hoc intake",
+        procoreLabel: "Budget",
+        href: "/planning/intake",
+        icon: ClipboardCheck,
       });
     }
   }
