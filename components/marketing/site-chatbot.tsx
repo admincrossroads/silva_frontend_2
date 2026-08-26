@@ -25,7 +25,7 @@ function replyFor(input: string): string {
   const q = input.toLowerCase();
 
   if (/(register|apply|access|sign.?up)/.test(q)) {
-    return "Use Apply for access on the home page. Choose Asset owner or Execution vendor, complete the application, then wait for review and an activation link.";
+    return "Public applications are paused for now. Use Contact on the home page to reach the platform team, or Sign in if you already have a workspace.";
   }
   if (/(owner|silva|asset|govern)/.test(q)) {
     return "Asset owners approve plans and higher-band spend, and read released reports. They do not see raw field tickets or platform revenue.";

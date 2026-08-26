@@ -76,9 +76,6 @@ export function SiteHeader({ signedIn, scrolled = false, showLogo = true }: Site
               >
                 <Link href="/login">Sign in</Link>
               </Button>
-              <Button asChild size="sm" className="rounded-xl bg-white px-4 text-[hsl(165_32%_12%)] hover:bg-white/90">
-                <Link href="/register">Apply for access</Link>
-              </Button>
             </>
           )}
         </nav>

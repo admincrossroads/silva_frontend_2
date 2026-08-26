@@ -89,14 +89,6 @@ export default function LandingPage() {
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
-                  <Button
-                    asChild
-                    size="lg"
-                    variant="outline"
-                    className="h-11 rounded-xl border-white/30 bg-white/5 px-6 text-[15px] text-white backdrop-blur-sm hover:bg-white/12 hover:text-white sm:h-12 sm:px-7 xl:h-[3.25rem] xl:px-8 xl:text-base 2xl:h-14 2xl:px-9"
-                  >
-                    <Link href="/register">Apply for access</Link>
-                  </Button>
                 </>
               )}
             </div>
@@ -141,8 +133,8 @@ export default function LandingPage() {
           <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-primary">Simple setup</p>
           <h2 className="mt-3 font-display text-3xl tracking-tight md:text-4xl">Three desks. One estate.</h2>
           <p className="mt-4 max-w-xl text-base leading-relaxed text-[hsl(160_12%_38%)]">
-            Asset owners and vendors apply for access. Applications are reviewed, workspaces are activated, and
-            partners are mapped to shared programs.
+            Asset owners, program managers, and vendors share one estate operating rhythm across planning, field work,
+            and settlement.
           </p>
 
           <div className="mt-12 grid gap-6 md:grid-cols-3">
@@ -245,50 +237,7 @@ export default function LandingPage() {
         </div>
       </ParallaxSection>
 
-      {/* Who it's for */}
-      <section className="bg-[hsl(155_18%_97%)] px-5 py-20 text-[hsl(160_28%_14%)] md:px-8 md:py-28">
-        <div className="mx-auto max-w-6xl xl:max-w-7xl 2xl:max-w-[90rem] 3xl:max-w-content-xl">
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-primary">Get started</p>
-          <h2 className="mt-3 font-display text-3xl tracking-tight md:text-4xl">Pick your organization type</h2>
-          <p className="mt-4 max-w-xl text-base leading-relaxed text-[hsl(160_12%_38%)]">
-            Apply as an asset owner or execution vendor. After review, your workspace is activated and you can sign in.
-          </p>
-
-          <div className="mt-10 divide-y divide-[hsl(150_14%_86%)] overflow-hidden rounded-2xl bg-white ring-1 ring-[hsl(150_14%_86%)]">
-            {[
-              {
-                type: "Asset owner",
-                role: "Governance desk",
-                copy: "Approve plans, higher-band spend, and released performance reports.",
-                href: "/register/asset-owner",
-              },
-              {
-                type: "Execution vendor",
-                role: "Field partner",
-                copy: "Record work, submit tickets, and request payment.",
-                href: "/register/vendor",
-              },
-            ].map((row) => (
-              <Link
-                key={row.type}
-                href={row.href}
-                className="group flex flex-col gap-2 px-5 py-6 transition hover:bg-primary/[0.04] sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-7"
-              >
-                <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-8">
-                  <span className="font-display text-2xl text-[hsl(160_28%_14%)]">{row.type}</span>
-                  <span className="text-xs font-medium uppercase tracking-[0.16em] text-primary">{row.role}</span>
-                  <span className="text-sm text-[hsl(160_12%_40%)]">{row.copy}</span>
-                </div>
-                <span className="inline-flex items-center gap-1 text-sm font-medium text-primary opacity-80 transition group-hover:opacity-100">
-                  Start application
-                  <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
+      {/* Who it's for — registration CTAs hidden for now */}
       {/* Contact */}
       <section id="contact" className="scroll-mt-20 bg-[hsl(155_18%_97%)] px-5 py-20 text-[hsl(160_28%_14%)] md:px-8 md:py-28">
         <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-start xl:max-w-7xl 2xl:max-w-[90rem] 3xl:max-w-content-xl">
@@ -298,13 +247,6 @@ export default function LandingPage() {
             <p className="mt-4 max-w-md text-base leading-relaxed text-[hsl(160_12%_38%)]">
               Questions about onboarding, partnerships, or how {siteConfig.name} fits your estate? Send a message and
               the team will follow up by email.
-            </p>
-            <p className="mt-6 text-sm text-[hsl(160_12%_40%)]">
-              Ready to join?{" "}
-              <Link href="/register" className="font-medium text-primary hover:underline">
-                Apply for access
-              </Link>{" "}
-              instead for a full workspace review.
             </p>
           </div>
           <ContactForm />
@@ -325,7 +267,7 @@ export default function LandingPage() {
             Ready when your estate is
           </h2>
           <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-white/60">
-            Apply as an asset owner or execution vendor. After review, your workspace is activated.
+            Sign in to your program workspace to plan, execute, and settle estate work.
           </p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             {signedIn ? (
@@ -346,14 +288,6 @@ export default function LandingPage() {
                     Sign in to workspace
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
-                </Button>
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="h-12 rounded-xl border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
-                >
-                  <Link href="/register">Apply for access</Link>
                 </Button>
               </>
             )}

@@ -114,15 +114,7 @@ export default function LoginPage() {
 
       <AuthCard
         title="Sign in"
-        description={
-          <>
-            Access your program workspace. New here?{" "}
-            <Link href="/register" className="font-medium text-primary hover:underline">
-              Apply for access
-            </Link>
-            .
-          </>
-        }
+        description="Access your program workspace with your organization account."
       >
         {error ? (
           <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2.5 text-sm text-destructive sm:px-4 sm:py-3">
