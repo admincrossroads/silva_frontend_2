@@ -15,17 +15,17 @@ const STARTER: ChatMessage = {
 };
 
 const QUICK_PROMPTS = [
-  "How do I register?",
   "What do asset owners see?",
   "What is the work flow?",
   "How do I sign in?",
+  "What does SPX do?",
 ];
 
 function replyFor(input: string): string {
   const q = input.toLowerCase();
 
   if (/(register|apply|access|sign.?up)/.test(q)) {
-    return "Use Apply for access on the home page. Choose Asset owner or Execution vendor, complete the application, then wait for review and an activation link.";
+    return "Public signup is not used in this demo. Sign in with a seeded workspace account (Silva, SPX, or B-Agro) from the Sign in page.";
   }
   if (/(owner|silva|asset|govern)/.test(q)) {
     return "Asset owners approve plans and higher-band spend, and read released reports. They do not see raw field tickets or platform revenue.";

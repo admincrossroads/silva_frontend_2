@@ -91,7 +91,7 @@ export function WorkOrderForm({ onSubmit, isPending }: WorkOrderFormProps) {
 
   const catalogQuery = useQuery({
     queryKey: ["activity-catalog", selectedAfe?.afpLineId],
-    queryFn: () => activityCatalogApi.list({ afpLineId: selectedAfe!.afpLineId }),
+    queryFn: () => activityCatalogApi.list({ afpLineId: selectedAfe!.afpLineId! }),
     enabled: Boolean(selectedAfe?.afpLineId),
   });
   const catalog = catalogQuery.data ?? [];

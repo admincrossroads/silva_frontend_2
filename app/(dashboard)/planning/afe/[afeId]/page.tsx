@@ -96,7 +96,32 @@ export default function AfeDetailPage() {
               <InfoRow icon={FileText} label="Description" value={afe.description} className="sm:col-span-2" />
               <InfoRow icon={DollarSign} label="Estimated cost" value={formatUsd(afe.estimatedCostUsd)} />
               <InfoRow icon={Shield} label="Silva approval" value={afe.silvaApprovalRequired ? "Required" : "Not required"} />
-              <InfoRow icon={Calendar} label="AFP line" value={afe.afpLineId} className="sm:col-span-2" />
+              <InfoRow
+                icon={Calendar}
+                label="AFP line"
+                value={
+                  afe.afpLineId
+                    ? afe.afpLineId
+                    : afe.planningMode === "ad_hoc"
+                      ? "Standalone (ad-hoc)"
+                      : "—"
+                }
+                className="sm:col-span-2"
+              />
+              {afe.planningMode ? (
+                <InfoRow
+                  icon={Layers}
+                  label="Planning mode"
+                  value={afe.planningMode === "ad_hoc" ? "Ad-hoc" : "Planned"}
+                />
+              ) : null}
+              {afe.origin ? (
+                <InfoRow
+                  icon={FileText}
+                  label="Origin"
+                  value={String(afe.origin).replace(/_/g, " ")}
+                />
+              ) : null}
             </dl>
           </Card>
 

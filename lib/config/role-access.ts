@@ -17,6 +17,8 @@ import {
   MapPin,
   ClipboardCheck,
   Mail,
+  Inbox,
+  Send,
 } from "lucide-react";
 import type { RoleKey } from "@/lib/utils/constants";
 import type { User as AuthUser } from "@/types";
@@ -175,6 +177,33 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
       procoreLabel: "Commitments",
       href: "/planning/afe",
       icon: FileCheck,
+    });
+  }
+
+  if (isSilvaRole(role) && role !== "silva_finance") {
+    items.push({
+      label: "My requests",
+      procoreLabel: "Requests",
+      href: "/planning/requests",
+      icon: Send,
+    });
+  }
+
+  if (isSpxRole(role) && role !== "spx_field_supervisor") {
+    items.push({
+      label: "Ad-hoc intake",
+      procoreLabel: "Intake",
+      href: "/planning/intake",
+      icon: Inbox,
+    });
+  }
+
+  if (role === "vendor_admin" || role === "vendor_manager" || role === "vendor_field_lead") {
+    items.push({
+      label: "Request work",
+      procoreLabel: "Requests",
+      href: "/planning/requests",
+      icon: Send,
     });
   }
 

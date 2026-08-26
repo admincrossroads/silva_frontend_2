@@ -118,11 +118,14 @@ export interface Afp {
 
 export interface Afe {
   id: string;
-  afpLineId: string;
+  afpLineId: string | null;
   operatingDiscipline: string;
   description: string;
   estimatedCostUsd: number;
   band: string;
+  planningMode?: "planned" | "ad_hoc";
+  origin?: "spx_initiated" | "silva_request" | "vendor_request";
+  activityRequestId?: string | null;
   status: string;
   silvaApprovalRequired: boolean;
   createdAt: string;

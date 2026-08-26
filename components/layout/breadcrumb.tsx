@@ -44,6 +44,9 @@ const LABELS: Record<string, string> = {
   accept: "Accept Invite",
   "activity-catalog": "Activity Catalog",
   "work-order-templates": "WO Templates",
+  requests: "Activity requests",
+  intake: "Ad-hoc intake",
+  new: "New",
 };
 
 const ID_PATTERN = /^(AFP|AFE|WO|FT|PR|STL|vct|act|WOT)-/i;

@@ -6,8 +6,33 @@ import { siteConfig } from "@/lib/config/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: siteConfig.name,
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
+  title: {
+    default: `${siteConfig.name} · ${siteConfig.company}`,
+    template: `%s · ${siteConfig.name}`,
+  },
   description: siteConfig.description,
+  applicationName: siteConfig.name,
+  keywords: siteConfig.keywords,
+  authors: [{ name: siteConfig.company }],
+  creator: siteConfig.company,
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    shortcut: ["/favicon.svg"],
+    apple: [{ url: "/favicon.svg" }],
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    siteName: siteConfig.name,
+    title: `${siteConfig.name} · ${siteConfig.company}`,
+    description: siteConfig.description,
+  },
+  twitter: {
+    card: "summary",
+    title: `${siteConfig.name} · ${siteConfig.company}`,
+    description: siteConfig.description,
+  },
 };
 
 export const viewport: Viewport = {

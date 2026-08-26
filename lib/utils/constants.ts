@@ -29,6 +29,7 @@ export const ROLES = {
   spx_field_supervisor: "SPX Field Supervisor",
   system_admin: "System Admin",
   vendor_admin: "Vendor Admin",
+  vendor_manager: "Vendor Manager",
   vendor_supervisor: "Vendor Supervisor",
   vendor_field_lead: "Vendor Field Lead",
   vendor_worker: "Vendor Worker",
@@ -38,4 +39,10 @@ export type RoleKey = keyof typeof ROLES;
 
 export const SILVA_ROLES: RoleKey[] = ["silva_owner", "silva_country_manager", "silva_finance"];
 export const SPX_ROLES: RoleKey[] = ["spx_principal", "spx_account_handler", "spx_field_supervisor", "system_admin"];
-export const VENDOR_ROLES: RoleKey[] = ["vendor_admin", "vendor_supervisor", "vendor_field_lead", "vendor_worker"];
+export const VENDOR_ROLES: RoleKey[] = [
+  "vendor_admin",
+  "vendor_manager",
+  "vendor_supervisor",
+  "vendor_field_lead",
+  "vendor_worker",
+];

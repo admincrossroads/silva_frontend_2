@@ -6,9 +6,8 @@ import {
   PlusCircle,
   LayoutDashboard,
   Wallet,
-  Users,
-  ClipboardCheck,
-  MapPin,
+  Inbox,
+  Send,
 } from "lucide-react";
 import type { QuickAction } from "@/components/dashboard/quick-actions";
 import type { User } from "@/types";
@@ -20,18 +19,18 @@ export function quickActionsFor(user: User): QuickAction[] {
 
   if (role === "spx_principal" || role === "system_admin") {
     return [
-      { label: "Registrations", href: "/settings/registrations", icon: ClipboardCheck },
-      { label: "Farm estates", href: "/settings/farm-estates", icon: MapPin },
-      { label: "Field tickets", href: "/execution/field-tickets", icon: FileText },
-      { label: "Revenue ledger", href: "/reports/revenue", icon: Wallet },
+      { label: "Ad-hoc intake", href: "/planning/intake", icon: Inbox },
+      { label: "AFE register", href: "/planning/afe", icon: FileCheck },
+      { label: "Work orders", href: "/execution/work-orders", icon: ClipboardList },
+      { label: "Report workspace", href: "/reports/workspace", icon: BarChart3 },
     ];
   }
 
   if (isSpxRole(role)) {
     return [
+      { label: "Ad-hoc intake", href: "/planning/intake", icon: Inbox },
       { label: "AFE register", href: "/planning/afe", icon: FileCheck },
       { label: "Work orders", href: "/execution/work-orders", icon: ClipboardList },
-      { label: "Field tickets", href: "/execution/field-tickets", icon: FileText },
       { label: "Reports", href: "/reports/workspace", icon: BarChart3 },
     ];
   }
@@ -39,20 +38,24 @@ export function quickActionsFor(user: User): QuickAction[] {
   if (isSilvaRole(role)) {
     return [
       { label: "Approve AFEs", href: "/planning/afe", icon: FileCheck },
-      { label: "Budget vs actual", href: "/reports/budget-vs-actual", icon: BarChart3 },
+      { label: "My requests", href: "/planning/requests", icon: Send },
       { label: "Monthly reports", href: "/reports/monthly", icon: FileText },
-      { label: "Assigned vendors", href: "/vendors", icon: Users },
+      { label: "Budget vs actual", href: "/reports/budget-vs-actual", icon: BarChart3 },
     ];
   }
 
   if (isVendorRole(role)) {
-    return [
+    const actions: QuickAction[] = [
       { label: "Field forms", href: "/execution/forms", icon: LayoutDashboard },
       { label: "New ticket", href: "/execution/field-tickets", icon: PlusCircle },
       { label: "Work orders", href: "/execution/work-orders", icon: ClipboardList },
       { label: "Payments", href: "/payments/payment-requests", icon: Wallet },
     ];
+    if (role === "vendor_admin" || role === "vendor_manager" || role === "vendor_field_lead") {
+      actions.unshift({ label: "Request work", href: "/planning/requests/new", icon: Send });
+    }
+    return actions.slice(0, 4);
   }
 
-  return [{ label: "Programs", href: "/settings/programs", icon: Users }];
+  return [{ label: "Programs", href: "/settings/programs", icon: LayoutDashboard }];
 }

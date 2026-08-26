@@ -45,6 +45,17 @@ export function ReportDetailView({ report, backHref, backLabel }: ReportDetailVi
   const bvaRows = getReportBvaRows(report);
   const summary = summarizeBva(bvaRows);
   const canDownload = report.status === "released" || isSpx;
+  const afeSummary = report.sections?.find((s) => s.key === "afe_summary")?.payload as
+    | { pendingSilvaApproval?: number; approved?: number }
+    | undefined;
+  const harvestKpis = report.sections?.find((s) => s.key === "harvest_kpis")?.payload as
+    | { pickerProductivityCurrent?: number; yieldTrendVsBaselinePercent?: number }
+    | null
+    | undefined;
+  const ownerRequested =
+    (report.sections?.find((s) => s.key === "owner_requested_activities")?.payload as
+      | Array<{ id: string; title: string; convertedAfeId?: string | null }>
+      | undefined) || [];
 
   const saveNarrative = useMutation({
     mutationFn: () => reportApi.patchNarrative(report.id, narrative),
@@ -178,6 +189,61 @@ export function ReportDetailView({ report, backHref, backLabel }: ReportDetailVi
             </h3>
             <ReportBvaTable rows={bvaRows} />
           </Card>
+
+          {afeSummary || harvestKpis || ownerRequested.length > 0 ? (
+            <Card className="p-5 space-y-4">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                SPX approved statistics
+              </h3>
+              {afeSummary ? (
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="rounded-lg border p-3">
+                    <p className="text-xs text-muted-foreground">AFEs pending Silva</p>
+                    <p className="text-lg font-semibold tabular-nums">{afeSummary.pendingSilvaApproval ?? 0}</p>
+                  </div>
+                  <div className="rounded-lg border p-3">
+                    <p className="text-xs text-muted-foreground">AFEs approved / active</p>
+                    <p className="text-lg font-semibold tabular-nums">{afeSummary.approved ?? 0}</p>
+                  </div>
+                </div>
+              ) : null}
+              {harvestKpis ? (
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="rounded-lg border p-3">
+                    <p className="text-xs text-muted-foreground">Picker productivity</p>
+                    <p className="text-lg font-semibold tabular-nums">
+                      {harvestKpis.pickerProductivityCurrent ?? "—"}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border p-3">
+                    <p className="text-xs text-muted-foreground">Yield vs baseline</p>
+                    <p className="text-lg font-semibold tabular-nums">
+                      {harvestKpis.yieldTrendVsBaselinePercent ?? 0}%
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+              {ownerRequested.length > 0 ? (
+                <div>
+                  <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Owner-requested activities
+                  </p>
+                  <ul className="space-y-2">
+                    {ownerRequested.map((r) => (
+                      <li key={r.id} className="flex items-center justify-between gap-2 text-sm border-b pb-2 last:border-0">
+                        <span className="truncate">{r.title}</span>
+                        {r.convertedAfeId ? (
+                          <Link href={`/planning/afe/${r.convertedAfeId}`} className="shrink-0 text-xs text-primary hover:underline">
+                            {r.convertedAfeId}
+                          </Link>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </Card>
+          ) : null}
         </div>
 
         <Card className="p-5 lg:sticky lg:top-20 lg:self-start">

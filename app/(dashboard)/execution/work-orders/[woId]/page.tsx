@@ -15,6 +15,7 @@ import { Card } from "@/components/ui/card";
 import { AttachmentsPanel } from "@/components/attachments/attachments-panel";
 import { ActivityFeed, InfoRow, StatusTimeline } from "@/components/items/activity-feed";
 import { DetailPageHeader, PageLoading, PageShell } from "@/components/layout/page-shell";
+import { WorkOrderCrewPanel } from "@/components/work-orders/work-order-crew-panel";
 import { WO_WORKFLOW } from "@/lib/config/procore-modules";
 import { useRole } from "@/hooks/use-role";
 import { CalendarDays, FileText, Layers, User, Wrench } from "lucide-react";
@@ -48,7 +49,9 @@ export default function WorkOrderDetailPage() {
         backLabel="Work orders"
         badges={
           <>
-            <Badge variant="secondary" className="font-mono text-[10px] font-normal">{wo.id}</Badge>
+            <Badge variant="secondary" className="font-mono text-[10px] font-normal">
+              {wo.id}
+            </Badge>
             <StatusBadge status={wo.status} />
           </>
         }
@@ -57,9 +60,15 @@ export default function WorkOrderDetailPage() {
       <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary/8 via-background to-background">
         <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Schedule window</p>
-            <p className="mt-1 font-display text-2xl font-semibold">Weeks {wo.weekStart}–{wo.weekEnd}</p>
-            <p className="mt-1 text-sm text-muted-foreground">{wo.category} · Tier {wo.tier}</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Schedule window
+            </p>
+            <p className="mt-1 font-display text-2xl font-semibold">
+              Weeks {wo.weekStart}–{wo.weekEnd}
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {wo.category} · Tier {wo.tier}
+            </p>
           </div>
           <Badge variant="outline" className="gap-1 py-1">
             <CalendarDays className="h-3 w-3" />
@@ -84,6 +93,12 @@ export default function WorkOrderDetailPage() {
             </dl>
           </Card>
 
+          <WorkOrderCrewPanel
+            workOrderId={wo.id}
+            assignedVendorId={wo.assignedVendorId}
+            closed={isTerminal}
+          />
+
           <ActivityFeed entityType="work_order" entityId={wo.id} />
           <AttachmentsPanel
             entityType="work_order"
@@ -93,28 +108,46 @@ export default function WorkOrderDetailPage() {
         </div>
 
         <Card className="p-5 lg:sticky lg:top-20 lg:self-start">
-          <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status timeline</h3>
+          <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Status timeline
+          </h3>
           <StatusTimeline steps={WO_WORKFLOW} current={wo.status} />
 
           {!isTerminal ? (
             <div className="mt-6 space-y-2 border-t pt-4">
               {canManageWo && wo.status === "draft" ? (
-                <Button className="w-full" onClick={() => issueMutation.mutate({ id: wo.id, comment: "" })} disabled={issueMutation.isPending}>
+                <Button
+                  className="w-full"
+                  onClick={() => issueMutation.mutate({ id: wo.id, comment: "" })}
+                  disabled={issueMutation.isPending}
+                >
                   Issue
                 </Button>
               ) : null}
               {wo.status === "issued" ? (
-                <Button className="w-full" onClick={() => startMutation.mutate(wo.id)} disabled={startMutation.isPending}>
+                <Button
+                  className="w-full"
+                  onClick={() => startMutation.mutate(wo.id)}
+                  disabled={startMutation.isPending}
+                >
                   Start
                 </Button>
               ) : null}
               {wo.status === "in_progress" ? (
-                <Button className="w-full" onClick={() => completeMutation.mutate(wo.id)} disabled={completeMutation.isPending}>
+                <Button
+                  className="w-full"
+                  onClick={() => completeMutation.mutate(wo.id)}
+                  disabled={completeMutation.isPending}
+                >
                   Complete
                 </Button>
               ) : null}
               {canManageWo && wo.status === "complete" ? (
-                <Button className="w-full" onClick={() => closeMutation.mutate({ id: wo.id, comment: "" })} disabled={closeMutation.isPending}>
+                <Button
+                  className="w-full"
+                  onClick={() => closeMutation.mutate({ id: wo.id, comment: "" })}
+                  disabled={closeMutation.isPending}
+                >
                   Close
                 </Button>
               ) : null}

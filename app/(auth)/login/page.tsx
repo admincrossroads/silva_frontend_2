@@ -24,6 +24,18 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
+const SHOW_DEMO = process.env.NEXT_PUBLIC_SHOW_DEMO_LOGINS !== "false";
+
+const DEMO_ACCOUNTS = [
+  { label: "Silva Owner", email: "owner@silva.example" },
+  { label: "SPX Planner", email: "handler@spx.example" },
+  { label: "SPX Executive", email: "principal@spx.example" },
+  { label: "B-Agro Manager", email: "manager@bagro.example" },
+  { label: "B-Agro Field Lead", email: "lead@bagro.example" },
+] as const;
+
+const DEMO_PASSWORD = "Password123!";
+
 export default function LoginPage() {
   const router = useRouter();
   const accessToken = useAuthStore((s) => s.accessToken);
@@ -37,6 +49,7 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
@@ -52,6 +65,11 @@ export default function LoginPage() {
       router.replace(activeProgram ? "/dashboard" : "/onboarding");
     }
   }, [mounted, accessToken, user, activeProgram, router]);
+
+  const fillDemo = (email: string) => {
+    setValue("email", email, { shouldValidate: true });
+    setValue("password", DEMO_PASSWORD, { shouldValidate: true });
+  };
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -84,15 +102,7 @@ export default function LoginPage() {
 
       <AuthCard
         title="Sign in"
-        description={
-          <>
-            Access your program workspace. New here?{" "}
-            <Link href="/register" className="font-medium text-primary hover:underline">
-              Apply for access
-            </Link>
-            .
-          </>
-        }
+        description="Access your program workspace with your seeded demo account."
       >
         {error ? (
           <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2.5 text-sm text-destructive sm:px-4 sm:py-3">
@@ -147,6 +157,27 @@ export default function LoginPage() {
             )}
           </Button>
         </form>
+
+        {SHOW_DEMO ? (
+          <div className="mt-5 space-y-2 border-t pt-4">
+            <p className="text-xs font-medium text-muted-foreground">Demo accounts</p>
+            <p className="text-[11px] text-muted-foreground">
+              Password for all: <span className="font-mono">{DEMO_PASSWORD}</span>
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {DEMO_ACCOUNTS.map((acct) => (
+                <button
+                  key={acct.email}
+                  type="button"
+                  onClick={() => fillDemo(acct.email)}
+                  className="rounded-full border bg-muted/40 px-2.5 py-1 text-[11px] font-medium hover:bg-muted"
+                >
+                  {acct.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </AuthCard>
     </div>
   );

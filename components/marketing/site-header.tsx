@@ -67,19 +67,9 @@ export function SiteHeader({ signedIn, scrolled = false, showLogo = true }: Site
               <Link href="/dashboard">Open workspace</Link>
             </Button>
           ) : (
-            <>
-              <Button
-                asChild
-                variant="ghost"
-                size="sm"
-                className="rounded-xl text-white/85 hover:bg-white/10 hover:text-white"
-              >
-                <Link href="/login">Sign in</Link>
-              </Button>
-              <Button asChild size="sm" className="rounded-xl bg-white px-4 text-[hsl(165_32%_12%)] hover:bg-white/90">
-                <Link href="/register">Apply for access</Link>
-              </Button>
-            </>
+            <Button asChild size="sm" className="ml-1 rounded-xl bg-white px-4 text-[hsl(165_32%_12%)] hover:bg-white/90">
+              <Link href="/login">Sign in</Link>
+            </Button>
           )}
         </nav>
       </div>

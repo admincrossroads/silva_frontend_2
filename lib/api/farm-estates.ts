@@ -27,6 +27,9 @@ export type FarmEstate = {
   location: string | null;
   notes: string | null;
   status: "active" | "inactive";
+  demoTempC?: number | null;
+  demoHumidityPct?: number | null;
+  demoRainfallMm?: number | null;
   ownerOrganizationId: string | null;
   ownerOrganization: FarmEstateOwner | null;
   createdAt: string;
