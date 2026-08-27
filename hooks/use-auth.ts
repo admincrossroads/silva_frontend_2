@@ -6,6 +6,10 @@ import { useAuthStore } from "@/stores/auth-store";
 import { authApi } from "@/lib/api/auth";
 import type { AuthMe } from "@/types";
 
+function getPersistApi() {
+  return useAuthStore.persist;
+}
+
 export function useAuth() {
   const {
     user,
@@ -19,12 +23,18 @@ export function useAuth() {
     logout,
   } = useAuthStore();
   const router = useRouter();
-  const [hydrated, setHydrated] = useState(() => useAuthStore.persist.hasHydrated());
+  // Always start false on server + first client paint so SSR never touches persist.
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    const unsub = useAuthStore.persist.onFinishHydration(() => setHydrated(true));
-    setHydrated(useAuthStore.persist.hasHydrated());
-    return unsub;
+    const persistApi = getPersistApi();
+    if (!persistApi) {
+      setHydrated(true);
+      return;
+    }
+
+    setHydrated(persistApi.hasHydrated());
+    return persistApi.onFinishHydration(() => setHydrated(true));
   }, []);
 
   useEffect(() => {

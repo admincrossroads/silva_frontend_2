@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { registrationApi } from "@/lib/api/registration";
@@ -11,7 +11,7 @@ import { useAuthStore } from "@/stores/auth-store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export default function ActivatePage() {
+function ActivateForm() {
   const router = useRouter();
   const params = useSearchParams();
   const token = params.get("token") || "";
@@ -104,5 +104,13 @@ export default function ActivatePage() {
         </Button>
       </form>
     </div>
+  );
+}
+
+export default function ActivatePage() {
+  return (
+    <Suspense fallback={<p className="text-sm text-muted-foreground">Verifying activation link…</p>}>
+      <ActivateForm />
+    </Suspense>
   );
 }

@@ -1,11 +1,12 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { RegistrationHeader } from "@/components/auth/registration-shell";
 
-export default function RegisterSubmittedPage() {
+function RegisterSubmittedContent() {
   const params = useSearchParams();
   const type = params.get("type");
 
@@ -28,5 +29,22 @@ export default function RegisterSubmittedPage() {
         </Button>
       </main>
     </>
+  );
+}
+
+export default function RegisterSubmittedPage() {
+  return (
+    <Suspense
+      fallback={
+        <>
+          <RegistrationHeader />
+          <main className="mx-auto flex max-w-lg flex-1 flex-col items-center justify-center px-5 py-16 text-center sm:px-8">
+            <p className="text-sm text-muted-foreground">Loading…</p>
+          </main>
+        </>
+      }
+    >
+      <RegisterSubmittedContent />
+    </Suspense>
   );
 }
