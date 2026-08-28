@@ -160,7 +160,9 @@ export interface FieldTicket {
   actualCostEtb?: number | null;
   normValidation?: {
     ok?: boolean;
-    flags?: Array<{ code: string; message: string; blockPayment?: boolean }>;
+    flags?: Array<{ code: string; message: string; blockPayment?: boolean; variancePct?: number }>;
+    planned?: { quantity?: number | null; mandays?: number | null; costEtb?: number | null };
+    actual?: { quantity?: number | null; mandays?: number | null; costEtb?: number | null };
   } | null;
   ticketDate: string;
   status: string;
