@@ -38,10 +38,10 @@ export function quickActionsFor(user: User): QuickAction[] {
 
   if (isSilvaRole(role)) {
     return [
+      { label: "Commitments", href: "/planning/afe", icon: FileCheck },
       { label: "Request ad-hoc", href: "/planning/intake", icon: PlusCircle },
       { label: "Review AFP", href: "/planning/afp", icon: Wallet },
       { label: "Budget vs actual", href: "/reports/budget-vs-actual", icon: BarChart3 },
-      { label: "Monthly reports", href: "/reports/monthly", icon: FileText },
     ];
   }
 

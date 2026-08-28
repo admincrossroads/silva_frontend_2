@@ -103,10 +103,18 @@ export function FieldTicketForm({ onSubmit, isPending, offlineEnabled, onOffline
       ) : null}
 
       {selectedActivity ? (
-        <div className="rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground">
-          Plan: {selectedActivity.annualQuantity?.toLocaleString() ?? "—"} {selectedActivity.unit} ·{" "}
-          {selectedActivity.annualMandays?.toLocaleString() ?? "—"} MD ·{" "}
-          {selectedActivity.annualCostEtb?.toLocaleString() ?? "—"} ETB/yr
+        <div className="rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground space-y-1">
+          <p>
+            Plan: {selectedActivity.annualQuantity?.toLocaleString() ?? "—"} {selectedActivity.unit} ·{" "}
+            {selectedActivity.annualMandays?.toLocaleString() ?? "—"} MD ·{" "}
+            {selectedActivity.annualCostEtb?.toLocaleString() ?? "—"} ETB/yr
+          </p>
+          {selectedActivity.normWageEtb != null ? (
+            <p>
+              Norm: {selectedActivity.normMdPerUnit ?? "—"} MD/{selectedActivity.unit} · wage{" "}
+              {selectedActivity.normWageEtb} ETB/MD — cost ≈ actual MD × wage
+            </p>
+          ) : null}
         </div>
       ) : null}
 

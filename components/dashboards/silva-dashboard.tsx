@@ -114,6 +114,15 @@ export function SilvaDashboard() {
             </Button>
           </DashboardPanel>
 
+          <DashboardPanel title="Commitments" viewAllHref="/planning/afe" contentClassName="p-4">
+            <p className="text-sm text-muted-foreground">
+              Review Band C/D authorizations after SPX validation. Approve or reject before work is issued.
+            </p>
+            <Button variant="outline" size="sm" className="mt-3" asChild>
+              <Link href="/planning/afe">Open commitments</Link>
+            </Button>
+          </DashboardPanel>
+
           <DashboardPanel title="Ad-hoc work" viewAllHref="/planning/intake" contentClassName="p-4">
             <p className="text-sm text-muted-foreground">
               Need work that was not in the annual plan? Submit an ad-hoc request for SPX to convert into an AFE.

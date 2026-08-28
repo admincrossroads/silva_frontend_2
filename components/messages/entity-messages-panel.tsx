@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { MessagesSquare, Plus, Send } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -229,6 +229,15 @@ function EntityComposeModal({
   const counterparties = useMessageCounterparties(counterpartyType, open && isSpx);
 
   const entityLabel = useMemo(() => notificationEntityLabel(entityType), [entityType]);
+
+  useEffect(() => {
+    if (!open) return;
+    setSubject(defaultSubject);
+    setBody("");
+    setError(null);
+    setOrgId("");
+    setCounterpartyType(isSilva ? "asset_owner" : "vendor");
+  }, [open, defaultSubject, isSilva]);
 
   return (
     <Modal

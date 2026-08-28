@@ -18,6 +18,8 @@ import { ActivityFeed, InfoRow, StatusTimeline } from "@/components/items/activi
 import { DetailPageHeader, PageLoading, PageShell } from "@/components/layout/page-shell";
 import { StartMessageButton } from "@/components/messages/start-message-button";
 import { EntityMessagesPanel } from "@/components/messages/entity-messages-panel";
+import { useRole } from "@/hooks/use-role";
+import { usePermissions } from "@/hooks/use-permissions";
 import {
   AlertCircle,
   Calendar,
@@ -40,6 +42,8 @@ function formatUsd(value: number | null | undefined) {
 export default function AfeDetailPage() {
   const { afeId } = useParams<{ afeId: string }>();
   const { data: afe, isLoading } = useAfe(afeId);
+  const { isSilva, isSpx, role } = useRole();
+  const { has } = usePermissions();
   const submitAfe = useSubmitAfe();
   const validateAfe = useValidateAfe();
   const approveAfe = useApproveAfe();
@@ -55,6 +59,30 @@ export default function AfeDetailPage() {
 
   const isRejected = afe.status === "rejected";
   const isTerminal = isRejected || afe.status === "closed";
+
+  const canSubmit = isSpx && afe.status === "draft" && has("afe.create");
+  const canValidate = isSpx && afe.status === "submitted" && has("afe.validate");
+  const canSpxApprove =
+    isSpx &&
+    afe.status === "validated" &&
+    !afe.silvaApprovalRequired &&
+    (has("afe.approve_band_a") || has("afe.approve_band_b"));
+  const canSilvaApprove =
+    isSilva &&
+    afe.status === "validated" &&
+    afe.silvaApprovalRequired &&
+    (role === "silva_owner" || role === "silva_country_manager");
+  const canSilvaReject =
+    isSilva &&
+    (afe.band === "C" || afe.band === "D") &&
+    ["submitted", "validated", "approved"].includes(afe.status) &&
+    (role === "silva_owner" || role === "silva_country_manager");
+  const canSpxReject =
+    isSpx &&
+    (afe.band === "A" || afe.band === "B") &&
+    ["submitted", "validated", "approved"].includes(afe.status);
+  const showActions =
+    !isTerminal && (canSubmit || canValidate || canSpxApprove || canSilvaApprove || canSilvaReject || canSpxReject);
 
   return (
     <PageShell>
@@ -124,32 +152,38 @@ export default function AfeDetailPage() {
             <StatusTimeline steps={STATUS_STEPS} current={afe.status} />
           )}
 
-          {!isTerminal ? (
+          {showActions ? (
             <div className="mt-6 space-y-2 border-t pt-4">
-              {afe.status === "draft" ? (
+              {canSubmit ? (
                 <Button className="w-full" onClick={() => submitAfe.mutate({ id: afe.id, comment: "" })} disabled={submitAfe.isPending}>
                   Submit for review
                 </Button>
               ) : null}
-              {afe.status === "submitted" ? (
+              {canValidate ? (
                 <Button className="w-full" onClick={() => validateAfe.mutate({ id: afe.id, comment: "" })} disabled={validateAfe.isPending}>
                   Validate
                 </Button>
               ) : null}
-              {afe.status === "validated" ? (
+              {canSpxApprove || canSilvaApprove ? (
                 <Button className="w-full" onClick={() => approveAfe.mutate({ id: afe.id, comment: "" })} disabled={approveAfe.isPending}>
-                  Approve
+                  {canSilvaApprove ? "Approve (Silva)" : "Approve"}
                 </Button>
               ) : null}
-              <Button variant="destructive" className="w-full" onClick={() => rejectAfe.mutate({ id: afe.id, reason: "" })} disabled={rejectAfe.isPending}>
-                Reject
-              </Button>
+              {canSilvaReject || canSpxReject ? (
+                <Button variant="destructive" className="w-full" onClick={() => rejectAfe.mutate({ id: afe.id, reason: "" })} disabled={rejectAfe.isPending}>
+                  Reject
+                </Button>
+              ) : null}
             </div>
+          ) : isSilva && afe.status === "validated" && afe.silvaApprovalRequired && role === "silva_finance" ? (
+            <p className="mt-6 border-t pt-4 text-sm text-muted-foreground">
+              Awaiting owner or country manager approval for Band {afe.band}.
+            </p>
           ) : null}
         </Card>
       </div>
 
-      <AttachmentsPanel entityType="afe" entityId={afe.id} canUpload={afe.status === "draft"} />
+      <AttachmentsPanel entityType="afe" entityId={afe.id} canUpload={afe.status === "draft" && isSpx} />
     </PageShell>
   );
 }

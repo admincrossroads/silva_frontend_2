@@ -45,7 +45,8 @@ export default function FieldTicketDetailPage() {
   const isSubmitter = ft.submittedByUserId === user?.id;
   const isRejected = ft.status === "rejected";
   const isTerminal = isRejected || ft.status === "validated";
-  const canSubmit = ft.status === "draft" && has("field_tickets.create");
+  const blockingNorm = ft.normValidation?.flags?.some((f) => f.blockPayment) ?? false;
+  const canSubmit = ft.status === "draft" && has("field_tickets.create") && !blockingNorm;
   const canReview = ft.status === "submitted" && has("field_tickets.review") && !isSubmitter;
   const canValidate = ft.status === "vendor_reviewed" && has("field_tickets.validate") && !isSubmitter;
   const canReject = canReview || canValidate;
@@ -99,13 +100,24 @@ export default function FieldTicketDetailPage() {
           </Card>
 
           {ft.normValidation?.flags?.length ? (
-            <Card className="border-amber-200 bg-amber-50/50 p-5">
-              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-amber-900">Norm validation</h3>
-              <ul className="space-y-1 text-sm text-amber-900">
+            <Card className={`p-5 ${blockingNorm ? "border-destructive/30 bg-destructive/5" : "border-amber-200 bg-amber-50/50"}`}>
+              <h3 className={`mb-2 text-xs font-semibold uppercase tracking-wider ${blockingNorm ? "text-destructive" : "text-amber-900"}`}>
+                Norm validation
+              </h3>
+              <ul className={`space-y-1 text-sm ${blockingNorm ? "text-destructive" : "text-amber-900"}`}>
                 {ft.normValidation.flags.map((f) => (
-                  <li key={f.code}>{f.message}</li>
+                  <li key={f.code}>
+                    {f.message}
+                    {f.blockPayment ? " — blocks submit until resolved." : ""}
+                  </li>
                 ))}
               </ul>
+              {ft.normValidation.planned?.costEtb != null ? (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Expected cost from norms: {Math.round(ft.normValidation.planned.costEtb).toLocaleString()} ETB
+                  {ft.actualCostEtb != null ? ` · Actual: ${Number(ft.actualCostEtb).toLocaleString()} ETB` : ""}
+                </p>
+              ) : null}
             </Card>
           ) : null}
 
@@ -128,6 +140,10 @@ export default function FieldTicketDetailPage() {
                 <Button className="w-full" onClick={() => submitMutation.mutate(ft.id)} disabled={submitMutation.isPending}>
                   Submit
                 </Button>
+              ) : blockingNorm && ft.status === "draft" ? (
+                <p className="text-xs text-destructive">
+                  Fix cost variance (actual cost should be within ±10% of mandays × wage) before submitting.
+                </p>
               ) : null}
               {canReview ? (
                 <Button className="w-full" onClick={() => reviewMutation.mutate(ft.id)} disabled={reviewMutation.isPending}>

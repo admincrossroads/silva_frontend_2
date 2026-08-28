@@ -163,8 +163,8 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
     { label: "Dashboard", procoreLabel: "Home", href: "/dashboard", icon: LayoutDashboard },
   ];
 
-  // Budget + Commitments (planning) — hidden from field-only vendor roles except admin;
-  // Silva governs AFP (Budget) — approve only; SPX creates and submits.
+  // Budget + Commitments (planning) — vendors see Budget only via vendor_admin;
+  // Silva governs AFP and reviews/approves Band C/D commitments.
   if (!isVendorRole(role) || role === "vendor_admin") {
     items.push({
       label: "Budget",
@@ -172,7 +172,7 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
       href: "/planning/afp",
       icon: Wallet,
     });
-    if (!isSilvaRole(role)) {
+    if (!isVendorRole(role)) {
       items.push({
         label: "Commitments",
         procoreLabel: "Commitments",

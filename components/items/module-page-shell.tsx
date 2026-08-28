@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 type ModulePageShellProps = {
   moduleId: ProcoreModuleId;
   title?: string;
+  description?: string;
   actions?: ReactNode;
   filters?: ReactNode;
   view: ModuleViewMode;
@@ -23,6 +24,7 @@ type ModulePageShellProps = {
 export function ModulePageShell({
   moduleId,
   title,
+  description,
   actions,
   filters,
   view,
@@ -37,6 +39,7 @@ export function ModulePageShell({
     <PageShell>
       <PageHeader
         title={title ?? mod.instrumentLabel}
+        description={description}
         badge={
           <Badge variant="outline" className="font-normal text-muted-foreground">
             {mod.procoreLabel}

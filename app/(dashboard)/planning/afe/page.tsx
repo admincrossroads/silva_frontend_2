@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useAfes } from "@/hooks/use-afes";
 import { afeColumns } from "@/components/data-table/columns/afe-columns";
 import { DataTable } from "@/components/data-table/data-table";
@@ -35,7 +34,6 @@ const BANDS = ["A", "B", "C", "D"];
 const BOARD_COLUMNS = [...DEFAULT_WORKFLOW, "rejected"] as const;
 
 export default function AfePage() {
-  const router = useRouter();
   const { isSilva } = useRole();
   const { has } = usePermissions();
   const canCreate = !isSilva && has("afe.create");
@@ -44,10 +42,6 @@ export default function AfePage() {
   const [view, setView] = useState<ModuleViewMode>("board");
   const [status, setStatus] = useState<string | undefined>();
   const [band, setBand] = useState<string | undefined>();
-
-  useEffect(() => {
-    if (isSilva) router.replace("/planning/afp");
-  }, [isSilva, router]);
 
   const { data: afes = [], isLoading } = useAfes({ status, band });
   const submitAfe = useSubmitAfe();
@@ -61,8 +55,6 @@ export default function AfePage() {
     else if (action === "validate") validateAfe.mutate({ id: item.id, comment: "" });
     else if (action === "approve") approveAfe.mutate({ id: item.id, comment: "" });
   };
-
-  if (isSilva) return null;
 
   return (
     <ModulePageShell
