@@ -23,15 +23,14 @@ import {
 } from "recharts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContactForm } from "@/components/marketing/contact-form";
-import { BrandLogo } from "@/components/brand/spx-farm-logo";
 import { CropfortNav } from "@/components/marketing/cropfort-landing/cropfort-nav";
 import { MobileFieldMock } from "@/components/marketing/cropfort-landing/mobile-field-mock";
+import { CropfortFooter } from "@/components/marketing/cropfort-landing/cropfort-footer";
 import { CropfortHeroCarousel } from "@/components/marketing/cropfort-landing/cropfort-hero-carousel";
 import { MetricsCounterSection } from "@/components/marketing/cropfort-landing/metrics-counter-section";
 import { PlatformSection } from "@/components/marketing/cropfort-landing/platform-section";
 import { WorkflowSection } from "@/components/marketing/cropfort-landing/workflow-section";
 import { cf, CTA_IMAGE } from "@/lib/config/cropfort-brand";
-import { siteConfig } from "@/lib/config/site";
 
 const TIMELINE = [
   { time: "07:58", label: "Assignment created" },
@@ -429,42 +428,7 @@ export function CropfortLandingPage({ signedIn }: Props) {
         </div>
       </section>
 
-      <footer className="border-t py-14" style={{ borderColor: cf.border, backgroundColor: cf.bg }}>
-        <div className="mx-auto max-w-7xl px-5 md:px-8">
-          <div className="grid gap-10 md:grid-cols-5">
-            <div className="md:col-span-2">
-              <BrandLogo size="sm" withWordmark showTagline={false} />
-              <p className="mt-4 max-w-xs text-sm leading-relaxed" style={{ color: cf.muted }}>
-                The operating platform for modern agricultural operations.
-              </p>
-            </div>
-            {[
-              { title: "Platform", links: ["Farm Operations", "Workforce", "Inventory", "Reporting"] },
-              { title: "Solutions", links: ["Commercial Farms", "Estates", "Agricultural Programs", "Farm Operators"] },
-              { title: "Company", links: ["About", "Contact", "Careers"] },
-              { title: "Resources", links: ["Documentation", "Help Center", "Privacy", "Terms"] },
-            ].map((col) => (
-              <div key={col.title}>
-                <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: cf.text }}>
-                  {col.title}
-                </p>
-                <ul className="mt-3 space-y-2">
-                  {col.links.map((l) => (
-                    <li key={l}>
-                      <a href="#contact" className="text-sm transition hover:underline" style={{ color: cf.muted }}>
-                        {l}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-          <p className="mt-12 border-t pt-8 text-center text-xs" style={{ borderColor: cf.border, color: cf.muted }}>
-            © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <CropfortFooter signedIn={signedIn} />
     </div>
   );
 }
