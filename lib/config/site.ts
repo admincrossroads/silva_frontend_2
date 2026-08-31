@@ -1,8 +1,8 @@
 export const siteConfig = {
-  name: "Farm OS",
-  shortName: "Farm OS",
+  name: "CropFort",
+  shortName: "CropFort",
   company: "SPX Africa",
-  tagline: "by SPX Africa",
+  tagline: "Agricultural operations platform",
   description:
-    "Plan, authorize, execute, and settle coffee estate work across owners, managers, and field crews.",
+    "The operating platform for modern agricultural operations — plan, execute, verify and understand performance across every hectare.",
 };

@@ -233,6 +233,59 @@
   }
 }
 
+@keyframes hero-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-marker-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.hero-stagger-item {
+  animation: hero-reveal 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes workflow-line-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.workflow-line-grow {
+  transform-origin: left center;
+  animation: workflow-line-grow 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-stagger-item,
+  .hero-ken-burns,
+  .hero-marker {
+    animation: none !important;
+  }
+
+  .workflow-line-grow {
+    animation: none;
+    transform: scaleX(1);
+  }
+}
+
 @keyframes landing-drift {
   from {
     transform: scale(1.05) translate3d(0, 0, 0);

@@ -12,7 +12,7 @@ type SiteHeaderProps = {
   /** True once the user has scrolled past the hero */
   scrolled?: boolean;
   /**
-   * When false, hide the Farm OS mark/wordmark (hero already shows the brand).
+   * When false, hide the Cropfort mark/wordmark (hero already shows the brand).
    * Defaults to true so non-landing uses always show the logo.
    */
   showLogo?: boolean;

@@ -20,7 +20,7 @@ const sizeMap = {
 } as const;
 
 /**
- * Farm OS mark — SPX Africa spiral growing from a farm stem.
+ * Cropfort mark — SPX Africa spiral growing from a farm stem.
  * Spiral = brand mark; stem + field line = estate / farm.
  */
 export function SpxFarmMark({ className }: { className?: string }) {
