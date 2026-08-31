@@ -8,6 +8,7 @@ import { dashboardApi } from "@/lib/api/dashboard";
 import { platformApi } from "@/lib/api/platform";
 import { programApi } from "@/lib/api/auth";
 import { useAuth } from "@/hooks/use-auth";
+import { CropfortDashboardSection } from "@/components/dashboards/cropfort-dashboard-section";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -104,6 +105,8 @@ export function SystemAdminDashboard() {
           <Link href="/settings/profile">Profile</Link>
         </Button>
       </div>
+
+      <CropfortDashboardSection />
     </div>
   );
 }

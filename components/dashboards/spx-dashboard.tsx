@@ -6,6 +6,7 @@ import { KpiStatCard } from "@/components/dashboard/kpi-stat-card";
 import { DashboardPanel, DashboardPanelEmpty, DashboardPanelRow } from "@/components/dashboard/dashboard-panel";
 import { ActionQueueCard } from "@/components/dashboard/action-queue-card";
 import { HealthBadge } from "@/components/badges/health-badge";
+import { CropfortDashboardSection } from "@/components/dashboards/cropfort-dashboard-section";
 import { ClipboardList, FileText, AlertTriangle } from "lucide-react";
 import { usePermissions } from "@/hooks/use-permissions";
 import { formatCurrency } from "@/lib/utils/format";
@@ -157,6 +158,8 @@ export function SpxDashboard() {
           </DashboardPanel>
         </div>
       </div>
+
+      <CropfortDashboardSection />
     </div>
   );
 }

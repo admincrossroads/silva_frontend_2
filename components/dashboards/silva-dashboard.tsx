@@ -8,6 +8,7 @@ import { DashboardPanel, DashboardPanelEmpty } from "@/components/dashboard/dash
 import { ActionQueueCard } from "@/components/dashboard/action-queue-card";
 import { HealthBadge } from "@/components/badges/health-badge";
 import { EstateMapHero } from "@/components/dashboards/estate-map-hero";
+import { CropfortDashboardSection } from "@/components/dashboards/cropfort-dashboard-section";
 import { Button } from "@/components/ui/button";
 import { Wallet, CreditCard, Wheat, ScrollText } from "lucide-react";
 import Link from "next/link";
@@ -159,6 +160,8 @@ export function SilvaDashboard() {
           </DashboardPanel>
         </div>
       </div>
+
+      <CropfortDashboardSection />
     </div>
   );
 }

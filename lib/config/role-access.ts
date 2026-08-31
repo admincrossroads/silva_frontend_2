@@ -18,6 +18,12 @@ import {
   MapPin,
   ClipboardCheck,
   Mail,
+  Coins,
+  Stamp,
+  Layers,
+  Grid3x3,
+  ShieldCheck,
+  FileSignature,
 } from "lucide-react";
 import type { RoleKey } from "@/lib/utils/constants";
 import type { User as AuthUser } from "@/types";
@@ -85,6 +91,10 @@ export function settingsSectionsFor(user: AuthUser): SettingsSection[] {
     sections.push({ label: "Registrations", href: "/settings/registrations", icon: ClipboardCheck });
     sections.push({ label: "Contact inbox", href: "/settings/contact", icon: Mail });
     sections.push({ label: "Farm estates", href: "/settings/farm-estates", icon: MapPin });
+  }
+
+  if (role === "system_admin") {
+    sections.push({ label: "Cropfort admin", href: "/settings/cropfort-admin", icon: ShieldCheck });
   }
 
   if (role === "spx_principal" || role === "system_admin") {
@@ -182,6 +192,54 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
     }
   }
 
+  // Cropfort — rate card (SPX) and Silva line approvals
+  if (isSpxRole(role) || role === "system_admin") {
+    items.push({
+      label: "Rate Card",
+      procoreLabel: "Budget",
+      href: "/planning/rate-card",
+      icon: Coins,
+    });
+    items.push({
+      label: "Activity Master",
+      procoreLabel: "Budget",
+      href: "/planning/activity-master",
+      icon: Layers,
+    });
+    items.push({
+      label: "Block AFP",
+      procoreLabel: "Budget",
+      href: "/planning/afp-blocks",
+      icon: Grid3x3,
+    });
+    items.push({
+      label: "Cropfort AFE",
+      procoreLabel: "Commitments",
+      href: "/planning/cropfort-afe",
+      icon: FileSignature,
+    });
+  }
+  if (isSilvaRole(role)) {
+    items.push({
+      label: "Rate Card Approvals",
+      procoreLabel: "Budget",
+      href: "/planning/rate-card-approvals",
+      icon: Stamp,
+    });
+    items.push({
+      label: "Block AFP Approvals",
+      procoreLabel: "Budget",
+      href: "/planning/afp-block-approvals",
+      icon: Stamp,
+    });
+    items.push({
+      label: "Cropfort AFE Approvals",
+      procoreLabel: "Commitments",
+      href: "/planning/cropfort-afe-approvals",
+      icon: Stamp,
+    });
+  }
+
   if (
     isSilvaRole(role) ||
     isSpxRole(role) ||
@@ -211,6 +269,13 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
     dailyLogChildren.push({ label: "Field Tickets", procoreLabel: "Daily Log", href: "/execution/field-tickets" });
     dailyLogChildren.push({ label: "Field Forms", procoreLabel: "Daily Log", href: "/execution/forms" });
   }
+  if (role === "vendor_admin" || role === "vendor_manager" || role === "vendor_field_lead" || isSpxRole(role)) {
+    dailyLogChildren.push({
+      label: "Weekly Entry",
+      procoreLabel: "Daily Log",
+      href: "/execution/weekly-entry",
+    });
+  }
 
   items.push({
     label: "Schedule",
@@ -225,6 +290,15 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
       procoreLabel: "Daily Log",
       icon: ClipboardList,
       children: dailyLogChildren,
+    });
+  }
+
+  if (isSpxRole(role) || role === "system_admin") {
+    items.push({
+      label: "Validation Queue",
+      procoreLabel: "Daily Log",
+      href: "/validation/queue",
+      icon: ShieldCheck,
     });
   }
 
@@ -303,6 +377,11 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
     const complianceChildren = [];
     if (role === "spx_principal" || role === "system_admin" || role === "silva_owner") {
       complianceChildren.push({ label: "Audit Trail", procoreLabel: "Compliance", href: "/reports/audit" });
+      complianceChildren.push({
+        label: "Cropfort audit",
+        procoreLabel: "Compliance",
+        href: "/reports/cropfort-audit",
+      });
     }
     if (isSilvaRole(role)) {
       complianceChildren.push({ label: "Spend bands", procoreLabel: "Compliance", href: "/settings/governance/bands" });

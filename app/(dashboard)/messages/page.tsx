@@ -35,6 +35,7 @@ import {
 } from "@/hooks/use-messages";
 import { platformApi } from "@/lib/api/platform";
 import { notificationEntityHref, notificationEntityLabel } from "@/lib/notifications/entity-links";
+import { MessageEntityLinkFields } from "@/components/messages/message-entity-link-fields";
 import type { MessageCounterpartyType, MessageThread } from "@/lib/api/messages";
 
 async function uploadFilesToMessage(messageId: string, files: File[]) {
@@ -162,7 +163,6 @@ function MessagesPageInner() {
     <PageShell>
       <PageHeader
         title="Messages"
-        description="Coordinate with SPX, vendors, and asset owners — ask questions and share files before and during work."
         actions={
           <Button onClick={() => setComposeOpen(true)}>
             <Plus className="mr-2 h-4 w-4" /> New conversation
@@ -587,32 +587,17 @@ function NewConversationModal({
           rows={4}
         />
 
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className="mb-1 block text-xs font-medium text-muted-foreground">
-              Linked task type (optional)
-            </label>
-            <Select value={entityType} onChange={(e) => setEntityType(e.target.value)}>
-              <option value="">None</option>
-              <option value="afp_line">AFP</option>
-              <option value="afe">AFE</option>
-              <option value="work_order">Work order</option>
-              <option value="field_ticket">Field ticket</option>
-              <option value="work_plan_submission">Work plan</option>
-              <option value="ad_hoc_request">Ad-hoc request</option>
-              <option value="farm_estate">Farm estate</option>
-              <option value="payment_request">Payment request</option>
-              <option value="owner_settlement">Settlement</option>
-            </Select>
-          </div>
-          <Input
-            label="Task ID (optional)"
-            value={entityId}
-            onChange={(e) => setEntityId(e.target.value)}
-            placeholder="ID"
-            disabled={!entityType}
-          />
-        </div>
+        <MessageEntityLinkFields
+          entityType={entityType}
+          entityId={entityId}
+          onEntityTypeChange={setEntityType}
+          onEntityIdChange={setEntityId}
+          onSubjectSuggest={(hint) => setSubject((s) => (s.trim() ? s : hint))}
+          enabled={open}
+          isSpx={isSpx}
+          isSilva={isSilva}
+          isVendor={isVendor}
+        />
 
         <div>
           <input

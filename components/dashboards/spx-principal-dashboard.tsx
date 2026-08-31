@@ -10,6 +10,7 @@ import { KpiStatCard } from "@/components/dashboard/kpi-stat-card";
 import { DashboardPanel, DashboardPanelEmpty, DashboardPanelRow } from "@/components/dashboard/dashboard-panel";
 import { ActionQueueCard } from "@/components/dashboard/action-queue-card";
 import { HealthBadge } from "@/components/badges/health-badge";
+import { CropfortDashboardSection } from "@/components/dashboards/cropfort-dashboard-section";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils/format";
 import {
@@ -328,6 +329,8 @@ export function SpxPrincipalDashboard() {
           </DashboardPanel>
         </div>
       </div>
+
+      <CropfortDashboardSection />
     </div>
   );
 }

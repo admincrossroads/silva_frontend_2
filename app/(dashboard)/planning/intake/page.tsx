@@ -331,11 +331,11 @@ export default function AdHocIntakePage() {
       <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="Request ad-hoc work">
         <Form {...createForm}>
           <form onSubmit={createForm.handleSubmit(onCreate)} className="space-y-4">
-            <p className="text-sm text-muted-foreground">
+            {/* <p className="text-sm text-muted-foreground">
               {isVendor
                 ? "For unexpected field work outside issued work orders. SPX will review and open an AFE."
                 : "For work not in the annual plan. SPX will review and open an AFE through the normal path."}
-            </p>
+            </p> */}
             <FormField
               control={createForm.control}
               name="title"

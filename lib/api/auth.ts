@@ -3,6 +3,8 @@ import api from "./index";
 import type { AuthMe, LoginResponse, ProgramInfo, TenantInfo } from "@/types";
 
 export const authApi = {
+  config: () => api.get<{ data: { otpOnLogin: boolean } }>("/auth/config").then((r) => r.data.data),
+
   login: (email: string, password: string) =>
     api.post<{ data: LoginResponse }>("/auth/login", { email, password }).then((r) => r.data.data),
 
@@ -32,6 +34,14 @@ export const authApi = {
 
   updateTenantBranding: (body: { displayName?: string; branding?: Record<string, unknown> }) =>
     api.patch<{ data: TenantInfo }>("/auth/tenant/branding", body).then((r) => r.data.data),
+
+  verifyOtp: (otpChallengeToken: string, code: string, deviceLabel?: string) =>
+    api
+      .post<{ data: LoginResponse }>("/auth/otp/verify", { otpChallengeToken, code, deviceLabel })
+      .then((r) => r.data.data),
+
+  enrollTotp: (enrollmentToken: string, code: string) =>
+    api.post<{ data: LoginResponse }>("/auth/totp/enroll", { enrollmentToken, code }).then((r) => r.data.data),
 };
 
 export const programApi = {

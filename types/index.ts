@@ -46,12 +46,16 @@ export interface AuthMe {
 }
 
 export interface LoginResponse {
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
-  user: User;
-  /** Full workspace session — preferred so the client can skip a second /auth/me call */
+  accessToken?: string;
+  refreshToken?: string;
+  expiresIn?: number;
+  user?: User;
   me?: AuthMe;
+  requiresOtp?: boolean;
+  requiresTotpEnrollment?: boolean;
+  otpChallengeToken?: string;
+  enrollmentToken?: string;
+  qrDataUrl?: string;
 }
 
 export interface BudgetVsActualRow {
