@@ -115,7 +115,6 @@ export default function NotificationsPage() {
     <PageShell className="max-w-5xl">
       <PageHeader
         title="Notifications"
-        description="Workflow alerts across planning, execution, payments, and reporting."
         actions={
           unreadCount > 0 ? (
             <Button

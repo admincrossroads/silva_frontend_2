@@ -157,7 +157,12 @@ export default function FieldTicketsPage() {
       ) : isLoading ? (
         <p className="text-muted-foreground">Loading…</p>
       ) : (
-        <DataTable columns={fieldTicketColumns} data={fieldTickets} searchKey="activityRecorded" />
+        <DataTable
+          columns={fieldTicketColumns}
+          data={fieldTickets}
+          searchKey="activityRecorded"
+          getRowStatus={(row) => row.status}
+        />
       )}
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Create Field Ticket">

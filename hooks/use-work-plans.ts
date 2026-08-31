@@ -91,7 +91,6 @@ export function useUpdateWorkPlanMeta() {
       totalAreaHa?: number | null;
       budgetYearLabel?: string;
       budgetYearGc?: number;
-      fxEtbPerUsd?: number;
     }) => workPlansApi.update(id, dto),
     meta: { successMessage: "Plan details saved", errorMessage: "Could not save plan details" },
     onSuccess: (_, { id }) => {

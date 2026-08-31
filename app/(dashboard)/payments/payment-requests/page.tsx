@@ -50,7 +50,7 @@ export default function PaymentRequestsPage() {
       ) : isLoading ? (
         <div className="text-center py-12 text-muted-foreground">Loading...</div>
       ) : (
-        <DataTable columns={paymentRequestColumns} data={data} searchKey="type" />
+        <DataTable columns={paymentRequestColumns} data={data} searchKey="type" getRowStatus={(row) => row.status} />
       )}
 
       <Modal open={open} onClose={() => setOpen(false)} title="Create Payment Request">

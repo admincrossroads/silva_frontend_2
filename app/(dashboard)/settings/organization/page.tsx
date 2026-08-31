@@ -22,7 +22,17 @@ import { platformApi } from "@/lib/api/platform";
 import { getApiErrorMessage } from "@/lib/api/errors";
 import { Users, Building2, Plus } from "lucide-react";
 import { ROLES, type RoleKey } from "@/lib/utils/constants";
+import { formatDate } from "@/lib/utils/format";
 import type { User } from "@/types";
+
+type OrgInvite = {
+  id: string;
+  email: string;
+  role: string;
+  status: string;
+  expiresAt: string;
+  createdAt: string;
+};
 
 function orgTypeLabel(type: string | undefined) {
   switch (type) {
@@ -44,17 +54,24 @@ export default function OrganizationPage() {
   const [email, setEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("spx_account_handler");
   const [inviteError, setInviteError] = useState("");
+  const [memberError, setMemberError] = useState("");
   const role = user?.role as RoleKey | undefined;
   const isVendorAdmin = role === "vendor_admin";
   const isSystemAdmin = role === "system_admin";
   const isSpxPrincipal = role === "spx_principal";
   const isSilvaOwner = role === "silva_owner";
-  const canInvite = isVendorAdmin || isSpxPrincipal;
+  const canManageMembers = isVendorAdmin || isSpxPrincipal;
   const canManageBranding = isVendorAdmin || isSpxPrincipal || isSilvaOwner || isSystemAdmin;
 
   const usersQuery = useQuery<User[]>({
     queryKey: ["users"],
     queryFn: () => platformApi.listUsers(),
+  });
+
+  const invitesQuery = useQuery<OrgInvite[]>({
+    queryKey: ["org-invites", user?.organizationId],
+    queryFn: () => platformApi.listInvites(user!.organizationId!),
+    enabled: Boolean(canManageMembers && user?.organizationId),
   });
 
   const invite = useMutation({
@@ -71,29 +88,52 @@ export default function OrganizationPage() {
       setEmail("");
       setInviteError("");
       qc.invalidateQueries({ queryKey: ["users"] });
+      qc.invalidateQueries({ queryKey: ["org-invites", user?.organizationId] });
     },
     onError: (err) => setInviteError(getApiErrorMessage(err, "Invite failed")),
+  });
+
+  const deactivateMember = useMutation({
+    mutationFn: (memberId: string) => platformApi.deactivateUser(memberId),
+    meta: { successMessage: "Access revoked", errorMessage: "Could not revoke access" },
+    onSuccess: () => {
+      setMemberError("");
+      qc.invalidateQueries({ queryKey: ["users"] });
+    },
+    onError: (err) => setMemberError(getApiErrorMessage(err, "Could not revoke access")),
+  });
+
+  const activateMember = useMutation({
+    mutationFn: (memberId: string) => platformApi.activateUser(memberId),
+    meta: { successMessage: "Access restored", errorMessage: "Could not restore access" },
+    onSuccess: () => {
+      setMemberError("");
+      qc.invalidateQueries({ queryKey: ["users"] });
+    },
+    onError: (err) => setMemberError(getApiErrorMessage(err, "Could not restore access")),
+  });
+
+  const revokeInvite = useMutation({
+    mutationFn: (inviteId: string) => platformApi.revokeInvite(inviteId),
+    meta: { successMessage: "Invitation revoked", errorMessage: "Could not revoke invitation" },
+    onSuccess: () => {
+      setMemberError("");
+      qc.invalidateQueries({ queryKey: ["org-invites", user?.organizationId] });
+    },
+    onError: (err) => setMemberError(getApiErrorMessage(err, "Could not revoke invitation")),
   });
 
   const team = (usersQuery.data ?? []).filter((member) =>
     isVendorAdmin ? member.organizationId === user?.organizationId : true,
   );
 
+  const pendingInvites = (invitesQuery.data ?? []).filter((inv) => inv.status === "pending");
+
   return (
     <div className="space-y-6 max-w-4xl">
-      <section className="space-y-1">
-        <h2 className="font-display text-2xl text-foreground">
-          {isVendorAdmin ? "Vendor team" : isSystemAdmin ? "Organization directory" : "Organization"}
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          {isVendorAdmin && "Manage your vendor workspace branding and team members."}
-          {isSystemAdmin && "Platform organizations, branding, and membership."}
-          {isSpxPrincipal && "SPX organization profile, workspace branding, and partner administration."}
-          {isSilvaOwner && "Silva organization profile, workspace branding, and membership."}
-          {!isVendorAdmin && !isSystemAdmin && !isSpxPrincipal && !isSilvaOwner &&
-            "Organization profile and membership."}
-        </p>
-      </section>
+      <h2 className="font-display text-2xl text-foreground">
+        {isVendorAdmin ? "Vendor team" : isSystemAdmin ? "Organization directory" : "Organization"}
+      </h2>
 
       {canManageBranding ? <OrganizationBrandingForm /> : null}
 
@@ -133,7 +173,7 @@ export default function OrganizationPage() {
             <CardTitle className="flex items-center gap-2 text-base">
               <Users className="h-4 w-4" /> {isVendorAdmin ? "Team members" : "Members"}
             </CardTitle>
-            {canInvite ? (
+            {canManageMembers ? (
               <Button
                 size="sm"
                 onClick={() => {
@@ -146,7 +186,9 @@ export default function OrganizationPage() {
             ) : null}
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
+          {memberError ? <p className="text-sm text-destructive">{memberError}</p> : null}
+
           {usersQuery.isLoading ? (
             <p className="text-sm text-muted-foreground">Loading members…</p>
           ) : team.length === 0 ? (
@@ -158,21 +200,109 @@ export default function OrganizationPage() {
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Role</TableHead>
-                  <TableHead>Active</TableHead>
+                  <TableHead>Status</TableHead>
+                  {canManageMembers ? <TableHead className="text-right">Actions</TableHead> : null}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {team.map((member) => (
-                  <TableRow key={member.id}>
-                    <TableCell>{member.name}</TableCell>
-                    <TableCell>{member.email}</TableCell>
-                    <TableCell className="capitalize">{member.role.replaceAll("_", " ")}</TableCell>
-                    <TableCell>{member.active ? "Yes" : "No"}</TableCell>
-                  </TableRow>
-                ))}
+                {team.map((member) => {
+                  const isSelf = member.id === user?.id;
+                  return (
+                    <TableRow key={member.id}>
+                      <TableCell>{member.name}</TableCell>
+                      <TableCell>{member.email}</TableCell>
+                      <TableCell className="capitalize">{member.role.replaceAll("_", " ")}</TableCell>
+                      <TableCell>
+                        <Badge variant={member.active ? "default" : "secondary"}>
+                          {member.active ? "Active" : "Revoked"}
+                        </Badge>
+                      </TableCell>
+                      {canManageMembers ? (
+                        <TableCell className="text-right">
+                          {isSelf ? (
+                            <span className="text-xs text-muted-foreground">You</span>
+                          ) : member.active ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-destructive hover:text-destructive"
+                              disabled={deactivateMember.isPending}
+                              onClick={() => {
+                                if (
+                                  window.confirm(
+                                    `Revoke access for ${member.name || member.email}? They will be signed out immediately.`,
+                                  )
+                                ) {
+                                  deactivateMember.mutate(member.id);
+                                }
+                              }}
+                            >
+                              Revoke access
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={activateMember.isPending}
+                              onClick={() => activateMember.mutate(member.id)}
+                            >
+                              Restore access
+                            </Button>
+                          )}
+                        </TableCell>
+                      ) : null}
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           )}
+
+          {canManageMembers ? (
+            <div className="space-y-3 border-t pt-6">
+              <h3 className="text-sm font-semibold">Pending invitations</h3>
+              {invitesQuery.isLoading ? (
+                <p className="text-sm text-muted-foreground">Loading invitations…</p>
+              ) : pendingInvites.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No pending invitations.</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead>Expires</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pendingInvites.map((inv) => (
+                      <TableRow key={inv.id}>
+                        <TableCell>{inv.email}</TableCell>
+                        <TableCell className="capitalize">{inv.role.replaceAll("_", " ")}</TableCell>
+                        <TableCell>{formatDate(inv.expiresAt)}</TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-destructive hover:text-destructive"
+                            disabled={revokeInvite.isPending}
+                            onClick={() => {
+                              if (window.confirm(`Revoke the invitation sent to ${inv.email}?`)) {
+                                revokeInvite.mutate(inv.id);
+                              }
+                            }}
+                          >
+                            Revoke invite
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </div>
+          ) : null}
         </CardContent>
       </Card>
 

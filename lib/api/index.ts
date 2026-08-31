@@ -12,6 +12,11 @@ api.interceptors.request.use((config) => {
   const token = useAuthStore.getState().accessToken;
   if (token) config.headers.Authorization = `Bearer ${token}`;
 
+  if (typeof window !== "undefined") {
+    const appUrl = (process.env.NEXT_PUBLIC_APP_URL || window.location.origin).replace(/\/$/, "");
+    config.headers["X-App-Base-Url"] = appUrl;
+  }
+
   if (config.method?.toLowerCase() === "get" && shouldScopeRequest(config.url)) {
     const farmEstateId = useWorkspaceStore.getState().activeFarmEstateId;
     if (farmEstateId) {

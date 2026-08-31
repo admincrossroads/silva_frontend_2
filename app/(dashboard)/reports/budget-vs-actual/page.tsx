@@ -34,10 +34,10 @@ export default function BudgetVsActualPage() {
   const boardItems = rows.map(bvaToBoardItem);
   const chartRows = rows.map((row) => ({
     discipline: row.activity,
-    budgetUsd: row.budgetAllocatedUsd,
-    plannedUsd: row.plannedUsd ?? row.budgetAllocatedUsd,
-    actualUsd: row.actualUsd,
-    committedUsd: row.committedUsd,
+    budgetEtb: row.budgetAllocatedEtb,
+    plannedEtb: row.plannedEtb ?? row.budgetAllocatedEtb,
+    actualEtb: row.actualEtb,
+    committedEtb: row.committedEtb,
   }));
 
   return (
@@ -79,13 +79,13 @@ export default function BudgetVsActualPage() {
                   <BarChart data={chartRows} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="discipline" />
-                    <YAxis tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`} />
+                    <YAxis tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k ETB`} />
                     <Tooltip formatter={(v: number) => formatCurrency(v)} />
                     <Legend />
-                    <Bar dataKey="budgetUsd" name="Budget" fill="#059669" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="plannedUsd" name="Planned" fill="#047857" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="committedUsd" name="Committed" fill="#34d399" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="actualUsd" name="Actual" fill="#6ee7b7" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="budgetEtb" name="Budget" fill="#059669" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="plannedEtb" name="Planned" fill="#047857" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="committedEtb" name="Committed" fill="#34d399" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="actualEtb" name="Actual" fill="#6ee7b7" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               )}
@@ -111,10 +111,10 @@ export default function BudgetVsActualPage() {
                     {rows.map((row) => (
                       <TableRow key={row.afpLineId}>
                         <TableCell>{row.activity}</TableCell>
-                        <TableCell className="text-right">{formatCurrency(row.budgetAllocatedUsd)}</TableCell>
-                        <TableCell className="text-right">{formatCurrency(row.plannedUsd ?? row.budgetAllocatedUsd)}</TableCell>
-                        <TableCell className="text-right">{formatCurrency(row.committedUsd)}</TableCell>
-                        <TableCell className="text-right">{formatCurrency(row.actualUsd)}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(row.budgetAllocatedEtb)}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(row.plannedEtb ?? row.budgetAllocatedEtb)}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(row.committedEtb)}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(row.actualEtb)}</TableCell>
                         <TableCell className="text-right">{row.utilizationPercent}%</TableCell>
                       </TableRow>
                     ))}

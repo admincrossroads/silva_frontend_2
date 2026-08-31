@@ -30,7 +30,6 @@ export type RevenueEntry = {
   period: string;
   tier: string;
   feeDescription: string;
-  amountUsd: number;
   amountEtb: number;
   invoiceDate: string;
   paymentStatus: string;
@@ -40,7 +39,6 @@ type RevenueFormState = {
   period: string;
   tier: string;
   feeDescription: string;
-  amountUsd: string;
   amountEtb: string;
   invoiceDate: string;
   paymentStatus: string;
@@ -50,8 +48,7 @@ const EMPTY_FORM: RevenueFormState = {
   period: "",
   tier: "retainer",
   feeDescription: "",
-  amountUsd: "",
-  amountEtb: "0",
+  amountEtb: "",
   invoiceDate: new Date().toISOString().slice(0, 10),
   paymentStatus: "invoiced",
 };
@@ -61,8 +58,7 @@ function entryToEditForm(entry: RevenueEntry): RevenueFormState {
     period: entry.period,
     tier: entry.tier,
     feeDescription: entry.feeDescription,
-    amountUsd: String(entry.amountUsd),
-    amountEtb: String(entry.amountEtb ?? 0),
+    amountEtb: String(entry.amountEtb),
     invoiceDate: entry.invoiceDate,
     paymentStatus: entry.paymentStatus,
   };
@@ -95,8 +91,7 @@ export default function RevenueLedgerPage() {
         period: form.period,
         tier: form.tier,
         feeDescription: form.feeDescription,
-        amountUsd: Number(form.amountUsd),
-        amountEtb: form.amountEtb ? Number(form.amountEtb) : undefined,
+        amountEtb: Number(form.amountEtb),
         invoiceDate: form.invoiceDate,
         paymentStatus: form.paymentStatus,
       }),
@@ -114,8 +109,7 @@ export default function RevenueLedgerPage() {
     mutationFn: () =>
       platformApi.updateRevenue(editing!.id, {
         feeDescription: form.feeDescription,
-        amountUsd: Number(form.amountUsd),
-        amountEtb: form.amountEtb ? Number(form.amountEtb) : undefined,
+        amountEtb: Number(form.amountEtb),
         paymentStatus: form.paymentStatus,
       }),
     meta: { successMessage: "Revenue entry updated", errorMessage: "Could not update entry" },
@@ -149,7 +143,6 @@ export default function RevenueLedgerPage() {
     <PageShell className="max-w-5xl">
       <PageHeader
         title="SPX Revenue Ledger"
-        description="SPX fee recognition — not visible to Silva or vendors (revenue firewall)."
         actions={
           <Button onClick={openCreate}>
             <Plus className="mr-2 h-4 w-4" />
@@ -179,7 +172,7 @@ export default function RevenueLedgerPage() {
                       <TableHead>Period</TableHead>
                       <TableHead>Description</TableHead>
                       <TableHead>Tier</TableHead>
-                      <TableHead className="text-right">Amount (USD)</TableHead>
+                      <TableHead className="text-right">Amount (ETB)</TableHead>
                       <TableHead className="text-right">Amount (ETB)</TableHead>
                       <TableHead>Invoice date</TableHead>
                       <TableHead>Status</TableHead>
@@ -193,10 +186,7 @@ export default function RevenueLedgerPage() {
                         <TableCell>{row.period}</TableCell>
                         <TableCell className="max-w-[200px] truncate font-medium">{row.feeDescription}</TableCell>
                         <TableCell className="capitalize">{row.tier}</TableCell>
-                        <TableCell className="text-right tabular-nums">{formatCurrency(row.amountUsd)}</TableCell>
-                        <TableCell className="text-right tabular-nums">
-                          {row.amountEtb ? `${row.amountEtb.toLocaleString()} ETB` : "—"}
-                        </TableCell>
+                        <TableCell className="text-right tabular-nums">{formatCurrency(row.amountEtb)}</TableCell>
                         <TableCell>{formatDate(row.invoiceDate)}</TableCell>
                         <TableCell>
                           <StatusBadge status={row.paymentStatus} />
@@ -284,23 +274,14 @@ export default function RevenueLedgerPage() {
             required
           />
 
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="Amount (USD)"
-              type="number"
-              step="0.01"
-              value={form.amountUsd}
-              onChange={(e) => setForm((f) => ({ ...f, amountUsd: e.target.value }))}
-              required
-            />
-            <Input
-              label="Amount (ETB)"
-              type="number"
-              step="0.01"
-              value={form.amountEtb}
-              onChange={(e) => setForm((f) => ({ ...f, amountEtb: e.target.value }))}
-            />
-          </div>
+          <Input
+            label="Amount (ETB)"
+            type="number"
+            step="0.01"
+            value={form.amountEtb}
+            onChange={(e) => setForm((f) => ({ ...f, amountEtb: e.target.value }))}
+            required
+          />
 
           <Select
             label="Payment status"

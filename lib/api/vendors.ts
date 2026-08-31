@@ -30,7 +30,7 @@ export const vendorApi = {
   createContract: (body: {
     vendorId: string;
     afeId: string;
-    contractValueUsd: number;
+    contractValueEtb: number;
     procurementRoute: "sole_source" | "competitive_tender";
     tenderStatus?: "n_a" | "in_progress" | "awarded";
     contractStart: string;

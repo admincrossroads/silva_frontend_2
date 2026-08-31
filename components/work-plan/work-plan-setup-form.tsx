@@ -12,7 +12,6 @@ export type WorkPlanSetupValues = {
   totalAreaHa: string;
   budgetYearLabel: string;
   budgetYearGc: number;
-  fxEtbPerUsd: string;
 };
 
 export const DEFAULT_BUDGET_YEARS = [
@@ -32,7 +31,6 @@ type Props = {
     totalAreaHa?: number | null;
     budgetYearLabel?: string;
     budgetYearGc?: number;
-    fxEtbPerUsd?: number | string;
   };
   readOnly?: boolean;
   submitLabel?: string;
@@ -61,20 +59,17 @@ export function WorkPlanSetupForm({
     initial?.budgetYearLabel || defaultYear.label,
   );
   const [budgetYearGc, setBudgetYearGc] = useState(initial?.budgetYearGc ?? defaultYear.gc);
-  const [fxEtbPerUsd, setFxEtbPerUsd] = useState(initial?.fxEtbPerUsd?.toString() || "130");
 
   useEffect(() => {
     if (initial?.farmEstateId) setFarmEstateId(initial.farmEstateId);
     if (initial?.totalAreaHa != null) setTotalAreaHa(String(initial.totalAreaHa));
     if (initial?.budgetYearLabel) setBudgetYearLabel(initial.budgetYearLabel);
     if (initial?.budgetYearGc) setBudgetYearGc(initial.budgetYearGc);
-    if (initial?.fxEtbPerUsd) setFxEtbPerUsd(String(initial.fxEtbPerUsd));
   }, [
     initial?.farmEstateId,
     initial?.totalAreaHa,
     initial?.budgetYearLabel,
     initial?.budgetYearGc,
-    initial?.fxEtbPerUsd,
   ]);
 
   const handleEstatePick = (value: string) => {
@@ -104,7 +99,6 @@ export function WorkPlanSetupForm({
           totalAreaHa,
           budgetYearLabel,
           budgetYearGc,
-          fxEtbPerUsd,
         });
       }}
     >
@@ -149,29 +143,17 @@ export function WorkPlanSetupForm({
         </p>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Input
-          id="totalAreaHa"
-          label="Total farm area (ha)"
-          type="number"
-          step="0.01"
-          min="0"
-          disabled={readOnly}
-          value={totalAreaHa}
-          onChange={(e) => setTotalAreaHa(e.target.value)}
-          placeholder="128.94"
-        />
-        <Input
-          id="fxEtbPerUsd"
-          label="FX rate (ETB / USD)"
-          type="number"
-          step="0.01"
-          min="1"
-          disabled={readOnly}
-          value={fxEtbPerUsd}
-          onChange={(e) => setFxEtbPerUsd(e.target.value)}
-        />
-      </div>
+      <Input
+        id="totalAreaHa"
+        label="Total farm area (ha)"
+        type="number"
+        step="0.01"
+        min="0"
+        disabled={readOnly}
+        value={totalAreaHa}
+        onChange={(e) => setTotalAreaHa(e.target.value)}
+        placeholder="128.94"
+      />
 
       <Select
         id="budgetYear"

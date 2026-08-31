@@ -93,12 +93,7 @@ export default function ProfilePage() {
 
   return (
     <PageContent className="max-w-3xl">
-      <section className="space-y-1">
-        <h2 className="font-display text-2xl text-foreground">Profile</h2>
-        <p className="text-sm text-muted-foreground">
-          Your account details, workspace context, and sign-in security.
-        </p>
-      </section>
+      <h2 className="font-display text-2xl text-foreground">Profile</h2>
 
       <Card>
         <CardContent className="flex flex-wrap items-center gap-4 p-6">
@@ -163,9 +158,6 @@ export default function ProfilePage() {
             <InfoRow label="User ID" value={user.id} mono />
             {user.vendorId ? <InfoRow label="Vendor ID" value={user.vendorId} mono /> : null}
             <InfoRow label="Account status" value={user.active ? "Active" : "Inactive"} />
-            <p className="pt-1 text-xs text-muted-foreground">
-              Role and organization membership are managed by your program administrator.
-            </p>
           </CardContent>
         </Card>
       </div>
@@ -207,10 +199,6 @@ export default function ProfilePage() {
               readOnly
               className="cursor-not-allowed bg-muted text-muted-foreground"
             />
-            <p className="text-xs text-muted-foreground">
-              Email is tied to your login and cannot be changed here. Contact your administrator if
-              it needs updating.
-            </p>
             {profileErr ? (
               <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
                 {profileErr}

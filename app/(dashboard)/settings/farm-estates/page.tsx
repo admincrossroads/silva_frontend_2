@@ -70,14 +70,8 @@ export default function FarmEstatesPage() {
 
   return (
     <div className="space-y-6 max-w-5xl">
-      <section className="flex flex-wrap items-start justify-between gap-3">
-        <div className="space-y-1">
-          <h2 className="text-lg font-semibold">Farm estates</h2>
-          <p className="text-sm text-muted-foreground">
-            Create farm areas, assign an asset owner and execution vendors. Asset owners and vendors only see
-            estates mapped to them.
-          </p>
-        </div>
+      <section className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-lg font-semibold">Farm estates</h2>
         <Button onClick={() => setCreateOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           New estate

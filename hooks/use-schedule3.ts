@@ -19,8 +19,8 @@ export function usePatchSchedule3Band() {
       ...dto
     }: {
       band: string;
-      minValueUsd?: number;
-      maxValueUsd?: number | null;
+      minValueEtb?: number;
+      maxValueEtb?: number | null;
       spxAuthority?: string;
       silvaAuthority?: string;
       effectiveYear?: number;

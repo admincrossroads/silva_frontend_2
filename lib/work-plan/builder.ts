@@ -107,8 +107,7 @@ export type ParsedWorkPlan = {
   totalAreaHa?: number | null;
   budgetYearLabel?: string;
   budgetYearGc?: number;
-  fxEtbPerUsd?: number;
-  categories?: Array<{ afpLineId: string; activity: string; budgetEtb: number; budgetUsd?: number }>;
+  categories?: Array<{ afpLineId: string; activity: string; budgetEtb: number }>;
   sections?: Array<{
     sectionCode: string;
     sectionLabel: string;
@@ -390,7 +389,6 @@ export function initSectionsFromTemplate(
 
 export function buildParsedFromSections(
   sections: WorkPlanSectionDraft[],
-  fx: number,
   inputMethod: "form" | "excel" = "form",
 ): ParsedWorkPlan {
   const activeSections = sections
@@ -420,7 +418,6 @@ export function buildParsedFromSections(
   return {
     source: inputMethod === "form" ? `${siteConfig.name} form builder` : "Excel upload",
     inputMethod,
-    fxEtbPerUsd: fx,
     sections: activeSections,
     categories: [],
     grandTotalEtb,

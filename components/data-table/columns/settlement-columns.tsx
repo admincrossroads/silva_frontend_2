@@ -4,47 +4,26 @@ import { type ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
 import { Settlement } from "@/types";
 import { StatusBadge } from "@/components/badges/status-badge";
-import { formatCurrency } from "@/lib/utils/format";
 import { Button } from "@/components/ui/button";
-import { Eye } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { TableMoney, TablePrimaryCell } from "../data-table-cells";
 
 export const settlementColumns: ColumnDef<Settlement, unknown>[] = [
   {
-    accessorKey: "id",
-    header: "ID",
-    cell: ({ row }) => (
-      <span className="font-mono text-xs">{row.original.id.slice(0, 8)}</span>
-    ),
-  },
-  {
-    accessorKey: "workOrderId",
-    header: "Work Order",
-    cell: ({ row }) => (
-      <span className="font-mono text-xs">{row.original.workOrderId.slice(0, 8)}</span>
-    ),
-  },
-  {
-    accessorKey: "paymentRequestId",
-    header: "Payment Req",
-    cell: ({ row }) => (
-      <span className="font-mono text-xs">{row.original.paymentRequestId.slice(0, 8)}</span>
-    ),
-  },
-  {
-    accessorKey: "type",
-    header: "Type",
-    cell: ({ row }) => (
-      <span className="capitalize">{row.original.type.replace(/_/g, " ")}</span>
-    ),
-  },
-  {
     accessorKey: "payee",
-    header: "Payee",
+    header: "Settlement",
+    cell: ({ row }) => (
+      <TablePrimaryCell
+        href={`/payments/settlements/${row.original.id}`}
+        title={row.original.payee}
+        subtitle={row.original.type.replace(/_/g, " ")}
+      />
+    ),
   },
   {
     accessorKey: "amountEtb",
-    header: "Amount (ETB)",
-    cell: ({ row }) => formatCurrency(row.original.amountEtb, "ETB"),
+    header: "Amount",
+    cell: ({ row }) => <TableMoney amount={row.original.amountEtb} currency="ETB" />,
   },
   {
     accessorKey: "status",
@@ -53,11 +32,12 @@ export const settlementColumns: ColumnDef<Settlement, unknown>[] = [
   },
   {
     id: "actions",
-    header: "Actions",
+    header: "",
     cell: ({ row }) => (
       <Link href={`/payments/settlements/${row.original.id}`}>
-        <Button variant="ghost" size="sm">
-          <Eye className="h-4 w-4" />
+        <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs text-muted-foreground hover:text-primary">
+          Open
+          <ArrowUpRight className="h-3.5 w-3.5" />
         </Button>
       </Link>
     ),

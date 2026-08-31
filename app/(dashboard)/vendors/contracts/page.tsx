@@ -29,7 +29,7 @@ type Contract = {
   id: string;
   vendorId: string;
   afeId: string;
-  contractValueUsd: number;
+  contractValueEtb: number;
   procurementRoute: string;
   tenderStatus: string;
   contractStart: string;
@@ -39,7 +39,7 @@ type Contract = {
 type ContractFormState = {
   vendorId: string;
   afeId: string;
-  contractValueUsd: string;
+  contractValueEtb: string;
   procurementRoute: "competitive_tender" | "sole_source";
   tenderStatus: "n_a" | "in_progress" | "awarded";
   contractStart: string;
@@ -49,7 +49,7 @@ type ContractFormState = {
 const EMPTY_FORM: ContractFormState = {
   vendorId: "",
   afeId: "",
-  contractValueUsd: "",
+  contractValueEtb: "",
   procurementRoute: "competitive_tender",
   tenderStatus: "n_a",
   contractStart: "",
@@ -104,7 +104,7 @@ export default function VendorContractsPage() {
       vendorApi.createContract({
         vendorId: form.vendorId,
         afeId: form.afeId,
-        contractValueUsd: Number(form.contractValueUsd),
+        contractValueEtb: Number(form.contractValueEtb),
         procurementRoute: form.procurementRoute,
         tenderStatus: form.tenderStatus,
         contractStart: form.contractStart,
@@ -141,7 +141,6 @@ export default function VendorContractsPage() {
     <PageShell>
       <PageHeader
         title="Vendor contracts"
-        description="Procurement route and tender status for vendor work tied to AFEs."
         actions={
           isSpx ? (
             <Button onClick={openCreate}>
@@ -208,7 +207,7 @@ export default function VendorContractsPage() {
                           </p>
                         </TableCell>
                         <TableCell className="text-right tabular-nums">
-                          {formatCurrency(Number(c.contractValueUsd))}
+                          {formatCurrency(Number(c.contractValueEtb))}
                         </TableCell>
                         <TableCell>{routeLabel(c.procurementRoute)}</TableCell>
                         <TableCell>
@@ -295,12 +294,12 @@ export default function VendorContractsPage() {
           </Select>
 
           <Input
-            label="Contract value (USD)"
+            label="Contract value (ETB)"
             type="number"
             min={0}
             step="0.01"
-            value={form.contractValueUsd}
-            onChange={(e) => setForm((f) => ({ ...f, contractValueUsd: e.target.value }))}
+            value={form.contractValueEtb}
+            onChange={(e) => setForm((f) => ({ ...f, contractValueEtb: e.target.value }))}
             required
           />
 
@@ -366,7 +365,7 @@ export default function VendorContractsPage() {
                 create.isPending ||
                 !form.vendorId ||
                 !form.afeId ||
-                !form.contractValueUsd ||
+                !form.contractValueEtb ||
                 !form.contractStart ||
                 !form.contractEnd
               }

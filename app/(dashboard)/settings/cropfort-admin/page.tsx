@@ -75,12 +75,7 @@ export default function CropfortAdminPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Cropfort admin</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Tenant configuration, Cropfort role assignment, and user suspension.
-        </p>
-      </div>
+      <h1 className="text-2xl font-bold tracking-tight">Cropfort admin</h1>
 
       <Card className="space-y-4 p-4">
         <h2 className="text-sm font-semibold">Tenant configuration</h2>

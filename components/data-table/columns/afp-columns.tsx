@@ -1,64 +1,81 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { Afp } from "@/types";
 import { StatusBadge } from "@/components/badges/status-badge";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-function formatUsd(value: number | null | undefined) {
-  if (value == null || Number.isNaN(Number(value))) return "—";
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0,
-  }).format(Number(value));
-}
+import { TableChip, TableMoney, TableMuted, TablePrimaryCell, TableRowActionsTrigger } from "../data-table-cells";
 
 export const afpColumns: ColumnDef<Afp>[] = [
-  { accessorKey: "id", header: "ID", cell: ({ row }) => row.original.id.slice(0, 8) },
-  { accessorKey: "year", header: "Year" },
-  { accessorKey: "operatingDiscipline", header: "Discipline" },
-  { accessorKey: "activity", header: "Activity" },
   {
-    accessorKey: "budgetAllocatedUsd",
-    header: "Budget",
-    cell: ({ row }) => formatUsd(row.original.budgetAllocatedUsd),
+    accessorKey: "activity",
+    header: "Activity",
+    cell: ({ row }) => (
+      <TablePrimaryCell
+        href={`/planning/afp/${row.original.id}`}
+        title={row.original.activity}
+        subtitle={row.original.operatingDiscipline}
+      />
+    ),
   },
-  { accessorKey: "kpiTarget", header: "KPI Target" },
+  {
+    accessorKey: "year",
+    header: "Year",
+    cell: ({ row }) => (
+      <div className="w-16">
+        <TableChip>{row.original.year}</TableChip>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "budgetAllocatedEtb",
+    header: "Budget",
+    cell: ({ row }) => (
+      <div className="w-28 whitespace-nowrap">
+        <TableMoney amount={row.original.budgetAllocatedEtb} />
+      </div>
+    ),
+  },
+  {
+    accessorKey: "kpiTarget",
+    header: "KPI",
+    cell: ({ row }) => (
+      <TableMuted className="line-clamp-2 block max-w-[14rem]">
+        {row.original.kpiTarget || "—"}
+      </TableMuted>
+    ),
+  },
   {
     accessorKey: "status",
     header: "Status",
-    cell: ({ row }) => <StatusBadge status={row.original.status} />,
+    cell: ({ row }) => (
+      <div className="w-32">
+        <StatusBadge status={row.original.status} />
+      </div>
+    ),
   },
   {
     id: "actions",
+    header: "",
     cell: ({ row }) => {
       const afp = row.original;
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
+            <TableRowActionsTrigger />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
-              <Link href={`/planning/afp/${afp.id}`}>View</Link>
+              <Link href={`/planning/afp/${afp.id}`}>View details</Link>
             </DropdownMenuItem>
-            {afp.status === "draft" && (
-              <DropdownMenuItem data-action="submit">Submit</DropdownMenuItem>
-            )}
-            {afp.status === "submitted" && (
-              <DropdownMenuItem data-action="approve">Approve</DropdownMenuItem>
-            )}
+            {afp.status === "draft" ? <DropdownMenuItem>Submit</DropdownMenuItem> : null}
+            {afp.status === "submitted" ? <DropdownMenuItem>Approve</DropdownMenuItem> : null}
           </DropdownMenuContent>
         </DropdownMenu>
       );

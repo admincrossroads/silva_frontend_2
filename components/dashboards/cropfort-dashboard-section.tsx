@@ -2,8 +2,16 @@
 
 import { useCropfortDashboard } from "@/hooks/use-cropfort-dashboard";
 import { DashboardPanel, DashboardPanelEmpty } from "@/components/dashboard/dashboard-panel";
+import {
+  DashboardTable,
+  DashboardTableBody,
+  DashboardTableHead,
+  DashboardTableRow,
+  DashboardTableTd,
+  DashboardTableTh,
+} from "@/components/dashboard/dashboard-table";
 import { KpiStatCard } from "@/components/dashboard/kpi-stat-card";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/badges/status-badge";
 import { Coins, TrendingUp, Wallet } from "lucide-react";
 
 function formatEtb(value: number) {
@@ -28,30 +36,26 @@ export function CropfortDashboardSection() {
   const totals = data?.bva.totals;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-semibold tracking-tight">Cropfort (ETB)</h2>
-       
-      </div>
+    <div className="space-y-4">
+      <h2 className="text-sm font-semibold text-foreground">Cropfort (ETB)</h2>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <KpiStatCard
-          label="Cropfort budget"
+          label="Budget"
           value={totals ? formatEtb(totals.budgetEtb) : "—"}
-          sublabel={`Plan year ${year}`}
+          sublabel={String(year)}
           icon={Wallet}
           tone="primary"
           loading={isLoading}
-          href="/planning/afp-blocks"
+          href="/planning/afp"
         />
         <KpiStatCard
-          label="Released actual"
+          label="Actual"
           value={totals ? formatEtb(totals.actualEtb) : "—"}
-          sublabel="From released tickets"
           icon={Coins}
           tone="primary"
           loading={isLoading}
-          href="/execution/weekly-entry"
+          href="/execution/field-tickets"
         />
         <KpiStatCard
           label="Variance"
@@ -66,8 +70,8 @@ export function CropfortDashboardSection() {
           value={data?.opexReserve.status ?? "—"}
           sublabel={
             data?.opexReserve.reserveBalanceEtb != null
-              ? `Balance ${formatEtb(data.opexReserve.reserveBalanceEtb)}`
-              : "Balance not configured"
+              ? formatEtb(data.opexReserve.reserveBalanceEtb)
+              : undefined
           }
           icon={Wallet}
           tone={opexTone(data?.opexReserve.status ?? "unknown")}
@@ -75,85 +79,77 @@ export function CropfortDashboardSection() {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <DashboardPanel title="Budget vs actual (block & activity)" viewAllHref="/planning/afp-blocks">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-left text-muted-foreground">
-                  <th className="px-3 py-2 font-medium">Block</th>
-                  <th className="px-3 py-2 font-medium">Activity</th>
-                  <th className="px-3 py-2 font-medium text-right">Budget</th>
-                  <th className="px-3 py-2 font-medium text-right">Actual</th>
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <DashboardPanel title="Budget vs actual" viewAllHref="/reports/budget-vs-actual">
+          <DashboardTable>
+            <DashboardTableHead>
+              <DashboardTableTh>Block</DashboardTableTh>
+              <DashboardTableTh>Activity</DashboardTableTh>
+              <DashboardTableTh align="right">Budget</DashboardTableTh>
+              <DashboardTableTh align="right">Actual</DashboardTableTh>
+            </DashboardTableHead>
+            <DashboardTableBody>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={4} className="px-4 py-8 text-center text-sm text-muted-foreground">
+                    Loading…
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {isLoading ? (
-                  <tr>
-                    <td colSpan={4} className="px-3 py-8 text-center text-muted-foreground">
-                      Loading…
-                    </td>
-                  </tr>
-                ) : !data?.bva.rows.length ? (
-                  <tr>
-                    <td colSpan={4}>
-                      <DashboardPanelEmpty message="No Cropfort BvA rows yet" />
-                    </td>
-                  </tr>
-                ) : (
-                  data.bva.rows.slice(0, 8).map((row) => (
-                    <tr key={`${row.blockId}-${row.activityId}`} className="border-b last:border-0">
-                      <td className="px-3 py-2">{row.blockCode}</td>
-                      <td className="px-3 py-2">{row.activityName}</td>
-                      <td className="px-3 py-2 text-right">{formatEtb(row.budgetEtb)}</td>
-                      <td className="px-3 py-2 text-right">{formatEtb(row.actualEtb)}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+              ) : !data?.bva.rows.length ? (
+                <tr>
+                  <td colSpan={4}>
+                    <DashboardPanelEmpty message="No rows yet" />
+                  </td>
+                </tr>
+              ) : (
+                data.bva.rows.slice(0, 8).map((row, index) => (
+                  <DashboardTableRow key={`${row.blockId}-${row.activityId}`} index={index}>
+                    <DashboardTableTd className="font-medium">{row.blockCode}</DashboardTableTd>
+                    <DashboardTableTd className="max-w-[12rem] truncate text-muted-foreground">
+                      {row.activityName}
+                    </DashboardTableTd>
+                    <DashboardTableTd align="right">{formatEtb(row.budgetEtb)}</DashboardTableTd>
+                    <DashboardTableTd align="right">{formatEtb(row.actualEtb)}</DashboardTableTd>
+                  </DashboardTableRow>
+                ))
+              )}
+            </DashboardTableBody>
+          </DashboardTable>
         </DashboardPanel>
 
         <DashboardPanel title="Weekly rollup" viewAllHref="/validation/queue">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-left text-muted-foreground">
-                  <th className="px-3 py-2 font-medium">Week ending</th>
-                  <th className="px-3 py-2 font-medium">Status</th>
-                  <th className="px-3 py-2 font-medium text-right">Total ETB</th>
+          <DashboardTable>
+            <DashboardTableHead>
+              <DashboardTableTh>Week ending</DashboardTableTh>
+              <DashboardTableTh>Status</DashboardTableTh>
+              <DashboardTableTh align="right">Total ETB</DashboardTableTh>
+            </DashboardTableHead>
+            <DashboardTableBody>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={3} className="px-4 py-8 text-center text-sm text-muted-foreground">
+                    Loading…
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {isLoading ? (
-                  <tr>
-                    <td colSpan={3} className="px-3 py-8 text-center text-muted-foreground">
-                      Loading…
-                    </td>
-                  </tr>
-                ) : !data?.weeklyRollup.length ? (
-                  <tr>
-                    <td colSpan={3}>
-                      <DashboardPanelEmpty message="No weekly submissions yet" />
-                    </td>
-                  </tr>
-                ) : (
-                  data.weeklyRollup.slice(0, 8).map((week) => (
-                    <tr key={week.id} className="border-b last:border-0">
-                      <td className="px-3 py-2">{week.weekEnding.slice(0, 10)}</td>
-                      <td className="px-3 py-2">
-                        <Badge variant="outline" className="capitalize">
-                          {week.status}
-                        </Badge>
-                      </td>
-                      <td className="px-3 py-2 text-right">{formatEtb(week.totalEtb)}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+              ) : !data?.weeklyRollup.length ? (
+                <tr>
+                  <td colSpan={3}>
+                    <DashboardPanelEmpty message="No submissions yet" />
+                  </td>
+                </tr>
+              ) : (
+                data.weeklyRollup.slice(0, 8).map((week, index) => (
+                  <DashboardTableRow key={week.id} index={index}>
+                    <DashboardTableTd>{week.weekEnding.slice(0, 10)}</DashboardTableTd>
+                    <DashboardTableTd>
+                      <StatusBadge status={week.status} />
+                    </DashboardTableTd>
+                    <DashboardTableTd align="right">{formatEtb(week.totalEtb)}</DashboardTableTd>
+                  </DashboardTableRow>
+                ))
+              )}
+            </DashboardTableBody>
+          </DashboardTable>
         </DashboardPanel>
       </div>
     </div>

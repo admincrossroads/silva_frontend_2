@@ -61,20 +61,18 @@ export interface LoginResponse {
 export interface BudgetVsActualRow {
   afpLineId: string;
   activity: string;
-  budgetAllocatedUsd: number;
-  budgetAllocatedEtb?: number | null;
-  plannedUsd?: number;
+  budgetAllocatedEtb: number;
   plannedEtb?: number;
-  committedUsd: number;
-  actualUsd: number;
+  committedEtb: number;
+  actualEtb: number;
   utilizationPercent: number;
   health: string;
 }
 
 export interface Schedule3Threshold {
   band: string;
-  minValueUsd: number;
-  maxValueUsd: number | null;
+  minValueEtb: number;
+  maxValueEtb: number | null;
   spxAuthority: string;
   silvaAuthority: string;
   effectiveYear: number;
@@ -84,7 +82,7 @@ export interface Schedule4Rule {
   id: string;
   party: string;
   coverageType: string;
-  minimumCoverageUsd: number;
+  minimumCoverageEtb: number;
   beneficiary: string;
 }
 
@@ -112,7 +110,7 @@ export interface Afp {
   year: number;
   operatingDiscipline: string;
   activity: string;
-  budgetAllocatedUsd: number | null;
+  budgetAllocatedEtb: number | null;
   kpiTarget: string;
   notes: string | null;
   status: string;
@@ -126,7 +124,7 @@ export interface Afe {
   afpLineId: string | null;
   operatingDiscipline: string;
   description: string;
-  estimatedCostUsd: number;
+  estimatedCostEtb: number;
   band: string;
   planningMode?: "planned" | "ad_hoc" | string;
   status: string;

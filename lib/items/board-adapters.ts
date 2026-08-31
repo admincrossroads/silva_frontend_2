@@ -1,15 +1,10 @@
 import type { Afe, Afp, BudgetVsActualRow, FieldTicket, PaymentRequest, Settlement, Vendor, WorkOrder } from "@/types";
 import type { BoardItem } from "@/components/items/types";
-import { formatOptionalNumber } from "@/lib/utils/format";
+import { formatEtb, formatOptionalNumber } from "@/lib/utils/format";
 
-function formatUsd(amount: number | null | undefined) {
+function formatEtbAmount(amount: number | null | undefined) {
   const formatted = formatOptionalNumber(amount);
-  return formatted === "—" ? formatted : `$${formatted}`;
-}
-
-function formatEtb(amount: number | null | undefined) {
-  const formatted = formatOptionalNumber(amount);
-  return formatted === "—" ? formatted : `${formatted} ETB`;
+  return formatted === "—" ? formatted : formatEtb(amount);
 }
 
 export const VENDOR_COLUMNS = ["active", "pending", "expired", "terminated"] as const;
@@ -26,7 +21,7 @@ export function afpToBoardItem(row: Afp): BoardItem {
     href: `/planning/afp/${row.id}`,
     meta: [
       { label: "Year", value: String(row.year) },
-      { label: "Budget", value: formatUsd(row.budgetAllocatedUsd) },
+      { label: "Budget", value: formatEtbAmount(row.budgetAllocatedEtb) },
     ],
     updatedAt: row.updatedAt,
   };
@@ -41,7 +36,7 @@ export function afeToBoardItem(row: Afe): BoardItem {
     subtitle: row.operatingDiscipline,
     href: `/planning/afe/${row.id}`,
     badge: row.band,
-    meta: [{ label: "Est.", value: formatUsd(row.estimatedCostUsd) }],
+    meta: [{ label: "Est.", value: formatEtbAmount(row.estimatedCostEtb) }],
     updatedAt: row.updatedAt,
   };
 }
@@ -86,7 +81,7 @@ export function paymentRequestToBoardItem(row: PaymentRequest): BoardItem {
     title: `${row.type} · ${row.id.slice(0, 8)}`,
     subtitle: row.workOrderId,
     href: `/payments/payment-requests/${row.id}`,
-    meta: [{ label: "Amount", value: formatEtb(row.amountRequestedEtb) }],
+    meta: [{ label: "Amount", value: formatEtbAmount(row.amountRequestedEtb) }],
     updatedAt: row.updatedAt,
   };
 }
@@ -115,7 +110,7 @@ export function settlementToBoardItem(row: Settlement): BoardItem {
     title: row.payee,
     subtitle: row.type.replace(/_/g, " "),
     href: `/payments/settlements/${row.id}`,
-    meta: [{ label: "Amount", value: formatEtb(row.amountEtb) }],
+    meta: [{ label: "Amount", value: formatEtbAmount(row.amountEtb) }],
     updatedAt: row.updatedAt,
   };
 }
@@ -129,9 +124,9 @@ export function bvaToBoardItem(row: BudgetVsActualRow): BoardItem {
     subtitle: `${row.utilizationPercent}% utilized`,
     href: `/planning/afp/${row.afpLineId}`,
     meta: [
-      { label: "Budget", value: formatUsd(row.budgetAllocatedUsd) },
-      { label: "Planned", value: formatUsd(row.plannedUsd ?? row.budgetAllocatedUsd) },
-      { label: "Actual", value: formatUsd(row.actualUsd) },
+      { label: "Budget", value: formatEtbAmount(row.budgetAllocatedEtb) },
+      { label: "Planned", value: formatEtbAmount(row.plannedEtb ?? row.budgetAllocatedEtb) },
+      { label: "Actual", value: formatEtbAmount(row.actualEtb) },
     ],
     updatedAt: new Date().toISOString(),
   };

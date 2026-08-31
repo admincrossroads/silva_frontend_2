@@ -30,7 +30,7 @@ export type AdHocRequest = {
   operatingDiscipline: string;
   operationKind: CoreOperationKind;
   urgency: AdHocUrgency;
-  estimatedCostUsd: number | null;
+  estimatedCostEtb: number | null;
   estimatedAmountEtb: number | null;
   plannedStartDate: string | null;
   plannedEndDate: string | null;

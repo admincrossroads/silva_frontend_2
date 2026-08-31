@@ -1,11 +1,9 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { WorkOrder } from "@/types";
 import { StatusBadge } from "@/components/badges/status-badge";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +16,7 @@ import {
   useStartWorkOrder,
 } from "@/hooks/use-work-orders";
 import { getApiErrorMessage } from "@/lib/api/errors";
+import { TableChip, TablePrimaryCell, TableRowActionsTrigger } from "../data-table-cells";
 
 function WoRowActions({ wo }: { wo: WorkOrder }) {
   const issue = useIssueWorkOrder();
@@ -36,25 +35,23 @@ function WoRowActions({ wo }: { wo: WorkOrder }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" disabled={busy}>
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
+        <TableRowActionsTrigger disabled={busy} />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem asChild>
-          <Link href={`/execution/work-orders/${wo.id}`}>View</Link>
+          <Link href={`/execution/work-orders/${wo.id}`}>View details</Link>
         </DropdownMenuItem>
-        {wo.status === "draft" && (
+        {wo.status === "draft" ? (
           <DropdownMenuItem onClick={() => run(() => issue.mutateAsync({ id: wo.id, comment: "" }))}>
             Issue
           </DropdownMenuItem>
-        )}
-        {wo.status === "issued" && (
+        ) : null}
+        {wo.status === "issued" ? (
           <DropdownMenuItem onClick={() => run(() => start.mutateAsync(wo.id))}>Start</DropdownMenuItem>
-        )}
-        {wo.status === "in_progress" && (
+        ) : null}
+        {wo.status === "in_progress" ? (
           <DropdownMenuItem onClick={() => run(() => complete.mutateAsync(wo.id))}>Complete</DropdownMenuItem>
-        )}
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -62,22 +59,31 @@ function WoRowActions({ wo }: { wo: WorkOrder }) {
 
 export const workOrderColumns: ColumnDef<WorkOrder>[] = [
   {
-    accessorKey: "id",
-    header: "ID",
+    accessorKey: "activity",
+    header: "Work order",
     cell: ({ row }) => (
-      <Link href={`/execution/work-orders/${row.original.id}`} className="font-mono text-xs text-primary hover:underline">
-        {row.original.id}
-      </Link>
+      <TablePrimaryCell
+        href={`/execution/work-orders/${row.original.id}`}
+        title={row.original.activity}
+        subtitle={`${row.original.category} · Tier ${row.original.tier}`}
+      />
     ),
   },
-  { accessorKey: "afeId", header: "AFE" },
-  { accessorKey: "category", header: "Category" },
-  { accessorKey: "activity", header: "Activity" },
-  { accessorKey: "tier", header: "Tier" },
   {
     id: "weeks",
     header: "Weeks",
-    cell: ({ row }) => `W${row.original.weekStart}–W${row.original.weekEnd}`,
+    cell: ({ row }) => (
+      <TableChip>
+        W{row.original.weekStart}–W{row.original.weekEnd}
+      </TableChip>
+    ),
+  },
+  {
+    accessorKey: "afeId",
+    header: "AFE",
+    cell: ({ row }) => (
+      <span className="font-mono text-xs text-muted-foreground">{row.original.afeId.slice(0, 10)}</span>
+    ),
   },
   {
     accessorKey: "status",
@@ -86,6 +92,7 @@ export const workOrderColumns: ColumnDef<WorkOrder>[] = [
   },
   {
     id: "actions",
+    header: "",
     cell: ({ row }) => <WoRowActions wo={row.original} />,
   },
 ];

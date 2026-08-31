@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { MessagesSquare, Plus, Send } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -45,8 +45,7 @@ function canUseMessages(role: string) {
 }
 
 /**
- * Upwork-style messages card scoped to one AFP / AFE / WO / etc.
- * Shows conversations linked to this entity and lets you start or reply in place.
+ * Messages card scoped to one planning / execution entity (AFE, field ticket, etc.).
  */
 export function EntityMessagesPanel({ entityType, entityId, title, className }: Props) {
   const { role, isSpx, isSilva } = useRole();
@@ -75,15 +74,10 @@ export function EntityMessagesPanel({ entityType, entityId, title, className }: 
   return (
     <Card className={cn("overflow-hidden", className)}>
       <div className="flex items-center justify-between gap-2 border-b bg-muted/30 px-4 py-3">
-        <div className="min-w-0">
-          <h3 className="flex items-center gap-2 text-sm font-semibold">
-            <MessagesSquare className="h-4 w-4 text-primary" />
-            Messages
-          </h3>
-          <p className="text-xs text-muted-foreground">
-            About this {entityLabel.toLowerCase()} — like a job chat on Upwork
-          </p>
-        </div>
+        <h3 className="flex items-center gap-2 text-sm font-semibold">
+          <MessagesSquare className="h-4 w-4 text-primary" />
+          Messages
+        </h3>
         <Button size="sm" variant="outline" onClick={() => setComposeOpen(true)}>
           <Plus className="mr-1.5 h-3.5 w-3.5" />
           New
@@ -91,15 +85,12 @@ export function EntityMessagesPanel({ entityType, entityId, title, className }: 
       </div>
 
       {threadsQuery.isLoading ? (
-        <div className="p-4 text-sm text-muted-foreground">Loading conversations…</div>
+        <div className="p-4 text-sm text-muted-foreground">Loading…</div>
       ) : threads.length === 0 ? (
-        <div className="space-y-3 p-4">
-          <p className="text-sm text-muted-foreground">
-            No messages linked to this {entityLabel.toLowerCase()} yet. Start a conversation with SPX
-            or your counterparty about this item.
-          </p>
-          <Button size="sm" onClick={() => setComposeOpen(true)}>
-            Message about this {entityLabel.toLowerCase()}
+        <div className="flex items-center justify-between gap-3 p-4">
+          <p className="text-sm text-muted-foreground">No messages yet.</p>
+          <Button size="sm" variant="secondary" onClick={() => setComposeOpen(true)}>
+            New message
           </Button>
         </div>
       ) : (
@@ -151,7 +142,7 @@ export function EntityMessagesPanel({ entityType, entityId, title, className }: 
                       <p className="mt-0.5 whitespace-pre-wrap">{active.lastMessagePreview}</p>
                     </div>
                   ) : (
-                    <p className="text-muted-foreground">No messages in this thread yet.</p>
+                    <p className="text-sm text-muted-foreground">No messages yet.</p>
                   )}
                 </div>
                 <div className="flex gap-2 border-t p-3">
@@ -159,7 +150,7 @@ export function EntityMessagesPanel({ entityType, entityId, title, className }: 
                     rows={2}
                     value={replyBody}
                     onChange={(e) => setReplyBody(e.target.value)}
-                    placeholder="Reply about this item…"
+                    placeholder="Write a reply…"
                     className="min-h-[64px] flex-1"
                   />
                   <Button
@@ -228,8 +219,6 @@ function EntityComposeModal({
   const createThread = useCreateMessageThread();
   const counterparties = useMessageCounterparties(counterpartyType, open && isSpx);
 
-  const entityLabel = useMemo(() => notificationEntityLabel(entityType), [entityType]);
-
   useEffect(() => {
     if (!open) return;
     setSubject(defaultSubject);
@@ -240,15 +229,10 @@ function EntityComposeModal({
   }, [open, defaultSubject, isSilva]);
 
   return (
-    <Modal
-      title={`Message about ${entityLabel}`}
-      isOpen={open}
-      onClose={onClose}
-      className="sm:max-w-lg"
-    >
+    <Modal title="New message" isOpen={open} onClose={onClose} className="sm:max-w-lg">
       <div className="space-y-3 pb-2">
         <div className="rounded-lg border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-          Linked to <span className="font-mono font-medium text-foreground">{entityId}</span>
+          <span className="font-mono font-medium text-foreground">{entityId}</span>
         </div>
 
         {isSpx ? (
@@ -278,11 +262,7 @@ function EntityComposeModal({
               </Select>
             </div>
           </>
-        ) : (
-          <p className="rounded-lg bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
-            This conversation goes to SPX for this {entityLabel.toLowerCase()}.
-          </p>
-        )}
+        ) : null}
 
         <Input
           label="Subject"
@@ -293,7 +273,7 @@ function EntityComposeModal({
           rows={4}
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          placeholder={`Ask a question or share an update about ${entityId}…`}
+          placeholder="Message…"
         />
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
         <div className="flex justify-end gap-2 pt-1">
@@ -323,7 +303,7 @@ function EntityComposeModal({
               }
             }}
           >
-            {createThread.isPending ? "Sending…" : "Start conversation"}
+            {createThread.isPending ? "Sending…" : "Send"}
           </Button>
         </div>
       </div>

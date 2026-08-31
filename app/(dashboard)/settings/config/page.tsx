@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { platformApi } from "@/lib/api/platform";
-import { dashboardApi } from "@/lib/api/dashboard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +13,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DollarSign, Layers, ShieldCheck, Shield } from "lucide-react";
+import { Layers, ShieldCheck, Shield } from "lucide-react";
+import { formatEtb } from "@/lib/utils/format";
 import { formatBandRange } from "@/lib/utils/compute-band";
 import type { AccountabilityRow, Schedule3Threshold, Schedule4Rule } from "@/types";
 
@@ -31,33 +31,10 @@ export default function ConfigPage() {
     queryKey: ["accountability"],
     queryFn: () => platformApi.listAccountabilityMatrix(),
   });
-  const summaryQuery = useQuery({
-    queryKey: ["bva-summary", 2026],
-    queryFn: () => dashboardApi.budgetVsActualSummary(2026),
-  });
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <section className="space-y-1">
-        <h2 className="text-lg font-semibold">Platform configuration</h2>
-        <p className="text-sm text-muted-foreground">
-          Live Schedule 3 / Schedule 4 thresholds and accountability matrix from the API.
-        </p>
-      </section>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4" /> FX Rate
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">USD / ETB Exchange Rate</span>
-            <span className="text-lg font-bold">{summaryQuery.data?.fxRateEtbPerUsd ?? "—"}</span>
-          </div>
-        </CardContent>
-      </Card>
+      <h2 className="text-lg font-semibold">Platform configuration</h2>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-3">
@@ -74,8 +51,8 @@ export default function ConfigPage() {
               <TableRow>
                 <TableHead>Band</TableHead>
                 <TableHead>Range</TableHead>
-                <TableHead>Min USD</TableHead>
-                <TableHead>Max USD</TableHead>
+                <TableHead>Min ETB</TableHead>
+                <TableHead>Max ETB</TableHead>
                 <TableHead>SPX authority</TableHead>
                 <TableHead>Asset owner authority</TableHead>
               </TableRow>
@@ -85,8 +62,8 @@ export default function ConfigPage() {
                 <TableRow key={t.band}>
                   <TableCell className="font-medium">Band {t.band}</TableCell>
                   <TableCell className="text-sm">{formatBandRange(t)}</TableCell>
-                  <TableCell>${t.minValueUsd.toLocaleString()}</TableCell>
-                  <TableCell>{t.maxValueUsd == null ? "Open" : `$${t.maxValueUsd.toLocaleString()}`}</TableCell>
+                  <TableCell>{formatEtb(t.minValueEtb)}</TableCell>
+                  <TableCell>{t.maxValueEtb == null ? "Open" : formatEtb(t.maxValueEtb)}</TableCell>
                   <TableCell>{t.spxAuthority}</TableCell>
                   <TableCell>{t.silvaAuthority}</TableCell>
                 </TableRow>
@@ -108,7 +85,7 @@ export default function ConfigPage() {
               <TableRow>
                 <TableHead>Party</TableHead>
                 <TableHead>Coverage</TableHead>
-                <TableHead>Minimum USD</TableHead>
+                <TableHead>Minimum ETB</TableHead>
                 <TableHead>Beneficiary</TableHead>
               </TableRow>
             </TableHeader>
@@ -117,15 +94,12 @@ export default function ConfigPage() {
                 <TableRow key={r.id}>
                   <TableCell className="font-medium">{r.party}</TableCell>
                   <TableCell>{r.coverageType}</TableCell>
-                  <TableCell>${Number(r.minimumCoverageUsd).toLocaleString()}</TableCell>
+                  <TableCell>{formatEtb(r.minimumCoverageEtb)}</TableCell>
                   <TableCell>{r.beneficiary}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
-          <p className="text-xs text-muted-foreground mt-3">
-            Certificates must be on file before Work Orders issue; renew by 14 days before expiry or work stops.
-          </p>
         </CardContent>
       </Card>
 

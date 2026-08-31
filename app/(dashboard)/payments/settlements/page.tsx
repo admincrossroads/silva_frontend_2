@@ -66,7 +66,7 @@ export default function SettlementsPage() {
       ) : isLoading ? (
         <div className="text-center py-12 text-muted-foreground">Loading...</div>
       ) : (
-        <DataTable columns={settlementColumns} data={data} searchKey="payee" />
+        <DataTable columns={settlementColumns} data={data} searchKey="payee" getRowStatus={(row) => row.status} />
       )}
 
       {canManageSettlements ? (

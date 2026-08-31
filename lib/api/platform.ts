@@ -21,8 +21,8 @@ export const platformApi = {
   patchSchedule3: (
     band: string,
     body: {
-      minValueUsd?: number;
-      maxValueUsd?: number | null;
+      minValueEtb?: number;
+      maxValueEtb?: number | null;
       spxAuthority?: string;
       silvaAuthority?: string;
       effectiveYear?: number;
@@ -92,6 +92,12 @@ export const platformApi = {
   deactivateUser: (id: string) =>
     api.post(`/users/${id}/deactivate`, {}).then((r) => r.data.data),
 
+  activateUser: (id: string) =>
+    api.post(`/users/${id}/activate`, {}).then((r) => r.data.data),
+
+  revokeInvite: (inviteId: string) =>
+    api.post(`/invites/${inviteId}/revoke`, {}).then((r) => r.data.data),
+
   createOrganizationInvite: (organizationId: string, body: { email: string; role: string }) =>
     api.post(`/organizations/${organizationId}/invites`, body).then((r) => r.data.data),
 
@@ -102,8 +108,7 @@ export const platformApi = {
     period: string;
     tier: string;
     feeDescription: string;
-    amountUsd: number;
-    amountEtb?: number;
+    amountEtb: number;
     invoiceDate: string;
     paymentStatus?: string;
   }) => api.post("/revenue-ledger", body).then((r) => r.data.data),
@@ -112,7 +117,6 @@ export const platformApi = {
     id: string,
     body: {
       feeDescription?: string;
-      amountUsd?: number;
       amountEtb?: number;
       paymentStatus?: string;
     },

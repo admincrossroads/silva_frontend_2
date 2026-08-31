@@ -69,12 +69,7 @@ export default function RaciPage() {
 
   return (
     <div className="space-y-6 max-w-5xl">
-      <div>
-        <h1 className="text-2xl font-bold">Schedule 3 RACI</h1>
-        <p className="text-sm text-muted-foreground">
-          Execute / Validate / Decide / Author matrix by operating discipline.
-        </p>
-      </div>
+      <h1 className="text-2xl font-bold">Schedule 3 RACI</h1>
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
@@ -82,7 +77,7 @@ export default function RaciPage() {
         <CardHeader>
           <CardTitle className="text-base">Decision domain legend</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+        <CardContent className="grid gap-2 text-sm sm:grid-cols-2">
           <p>
             <span className="font-medium text-foreground">Procurement</span> — competitive tender /
             sole-source routes and award authority.

@@ -10,10 +10,8 @@ import { cn } from "@/lib/utils";
 
 const LINKS = [
   { label: "Platform", href: "#platform" },
-  { label: "Solutions", href: "#capabilities" },
-  { label: "How It Works", href: "#workflow" },
-  { label: "Resources", href: "#intelligence" },
-  { label: "About", href: "#contact" },
+  { label: "Workflow", href: "#workflow" },
+  { label: "Contact", href: "#contact" },
 ];
 
 type Props = {

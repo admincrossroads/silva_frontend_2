@@ -42,9 +42,9 @@ export function ReportBvaTable({ rows }: ReportBvaTableProps) {
           {rows.map((row) => (
             <TableRow key={row.afpLineId}>
               <TableCell className="font-medium">{row.activity}</TableCell>
-              <TableCell className="text-right tabular-nums">{formatCurrency(row.budgetAllocatedUsd)}</TableCell>
-              <TableCell className="text-right tabular-nums">{formatCurrency(row.committedUsd)}</TableCell>
-              <TableCell className="text-right tabular-nums">{formatCurrency(row.actualUsd)}</TableCell>
+              <TableCell className="text-right tabular-nums">{formatCurrency(row.budgetAllocatedEtb)}</TableCell>
+              <TableCell className="text-right tabular-nums">{formatCurrency(row.committedEtb)}</TableCell>
+              <TableCell className="text-right tabular-nums">{formatCurrency(row.actualEtb)}</TableCell>
               <TableCell className="text-right tabular-nums">{row.utilizationPercent}%</TableCell>
               <TableCell>
                 <StatusBadge status={row.health} />

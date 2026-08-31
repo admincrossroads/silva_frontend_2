@@ -14,10 +14,10 @@ export const STATUS_COLORS: Record<string, string> = {
 };
 
 export const BAND_COLORS: Record<string, { bg: string; text: string; label: string }> = {
-  A: { bg: "bg-green-100", text: "text-green-800", label: "Band A (≤$5k)" },
-  B: { bg: "bg-blue-100", text: "text-blue-800", label: "Band B ($5k–$20k)" },
-  C: { bg: "bg-amber-100", text: "text-amber-800", label: "Band C ($20k–$50k)" },
-  D: { bg: "bg-red-100", text: "text-red-800", label: "Band D (>$50k)" },
+  A: { bg: "bg-green-100", text: "text-green-800", label: "Band A (≤5k ETB)" },
+  B: { bg: "bg-blue-100", text: "text-blue-800", label: "Band B (5k–20k ETB)" },
+  C: { bg: "bg-amber-100", text: "text-amber-800", label: "Band C (20k–50k ETB)" },
+  D: { bg: "bg-red-100", text: "text-red-800", label: "Band D (>50k ETB)" },
 };
 
 export const ROLES = {
@@ -46,10 +46,13 @@ export const VENDOR_ROLES: RoleKey[] = [
   "vendor_field_lead",
   "vendor_worker",
 ];
-/** SPX owns annual work plan create / edit / promote */
+/** SPX can create, edit, submit, and promote annual work plans */
 export const SPX_WORK_PLAN_ROLES: RoleKey[] = [
   "spx_principal",
   "spx_account_handler",
   "spx_field_supervisor",
   "system_admin",
 ];
+/** Vendor roles that can create and submit annual work plans for SPX review */
+export const VENDOR_WORK_PLAN_ROLES: RoleKey[] = ["vendor_admin", "vendor_manager"];
+export const WORK_PLAN_MANAGE_ROLES: RoleKey[] = [...SPX_WORK_PLAN_ROLES, ...VENDOR_WORK_PLAN_ROLES];

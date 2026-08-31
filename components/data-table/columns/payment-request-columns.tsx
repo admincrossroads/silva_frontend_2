@@ -4,43 +4,33 @@ import { type ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
 import { PaymentRequest } from "@/types";
 import { StatusBadge } from "@/components/badges/status-badge";
-import { formatCurrency, formatDate } from "@/lib/utils/format";
 import { Button } from "@/components/ui/button";
-import { Eye } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { TableChip, TableIdLink, TableMoney, TablePrimaryCell } from "../data-table-cells";
 
 export const paymentRequestColumns: ColumnDef<PaymentRequest, unknown>[] = [
   {
-    accessorKey: "id",
-    header: "ID",
+    accessorKey: "type",
+    header: "Payment",
     cell: ({ row }) => (
-      <span className="font-mono text-xs">{row.original.id.slice(0, 8)}</span>
-    ),
-  },
-  {
-    accessorKey: "workOrderId",
-    header: "Work Order",
-    cell: ({ row }) => (
-      <span className="font-mono text-xs">{row.original.workOrderId.slice(0, 8)}</span>
+      <TablePrimaryCell
+        href={`/payments/payment-requests/${row.original.id}`}
+        title={row.original.type.replace(/_/g, " ")}
+        subtitle={`WO ${row.original.workOrderId.slice(0, 8)}`}
+      />
     ),
   },
   {
     accessorKey: "fieldTicketId",
-    header: "Field Ticket",
+    header: "Field ticket",
     cell: ({ row }) => (
-      <span className="font-mono text-xs">{row.original.fieldTicketId.slice(0, 8)}</span>
-    ),
-  },
-  {
-    accessorKey: "type",
-    header: "Type",
-    cell: ({ row }) => (
-      <span className="capitalize">{row.original.type.replace(/_/g, " ")}</span>
+      <TableIdLink href={`/execution/field-tickets/${row.original.fieldTicketId}`} id={row.original.fieldTicketId} />
     ),
   },
   {
     accessorKey: "amountRequestedEtb",
-    header: "Amount (ETB)",
-    cell: ({ row }) => formatCurrency(row.original.amountRequestedEtb, "ETB"),
+    header: "Amount",
+    cell: ({ row }) => <TableMoney amount={row.original.amountRequestedEtb} currency="ETB" />,
   },
   {
     accessorKey: "status",
@@ -49,11 +39,12 @@ export const paymentRequestColumns: ColumnDef<PaymentRequest, unknown>[] = [
   },
   {
     id: "actions",
-    header: "Actions",
+    header: "",
     cell: ({ row }) => (
       <Link href={`/payments/payment-requests/${row.original.id}`}>
-        <Button variant="ghost" size="sm">
-          <Eye className="h-4 w-4" />
+        <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs text-muted-foreground hover:text-primary">
+          Open
+          <ArrowUpRight className="h-3.5 w-3.5" />
         </Button>
       </Link>
     ),

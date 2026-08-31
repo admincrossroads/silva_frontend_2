@@ -36,7 +36,6 @@ export default function WorkPlansPage() {
         totalAreaHa: values.totalAreaHa ? Number(values.totalAreaHa) : undefined,
         budgetYearLabel: values.budgetYearLabel,
         budgetYearGc: values.budgetYearGc,
-        fxEtbPerUsd: Number(values.fxEtbPerUsd) || 130,
       });
       setModalOpen(false);
       router.push(`/execution/work-plans/${row.id}`);

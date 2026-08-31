@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { DollarSign, FileText, Layers, TrendingUp } from "lucide-react";
 import { useAfps } from "@/hooks/use-afps";
 import { usePermissions } from "@/hooks/use-permissions";
 import { afpColumns } from "@/components/data-table/columns/afp-columns";
@@ -19,11 +20,13 @@ import {
 import { Plus } from "lucide-react";
 import { ModulePageShell } from "@/components/items/module-page-shell";
 import { DraggableBoardView } from "@/components/items/draggable-board-view";
+import { BoardSummaryStrip } from "@/components/items/board-summary-strip";
 import { afpToBoardItem, BOARD_TRANSITIONS, boardTransitionKey } from "@/lib/items/board-adapters";
 import type { ModuleViewMode } from "@/lib/config/procore-modules";
 import type { BoardItem } from "@/components/items/types";
 import { useSubmitAfp, useApproveAfp } from "@/hooks/use-afps";
 import { useRole } from "@/hooks/use-role";
+import { formatEtb } from "@/lib/utils/format";
 
 const STATUSES = ["draft", "submitted", "approved", "closed"];
 const SPX_BOARD_COLUMNS = ["draft", "submitted", "approved", "closed"] as const;
@@ -43,6 +46,26 @@ export default function AfpPage() {
   const submitAfp = useSubmitAfp();
   const approveAfp = useApproveAfp();
   const boardItems = afps.map(afpToBoardItem);
+
+  const totalBudget = useMemo(
+    () => afps.reduce((sum, row) => sum + (row.budgetAllocatedEtb ?? 0), 0),
+    [afps],
+  );
+
+  const approvedBudget = useMemo(
+    () =>
+      afps.filter((row) => row.status === "approved" || row.status === "closed").reduce((sum, row) => sum + (row.budgetAllocatedEtb ?? 0), 0),
+    [afps],
+  );
+
+  const columnSummaries = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const col of BOARD_COLUMNS) {
+      const total = afps.filter((row) => row.status === col).reduce((sum, row) => sum + (row.budgetAllocatedEtb ?? 0), 0);
+      if (total > 0) map[col] = formatEtb(total);
+    }
+    return map;
+  }, [afps, BOARD_COLUMNS]);
 
   const handleMove = (item: BoardItem, toStatus: string) => {
     const action = BOARD_TRANSITIONS.afp[boardTransitionKey(item.status, toStatus)];
@@ -86,11 +109,57 @@ export default function AfpPage() {
         </>
       }
     >
-      {view === "board" ? (
-        <DraggableBoardView columns={BOARD_COLUMNS} items={boardItems} loading={isLoading} onItemMove={handleMove} />
-      ) : (
-        <DataTable columns={afpColumns} data={afps} searchKey="activity" emptyMessage="No AFP lines found" />
-      )}
+      <div className="space-y-5">
+        <BoardSummaryStrip
+          stats={[
+            {
+              label: "Total lines",
+              value: String(afps.length),
+              sublabel: year ? `Plan year ${year}` : "All years",
+              icon: Layers,
+              tone: "primary",
+            },
+            {
+              label: "Total budget",
+              value: formatEtb(totalBudget),
+              sublabel: "Allocated ETB",
+              icon: DollarSign,
+            },
+            {
+              label: "Approved budget",
+              value: formatEtb(approvedBudget),
+              sublabel: "Approved + closed",
+              icon: TrendingUp,
+              tone: "emerald",
+            },
+            {
+              label: "In workflow",
+              value: String(afps.filter((r) => r.status === "submitted" || r.status === "draft").length),
+              sublabel: "Draft & submitted",
+              icon: FileText,
+              tone: "amber",
+            },
+          ]}
+        />
+        {view === "board" ? (
+          <DraggableBoardView
+            columns={BOARD_COLUMNS}
+            items={boardItems}
+            loading={isLoading}
+            columnSummaries={columnSummaries}
+            onItemMove={handleMove}
+            emptyMessage="No AFP lines yet. Create a line to start building the annual farm program."
+          />
+        ) : (
+          <DataTable
+            columns={afpColumns}
+            data={afps}
+            searchKey="activity"
+            emptyMessage="No AFP lines found"
+            getRowStatus={(row) => row.status}
+          />
+        )}
+      </div>
 
       {canCreate && (
         <Modal title="Create AFP" isOpen={open} onClose={() => setOpen(false)}>

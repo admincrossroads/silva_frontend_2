@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { dashboardApi } from "@/lib/api/dashboard";
 import { KpiStatCard } from "@/components/dashboard/kpi-stat-card";
 import { DashboardPanel, DashboardPanelEmpty, DashboardPanelRow } from "@/components/dashboard/dashboard-panel";
+import { DashboardStatGrid } from "@/components/dashboard/dashboard-stat-grid";
 import { ActionQueueCard } from "@/components/dashboard/action-queue-card";
 import { HealthBadge } from "@/components/badges/health-badge";
 import { CropfortDashboardSection } from "@/components/dashboards/cropfort-dashboard-section";
@@ -29,20 +30,19 @@ export function SpxDashboard() {
     (coreOpsStats?.submittedInterventions ?? 0) + (coreOpsStats?.submittedProjects ?? 0);
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <KpiStatCard
-          label="Core ops queue"
+          label="Core ops"
           value={String(interventionQueue)}
-          sublabel={`${coreOpsStats?.activeProjects ?? 0} active projects`}
+          sublabel={coreOpsStats?.activeProjects ? `${coreOpsStats.activeProjects} active` : undefined}
           icon={ClipboardList}
           tone={interventionQueue > 0 ? "amber" : "slate"}
           href="/operations/interventions"
         />
         <KpiStatCard
-          label="Silva AFE queue"
+          label="Silva AFE"
           value={String(pendingAfe)}
-          sublabel={pendingAfe ? "Awaiting Silva decision" : "Queue clear"}
           icon={ClipboardList}
           tone="blue"
           loading={isLoading}
@@ -51,7 +51,6 @@ export function SpxDashboard() {
         <KpiStatCard
           label="Field tickets"
           value={String(awaitingFt)}
-          sublabel="Awaiting SPX sign-off"
           icon={FileText}
           tone="amber"
           loading={isLoading}
@@ -60,58 +59,42 @@ export function SpxDashboard() {
         <KpiStatCard
           label="Exceptions"
           value={String(exceptions)}
-          sublabel="Budget, insurance, overdue"
           icon={AlertTriangle}
           tone={exceptions > 0 ? "rose" : "slate"}
           loading={isLoading}
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <div className="xl:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <div className="space-y-4 xl:col-span-2">
           {showRevenue && data?.revenueLedgerSummary ? (
-            <DashboardPanel title="Revenue ledger">
-              <div className="grid grid-cols-2 gap-4 p-4 sm:grid-cols-4">
-                <div>
-                  <p className="text-xs text-muted-foreground">YTD</p>
-                  <p className="text-lg font-semibold tabular-nums">{formatCurrency(data.revenueLedgerSummary.yearToDateUsd)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Invoiced</p>
-                  <p className="text-lg font-semibold tabular-nums">{formatCurrency(data.revenueLedgerSummary.invoicedUsd)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Paid</p>
-                  <p className="text-lg font-semibold tabular-nums">{formatCurrency(data.revenueLedgerSummary.paidUsd)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Overdue</p>
-                  <p className="text-lg font-semibold tabular-nums">{data.revenueLedgerSummary.overdueCount}</p>
-                </div>
-              </div>
+            <DashboardPanel title="Revenue ledger" viewAllHref="/reports/revenue">
+              <DashboardStatGrid
+                items={[
+                  { label: "YTD", value: formatCurrency(data.revenueLedgerSummary.yearToDateEtb) },
+                  { label: "Invoiced", value: formatCurrency(data.revenueLedgerSummary.invoicedEtb) },
+                  { label: "Paid", value: formatCurrency(data.revenueLedgerSummary.paidEtb) },
+                  { label: "Overdue", value: String(data.revenueLedgerSummary.overdueCount) },
+                ]}
+              />
             </DashboardPanel>
           ) : null}
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <DashboardPanel title="Exception feed" contentClassName="divide-y max-h-64 overflow-y-auto" noPadding>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <DashboardPanel title="Exceptions" contentClassName="max-h-64 divide-y overflow-y-auto" noPadding>
               {(data?.exceptions ?? []).length ? (
                 data.exceptions.map((ex: { entityId: string; label: string; health?: string; type: string }) => (
                   <DashboardPanelRow key={`${ex.type}-${ex.entityId}`}>
-                    <span className="flex-1 min-w-0 truncate">{ex.label}</span>
+                    <span className="min-w-0 flex-1 truncate">{ex.label}</span>
                     <HealthBadge health={ex.health} />
                   </DashboardPanelRow>
                 ))
               ) : (
-                <DashboardPanelEmpty message="No exceptions — operations on track" />
+                <DashboardPanelEmpty message="None" />
               )}
             </DashboardPanel>
 
-            <DashboardPanel
-              title="Silva pending actions"
-              viewAllHref="/planning/afe"
-              contentClassName="divide-y"
-              noPadding
-            >
+            <DashboardPanel title="Silva actions" viewAllHref="/planning/afe" contentClassName="divide-y" noPadding>
               {(data?.silva?.upcomingActions ?? []).length ? (
                 data.silva.upcomingActions.map((action: { entityId: string; label: string }) => (
                   <DashboardPanelRow key={action.entityId} href={`/planning/afe/${action.entityId}`}>
@@ -119,46 +102,42 @@ export function SpxDashboard() {
                   </DashboardPanelRow>
                 ))
               ) : (
-                <DashboardPanelEmpty message="No pending Silva actions" />
+                <DashboardPanelEmpty message="None" />
               )}
             </DashboardPanel>
           </div>
         </div>
 
-        <div className="space-y-6">
-          <ActionQueueCard title="Your action queue" />
+        <div className="space-y-4">
+          <ActionQueueCard title="Action queue" />
 
-          <DashboardPanel
-            title="Vendor insurance"
-            viewAllHref="/vendors"
-            contentClassName="divide-y"
-            noPadding
-          >
+          <DashboardPanel title="Vendor insurance" viewAllHref="/vendors" contentClassName="divide-y" noPadding>
             {(data?.vendorInsurance?.alerts ?? []).length ? (
               data.vendorInsurance.alerts.map(
                 (a: { vendorId: string; name: string; insuranceExpiry: string | null }) => (
                   <DashboardPanelRow key={a.vendorId}>
                     <span className="flex-1">{a.name}</span>
-                    <span className="text-muted-foreground text-xs">{a.insuranceExpiry ?? "No certificate"}</span>
+                    <span className="text-xs text-muted-foreground">{a.insuranceExpiry ?? "—"}</span>
                   </DashboardPanelRow>
                 ),
               )
             ) : (
-              <DashboardPanelEmpty message="All vendors compliant" />
+              <DashboardPanelEmpty message="None" />
             )}
           </DashboardPanel>
 
-          <DashboardPanel title="Narrative workspace" viewAllHref="/reports/workspace">
-            <div className="p-4 text-sm text-muted-foreground space-y-2">
-              <p>
-                Draft: {data?.reportWorkspace?.monthlyDraftId ?? "None"} ({data?.reportWorkspace?.monthlyStatus ?? "—"})
-              </p>
-              {data?.reportWorkspace?.needsNarrative ? (
-                <p className="text-amber-700 dark:text-amber-400 font-medium">Narrative required before release.</p>
-              ) : (
-                <p>Write the SPX interpretive layer, then release explicitly.</p>
-              )}
-            </div>
+          <DashboardPanel title="Narrative" viewAllHref="/reports/workspace" noPadding contentClassName="divide-y">
+            <DashboardPanelRow href="/reports/workspace">
+              <span className="flex-1">Monthly draft</span>
+              <span className="text-xs text-muted-foreground">
+                {data?.reportWorkspace?.monthlyStatus ?? "—"}
+              </span>
+            </DashboardPanelRow>
+            {data?.reportWorkspace?.needsNarrative ? (
+              <div className="px-4 py-2.5 text-xs font-medium text-amber-700 dark:text-amber-400">
+                Narrative required
+              </div>
+            ) : null}
           </DashboardPanel>
         </div>
       </div>

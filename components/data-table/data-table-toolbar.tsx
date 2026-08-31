@@ -10,24 +10,26 @@ interface DataTableToolbarProps {
 
 export function DataTableToolbar({ globalFilter, setGlobalFilter, filterOptions }: DataTableToolbarProps) {
   return (
-    <div className="flex items-center gap-2">
-      <div className="relative flex-1 max-w-xs">
-        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+    <div className="flex flex-1 flex-wrap items-center gap-2">
+      <div className="relative min-w-[12rem] flex-1 max-w-sm">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-          placeholder="Search..."
+          placeholder="Search table…"
           value={globalFilter}
           onChange={(e) => setGlobalFilter(e.target.value)}
-          className="pl-8 h-8 text-xs"
+          className="h-9 rounded-lg border-border/80 bg-background pl-9 text-sm shadow-sm"
         />
       </div>
-      {filterOptions && (
-        <NativeSelect className="h-8 w-auto px-2.5 text-xs">
+      {filterOptions ? (
+        <NativeSelect className="h-9 w-auto rounded-lg border-border/80 bg-background px-3 text-sm shadow-sm">
           <option value="">All statuses</option>
           {filterOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
           ))}
         </NativeSelect>
-      )}
+      ) : null}
     </div>
   );
 }

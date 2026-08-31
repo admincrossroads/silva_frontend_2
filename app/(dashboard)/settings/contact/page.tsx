@@ -33,12 +33,7 @@ export default function ContactInboxPage() {
 
   return (
     <div className="space-y-6 max-w-6xl">
-      <section className="space-y-1">
-        <h2 className="text-lg font-semibold">Contact inbox</h2>
-        <p className="text-sm text-muted-foreground">
-          Messages submitted from the public landing page contact form.
-        </p>
-      </section>
+      <h2 className="text-lg font-semibold">Contact inbox</h2>
 
       <div className="flex flex-wrap gap-2">
         {[

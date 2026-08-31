@@ -1,5 +1,4 @@
 import type { BudgetVsActualRow, Report, ReportSection } from "@/types";
-import { downloadBlob } from "@/lib/api/exports";
 
 export const PERIOD_REPORT_CONFIG = {
   weekly: {
@@ -26,10 +25,39 @@ export const PERIOD_REPORT_CONFIG = {
 
 export type PeriodReportType = keyof typeof PERIOD_REPORT_CONFIG;
 
+/** Map legacy *Usd snapshot fields to ETB names used by the UI. */
+export function normalizeBvaRow(row: Record<string, unknown>): BudgetVsActualRow | null {
+  if (!row || typeof row !== "object") return null;
+  const budgetRaw = (row.budgetAllocatedEtb ?? row.budgetAllocatedUsd) as number | null | undefined;
+  const plannedRaw = (row.plannedEtb ?? row.plannedUsd) as number | null | undefined;
+  const committedRaw = (row.committedEtb ?? row.committedUsd ?? 0) as number;
+  const actualRaw = (row.actualEtb ?? row.actualUsd ?? 0) as number;
+  const budget = budgetRaw != null ? Number(budgetRaw) : 0;
+  const actual = Number(actualRaw) || 0;
+  const utilization =
+    row.utilizationPercent != null
+      ? Number(row.utilizationPercent)
+      : budget
+        ? Math.round((actual / budget) * 100)
+        : 0;
+  return {
+    afpLineId: String(row.afpLineId ?? ""),
+    activity: String(row.activity ?? ""),
+    budgetAllocatedEtb: budgetRaw != null ? Number(budgetRaw) : 0,
+    plannedEtb: plannedRaw != null ? Number(plannedRaw) : budgetRaw != null ? Number(budgetRaw) : 0,
+    committedEtb: Number(committedRaw) || 0,
+    actualEtb: Number(actualRaw) || 0,
+    utilizationPercent: utilization,
+    health: String(row.health ?? "on_track"),
+  };
+}
+
 export function getReportBvaRows(report: Report): BudgetVsActualRow[] {
   const section = report.sections?.find((s) => s.key === "budget_vs_actual");
   if (!section || !Array.isArray(section.payload)) return [];
-  return section.payload as BudgetVsActualRow[];
+  return section.payload
+    .map((row) => normalizeBvaRow(row as Record<string, unknown>))
+    .filter((row): row is BudgetVsActualRow => row != null);
 }
 
 export function formatReportPeriod(period: string, type: string) {
@@ -42,22 +70,11 @@ export function formatReportPeriod(period: string, type: string) {
   return period;
 }
 
-export function downloadReportCsv(report: Report, rows: BudgetVsActualRow[]) {
-  const header = "activity,budget_usd,planned_usd,committed_usd,actual_usd,utilization_percent,health";
-  const lines = rows.map(
-    (r) =>
-      `"${r.activity.replace(/"/g, '""')}",${r.budgetAllocatedUsd},${r.plannedUsd ?? ""},${r.committedUsd},${r.actualUsd},${r.utilizationPercent},${r.health}`,
-  );
-  const narrative = report.narrative ? `\n\nNarrative\n"${report.narrative.replace(/"/g, '""')}"` : "";
-  const csv = [`Report,${report.type}`, `Period,${report.period}`, `Status,${report.status}`, "", header, ...lines].join("\n") + narrative;
-  downloadBlob(new Blob([csv], { type: "text/csv;charset=utf-8" }), `report-${report.type}-${report.period}.csv`);
-}
-
 export function summarizeBva(rows: BudgetVsActualRow[]) {
   if (!rows.length) return null;
-  const budget = rows.reduce((s, r) => s + (r.budgetAllocatedUsd ?? 0), 0);
-  const actual = rows.reduce((s, r) => s + (r.actualUsd ?? 0), 0);
-  const committed = rows.reduce((s, r) => s + (r.committedUsd ?? 0), 0);
+  const budget = rows.reduce((s, r) => s + (r.budgetAllocatedEtb ?? 0), 0);
+  const actual = rows.reduce((s, r) => s + (r.actualEtb ?? 0), 0);
+  const committed = rows.reduce((s, r) => s + (r.committedEtb ?? 0), 0);
   const utilization = budget ? Math.round((actual / budget) * 100) : 0;
   return { budget, actual, committed, utilization, lineCount: rows.length };
 }

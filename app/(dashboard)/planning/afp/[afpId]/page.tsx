@@ -37,14 +37,7 @@ function stepCaption(completed: boolean, current: boolean) {
   return "Upcoming";
 }
 
-function formatUsd(value: number | null | undefined) {
-  if (value == null || Number.isNaN(Number(value))) return "—";
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0,
-  }).format(Number(value));
-}
+import { formatEtb } from "@/lib/utils/format";
 
 function formatKpi(value: string) {
   const trimmed = value.trim();
@@ -142,7 +135,7 @@ export default function AfpDetailPage() {
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Allocated budget</p>
             <p className="mt-1 font-display text-3xl font-semibold tabular-nums text-foreground">
-              {formatUsd(afp.budgetAllocatedUsd)}
+              {formatEtb(afp.budgetAllocatedEtb)}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
               {afp.operatingDiscipline} · {formatKpi(afp.kpiTarget)} KPI target
@@ -172,7 +165,7 @@ export default function AfpDetailPage() {
               <InfoRow icon={Calendar} label="Year" value={afp.year} />
               <InfoRow icon={Layers} label="Discipline" value={afp.operatingDiscipline} />
               <InfoRow icon={FileText} label="Activity" value={afp.activity} className="sm:col-span-2" />
-              <InfoRow icon={DollarSign} label="Budget" value={formatUsd(afp.budgetAllocatedUsd)} />
+              <InfoRow icon={DollarSign} label="Budget" value={formatEtb(afp.budgetAllocatedEtb)} />
               <InfoRow icon={Target} label="KPI target" value={formatKpi(afp.kpiTarget)} />
             </dl>
           </Card>

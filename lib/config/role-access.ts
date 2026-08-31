@@ -18,12 +18,7 @@ import {
   MapPin,
   ClipboardCheck,
   Mail,
-  Coins,
-  Stamp,
-  Layers,
-  Grid3x3,
   ShieldCheck,
-  FileSignature,
 } from "lucide-react";
 import type { RoleKey } from "@/lib/utils/constants";
 import type { User as AuthUser } from "@/types";
@@ -61,7 +56,6 @@ export function canAccessSettings(user: AuthUser | null): boolean {
 export function settingsSectionsFor(user: AuthUser): SettingsSection[] {
   const role = user.role as RoleKey;
   const sections: SettingsSection[] = [
-    { label: "Overview", href: "/settings", icon: LayoutDashboard },
     { label: "Profile", href: "/settings/profile", icon: Settings },
   ];
 
@@ -114,6 +108,7 @@ export function settingsSectionsFor(user: AuthUser): SettingsSection[] {
 }
 
 export function canAccessSettingsRoute(pathname: string, user: AuthUser): boolean {
+  if (pathname === "/settings") return true;
   if (pathname.startsWith("/settings/programs")) {
     const role = user.role as RoleKey;
     return (
@@ -192,62 +187,7 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
     }
   }
 
-  // Cropfort — rate card (SPX) and Silva line approvals
-  if (isSpxRole(role) || role === "system_admin") {
-    items.push({
-      label: "Rate Card",
-      procoreLabel: "Budget",
-      href: "/planning/rate-card",
-      icon: Coins,
-    });
-    items.push({
-      label: "Activity Master",
-      procoreLabel: "Budget",
-      href: "/planning/activity-master",
-      icon: Layers,
-    });
-    items.push({
-      label: "Block AFP",
-      procoreLabel: "Budget",
-      href: "/planning/afp-blocks",
-      icon: Grid3x3,
-    });
-    items.push({
-      label: "Cropfort AFE",
-      procoreLabel: "Commitments",
-      href: "/planning/cropfort-afe",
-      icon: FileSignature,
-    });
-  }
-  if (isSilvaRole(role)) {
-    items.push({
-      label: "Rate Card Approvals",
-      procoreLabel: "Budget",
-      href: "/planning/rate-card-approvals",
-      icon: Stamp,
-    });
-    items.push({
-      label: "Block AFP Approvals",
-      procoreLabel: "Budget",
-      href: "/planning/afp-block-approvals",
-      icon: Stamp,
-    });
-    items.push({
-      label: "Cropfort AFE Approvals",
-      procoreLabel: "Commitments",
-      href: "/planning/cropfort-afe-approvals",
-      icon: Stamp,
-    });
-  }
-
-  if (
-    isSilvaRole(role) ||
-    isSpxRole(role) ||
-    role === "vendor_admin" ||
-    role === "vendor_manager" ||
-    role === "vendor_supervisor" ||
-    role === "vendor_field_lead"
-  ) {
+  if (isSilvaRole(role) || isSpxRole(role)) {
     const coreOpsChildren: NavItem["children"] = [
       { label: "Interventions", procoreLabel: "Budget", href: "/operations/interventions" },
       { label: "Projects", procoreLabel: "Budget", href: "/operations/projects" },
@@ -265,20 +205,13 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
     { label: "Work Orders", procoreLabel: "Schedule", href: "/execution/work-orders" },
     { label: "Season Calendar", procoreLabel: "Schedule", href: "/execution/calendar" },
   ];
-  if (isSpxRole(role)) {
+  if (isSpxRole(role) || role === "vendor_admin" || role === "vendor_manager") {
     scheduleChildren.push({ label: "Work Plan", procoreLabel: "Schedule", href: "/execution/work-plans" });
   }
   const dailyLogChildren: NavItem["children"] = [];
   if (!isSilvaRole(role)) {
     dailyLogChildren.push({ label: "Field Tickets", procoreLabel: "Daily Log", href: "/execution/field-tickets" });
     dailyLogChildren.push({ label: "Field Forms", procoreLabel: "Daily Log", href: "/execution/forms" });
-  }
-  if (role === "vendor_admin" || role === "vendor_manager" || role === "vendor_field_lead" || isSpxRole(role)) {
-    dailyLogChildren.push({
-      label: "Weekly Entry",
-      procoreLabel: "Daily Log",
-      href: "/execution/weekly-entry",
-    });
   }
 
   items.push({
@@ -411,15 +344,17 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
     items.push({ label: "Messages", href: "/messages", icon: MessagesSquare });
   }
 
-  const settingsChildren = settingsSectionsFor(user)
-    .filter((section) => section.href !== "/settings")
-    .map((section) => ({ label: section.label, href: section.href }));
+  const settingsChildren = settingsSectionsFor(user).map((section) => ({
+    label: section.label,
+    href: section.href,
+  }));
 
   items.push({
     label: role === "system_admin" || role === "spx_principal" || role === "vendor_admin" ? "Admin" : "Settings",
     procoreLabel: "Admin",
+    href: "/settings/profile",
     icon: Settings,
-    children: [{ label: "Overview", href: "/settings" }, ...settingsChildren],
+    children: settingsChildren,
   });
 
   return items;

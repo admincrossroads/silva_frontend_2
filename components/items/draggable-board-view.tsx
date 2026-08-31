@@ -11,8 +11,8 @@ import {
 } from "@dnd-kit/core";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { useState } from "react";
-import { formatWorkflowLabel } from "@/lib/config/procore-modules";
-import { ItemCard, ItemCardSkeleton } from "./item-card";
+import { BoardColumnEmpty, BoardColumnShell, BoardEmptyState, BoardLoadingSkeleton } from "./board-column";
+import { ItemCard } from "./item-card";
 import type { BoardItem } from "./types";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +22,7 @@ type DraggableBoardViewProps = {
   loading?: boolean;
   emptyMessage?: string;
   className?: string;
+  columnSummaries?: Record<string, string>;
   onItemMove?: (item: BoardItem, toStatus: string) => void;
 };
 
@@ -31,7 +32,7 @@ function DraggableCard({ item }: { item: BoardItem }) {
     data: { item },
   });
   const style = transform
-    ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, opacity: isDragging ? 0.4 : 1 }
+    ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, opacity: isDragging ? 0.35 : 1 }
     : undefined;
 
   return (
@@ -44,36 +45,22 @@ function DraggableCard({ item }: { item: BoardItem }) {
 function DropColumn({
   col,
   colItems,
+  summary,
 }: {
   col: string;
   colItems: BoardItem[];
+  summary?: string;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: col });
 
   return (
-    <div
-      ref={setNodeRef}
-      className={cn(
-        "flex min-w-[17rem] max-w-[20rem] flex-1 flex-col rounded-xl border bg-muted/20",
-        isOver && "ring-2 ring-primary/40",
+    <BoardColumnShell status={col} count={colItems.length} summary={summary} isOver={isOver} droppableRef={setNodeRef}>
+      {colItems.length ? (
+        colItems.map((item) => <DraggableCard key={item.id} item={item} />)
+      ) : (
+        <BoardColumnEmpty status={col} />
       )}
-    >
-      <div className="flex items-center justify-between border-b px-3 py-2.5">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          {formatWorkflowLabel(col)}
-        </h3>
-        <span className="rounded-full bg-background px-2 py-0.5 text-[10px] font-medium tabular-nums text-muted-foreground">
-          {colItems.length}
-        </span>
-      </div>
-      <div className="flex flex-1 flex-col gap-2 p-2 min-h-[8rem]">
-        {colItems.length ? (
-          colItems.map((item) => <DraggableCard key={item.id} item={item} />)
-        ) : (
-          <p className="px-2 py-6 text-center text-[11px] text-muted-foreground/80">Empty</p>
-        )}
-      </div>
-    </div>
+    </BoardColumnShell>
   );
 }
 
@@ -81,29 +68,20 @@ export function DraggableBoardView({
   columns,
   items,
   loading,
-  emptyMessage = "No items in this workflow.",
+  emptyMessage = "Create your first item or switch to table view to see all records.",
   className,
+  columnSummaries,
   onItemMove,
 }: DraggableBoardViewProps) {
   const [active, setActive] = useState<BoardItem | null>(null);
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
   if (loading) {
-    return (
-      <div className={cn("grid gap-4 md:grid-cols-3 xl:grid-cols-4", className)}>
-        {Array.from({ length: 4 }).map((_, i) => (
-          <ItemCardSkeleton key={i} />
-        ))}
-      </div>
-    );
+    return <BoardLoadingSkeleton columns={columns.length || 4} />;
   }
 
   if (!items.length) {
-    return (
-      <div className="rounded-xl border border-dashed bg-muted/20 px-6 py-16 text-center text-sm text-muted-foreground">
-        {emptyMessage}
-      </div>
-    );
+    return <BoardEmptyState message={emptyMessage} />;
   }
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -123,12 +101,24 @@ export function DraggableBoardView({
 
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className={cn("flex gap-3 overflow-x-auto pb-2", className)}>
+      <div className={cn("flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory", className)}>
         {columns.map((col) => (
-          <DropColumn key={col} col={col} colItems={items.filter((i) => i.status === col)} />
+          <div key={col} className="snap-start">
+            <DropColumn
+              col={col}
+              colItems={items.filter((i) => i.status === col)}
+              summary={columnSummaries?.[col]}
+            />
+          </div>
         ))}
       </div>
-      <DragOverlay>{active ? <ItemCard item={active} /> : null}</DragOverlay>
+      <DragOverlay dropAnimation={{ duration: 180, easing: "ease-out" }}>
+        {active ? (
+          <div className="rotate-1 scale-[1.02] shadow-xl">
+            <ItemCard item={active} compact />
+          </div>
+        ) : null}
+      </DragOverlay>
     </DndContext>
   );
 }

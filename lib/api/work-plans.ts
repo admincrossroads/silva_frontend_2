@@ -23,7 +23,6 @@ export type WorkPlanSubmission = {
   budgetYearLabel: string;
   budgetYearGc: number;
   status: WorkPlanStatus;
-  fxEtbPerUsd: number;
   parsedJson: Record<string, unknown> | null;
   sourceAttachmentId: string | null;
   submittedAt: string | null;
@@ -55,7 +54,6 @@ export const workPlansApi = {
     totalAreaHa?: number;
     budgetYearLabel: string;
     budgetYearGc: number;
-    fxEtbPerUsd?: number;
     parsedJson?: Record<string, unknown>;
   }) => api.post<{ data: WorkPlanSubmission }>("/work-plans", dto).then((r) => r.data.data),
 
@@ -66,7 +64,6 @@ export const workPlansApi = {
       totalAreaHa?: number | null;
       budgetYearLabel?: string;
       budgetYearGc?: number;
-      fxEtbPerUsd?: number;
     },
   ) => api.patch<{ data: WorkPlanSubmission }>(`/work-plans/${id}`, dto).then((r) => r.data.data),
 
@@ -100,9 +97,8 @@ export const workPlansApi = {
 export type AfpLineSchedule = {
   afpLineId: string;
   year: number;
-  budgetAllocatedEtb: number | null;
-  budgetAllocatedUsd: number;
-  months: Array<{ month: number; plannedCostEtb: number; plannedCostUsd: number | null }>;
+  budgetAllocatedEtb: number;
+  months: Array<{ month: number; plannedCostEtb: number }>;
 };
 
 export const afpScheduleApi = {

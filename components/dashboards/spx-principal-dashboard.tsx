@@ -3,11 +3,12 @@
 import { useRole } from "@/hooks/use-role";
 import { useQuery } from "@tanstack/react-query";
 import { dashboardApi } from "@/lib/api/dashboard";
-import { registrationApi } from "@/lib/api/registration";
+import { registrationApi, registrationStatusLabel } from "@/lib/api/registration";
 import { contactApi } from "@/lib/api/contact";
 import { farmEstatesApi } from "@/lib/api/farm-estates";
 import { KpiStatCard } from "@/components/dashboard/kpi-stat-card";
 import { DashboardPanel, DashboardPanelEmpty, DashboardPanelRow } from "@/components/dashboard/dashboard-panel";
+import { DashboardStatGrid } from "@/components/dashboard/dashboard-stat-grid";
 import { ActionQueueCard } from "@/components/dashboard/action-queue-card";
 import { HealthBadge } from "@/components/badges/health-badge";
 import { CropfortDashboardSection } from "@/components/dashboards/cropfort-dashboard-section";
@@ -40,14 +41,14 @@ export function SpxPrincipalDashboard() {
     queryFn: () => dashboardApi.spxManagement(year),
   });
 
-  const { data: submittedRegs, isLoading: regsLoading } = useQuery({
-    queryKey: ["dashboard", "registrations", "submitted"],
-    queryFn: () => registrationApi.list({ status: "submitted" }),
+  const { data: pendingRegs, isLoading: regsLoading } = useQuery({
+    queryKey: ["dashboard", "registrations", "pending_activation"],
+    queryFn: () => registrationApi.list({ lifecycle: "pending_activation" }),
   });
 
-  const { data: reviewRegs, isLoading: reviewRegsLoading } = useQuery({
-    queryKey: ["dashboard", "registrations", "under_review"],
-    queryFn: () => registrationApi.list({ status: "under_review" }),
+  const { data: draftRegs, isLoading: draftRegsLoading } = useQuery({
+    queryKey: ["dashboard", "registrations", "draft"],
+    queryFn: () => registrationApi.list({ lifecycle: "draft" }),
   });
 
   const { data: newContact, isLoading: contactLoading } = useQuery({
@@ -61,13 +62,10 @@ export function SpxPrincipalDashboard() {
   });
 
   const pendingRegCount =
-    (submittedRegs?.meta?.total ?? submittedRegs?.items?.length ?? 0) +
-    (reviewRegs?.meta?.total ?? reviewRegs?.items?.length ?? 0);
+    (pendingRegs?.meta?.total ?? pendingRegs?.items?.length ?? 0) +
+    (draftRegs?.meta?.total ?? draftRegs?.items?.length ?? 0);
 
-  const registrationPreview = [
-    ...(submittedRegs?.items ?? []),
-    ...(reviewRegs?.items ?? []),
-  ].slice(0, 5);
+  const registrationPreview = [...(pendingRegs?.items ?? []), ...(draftRegs?.items ?? [])].slice(0, 5);
 
   const newContactCount = newContact?.items?.length ?? 0;
   const estateCount = estates?.length ?? 0;
@@ -80,21 +78,19 @@ export function SpxPrincipalDashboard() {
     (coreOpsStats?.submittedInterventions ?? 0) + (coreOpsStats?.submittedProjects ?? 0);
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <KpiStatCard
-          label="Registration queue"
+          label="Activations"
           value={String(pendingRegCount)}
-          sublabel={pendingRegCount ? "Applications awaiting review" : "Queue clear"}
           icon={ClipboardCheck}
           tone={pendingRegCount > 0 ? "amber" : "slate"}
-          loading={regsLoading || reviewRegsLoading}
+          loading={regsLoading || draftRegsLoading}
           href="/settings/registrations"
         />
         <KpiStatCard
           label="Contact inbox"
           value={String(newContactCount)}
-          sublabel={newContactCount ? "Unread landing-page messages" : "Inbox clear"}
           icon={Mail}
           tone={newContactCount > 0 ? "blue" : "slate"}
           loading={contactLoading}
@@ -103,7 +99,6 @@ export function SpxPrincipalDashboard() {
         <KpiStatCard
           label="Farm estates"
           value={String(estateCount)}
-          sublabel="Active areas in program"
           icon={MapPin}
           tone="primary"
           loading={estatesLoading}
@@ -111,9 +106,8 @@ export function SpxPrincipalDashboard() {
         />
         {isSystemAdmin ? (
           <KpiStatCard
-            label="Platform scope"
-            value="All orgs"
-            sublabel="System administrator view"
+            label="Organizations"
+            value="All"
             icon={Wallet}
             tone="primary"
             href="/settings/organization"
@@ -121,8 +115,8 @@ export function SpxPrincipalDashboard() {
         ) : (
           <KpiStatCard
             label="Revenue YTD"
-            value={formatCurrency(data?.revenueLedgerSummary?.yearToDateUsd ?? 0)}
-            sublabel={`${data?.revenueLedgerSummary?.overdueCount ?? 0} overdue · SPX fee ledger`}
+            value={formatCurrency(data?.revenueLedgerSummary?.yearToDateEtb ?? 0)}
+            sublabel={data?.revenueLedgerSummary?.overdueCount ? `${data.revenueLedgerSummary.overdueCount} overdue` : undefined}
             icon={Wallet}
             tone="primary"
             loading={isLoading}
@@ -131,19 +125,17 @@ export function SpxPrincipalDashboard() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
         <KpiStatCard
-          label="Core ops queue"
+          label="Core ops"
           value={String(coreOpsQueue)}
-          sublabel={`${coreOpsStats?.activeProjects ?? 0} active projects`}
           icon={ClipboardList}
           tone={coreOpsQueue > 0 ? "amber" : "slate"}
           href="/operations/interventions"
         />
         <KpiStatCard
-          label="Silva AFE queue"
+          label="Silva AFE"
           value={String(pendingAfe)}
-          sublabel={pendingAfe ? "Awaiting Silva decision" : "Queue clear"}
           icon={ClipboardList}
           tone="blue"
           loading={isLoading}
@@ -152,7 +144,6 @@ export function SpxPrincipalDashboard() {
         <KpiStatCard
           label="Field tickets"
           value={String(awaitingFt)}
-          sublabel="Awaiting SPX sign-off"
           icon={FileText}
           tone="amber"
           loading={isLoading}
@@ -160,8 +151,7 @@ export function SpxPrincipalDashboard() {
         />
         <KpiStatCard
           label="Monthly report"
-          value={data?.reportWorkspace?.monthlyStatus ?? "None"}
-          sublabel={data?.reportWorkspace?.needsNarrative ? "Narrative required" : "Report workspace"}
+          value={data?.reportWorkspace?.monthlyStatus ?? "—"}
           icon={CreditCard}
           tone="primary"
           loading={isLoading}
@@ -170,47 +160,30 @@ export function SpxPrincipalDashboard() {
         <KpiStatCard
           label="Exceptions"
           value={String(exceptions)}
-          sublabel="Budget, insurance, overdue"
           icon={AlertTriangle}
           tone={exceptions > 0 ? "rose" : "slate"}
           loading={isLoading}
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <div className="xl:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <div className="space-y-4 xl:col-span-2">
           {!isSystemAdmin && data?.revenueLedgerSummary ? (
             <DashboardPanel title="Revenue ledger" viewAllHref="/reports/revenue">
-              <div className="grid grid-cols-2 gap-4 p-4 sm:grid-cols-4">
-                <div>
-                  <p className="text-xs text-muted-foreground">YTD</p>
-                  <p className="text-lg font-semibold tabular-nums">
-                    {formatCurrency(data.revenueLedgerSummary.yearToDateUsd)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Invoiced</p>
-                  <p className="text-lg font-semibold tabular-nums">
-                    {formatCurrency(data.revenueLedgerSummary.invoicedUsd)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Paid</p>
-                  <p className="text-lg font-semibold tabular-nums">
-                    {formatCurrency(data.revenueLedgerSummary.paidUsd)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Overdue</p>
-                  <p className="text-lg font-semibold tabular-nums">{data.revenueLedgerSummary.overdueCount}</p>
-                </div>
-              </div>
+              <DashboardStatGrid
+                items={[
+                  { label: "YTD", value: formatCurrency(data.revenueLedgerSummary.yearToDateEtb) },
+                  { label: "Invoiced", value: formatCurrency(data.revenueLedgerSummary.invoicedEtb) },
+                  { label: "Paid", value: formatCurrency(data.revenueLedgerSummary.paidEtb) },
+                  { label: "Overdue", value: String(data.revenueLedgerSummary.overdueCount) },
+                ]}
+              />
             </DashboardPanel>
           ) : null}
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <DashboardPanel
-              title="Registration review"
+              title="Registrations"
               viewAllHref="/settings/registrations"
               contentClassName="divide-y max-h-64 overflow-y-auto"
               noPadding
@@ -222,11 +195,13 @@ export function SpxPrincipalDashboard() {
                     <Badge variant="outline" className="shrink-0 text-2xs">
                       {orgTypeLabel(req.orgType)}
                     </Badge>
-                    <span className="text-xs text-muted-foreground shrink-0 capitalize">{req.status.replace("_", " ")}</span>
+                    <span className="text-xs text-muted-foreground shrink-0">
+                      {registrationStatusLabel(req)}
+                    </span>
                   </DashboardPanelRow>
                 ))
               ) : (
-                <DashboardPanelEmpty message="No pending registration applications" />
+                <DashboardPanelEmpty message="None" />
               )}
             </DashboardPanel>
 
@@ -243,7 +218,7 @@ export function SpxPrincipalDashboard() {
                   </DashboardPanelRow>
                 ))
               ) : (
-                <DashboardPanelEmpty message="No exceptions — operations on track" />
+                <DashboardPanelEmpty message="None" />
               )}
             </DashboardPanel>
           </div>
@@ -261,13 +236,13 @@ export function SpxPrincipalDashboard() {
                 </DashboardPanelRow>
               ))
             ) : (
-              <DashboardPanelEmpty message="No pending Silva actions" />
+              <DashboardPanelEmpty message="None" />
             )}
           </DashboardPanel>
         </div>
 
-        <div className="space-y-6">
-          <ActionQueueCard title="Your action queue" />
+        <div className="space-y-4">
+          <ActionQueueCard title="Action queue" />
 
           <DashboardPanel
             title="Contact inbox"
@@ -283,7 +258,7 @@ export function SpxPrincipalDashboard() {
                 </DashboardPanelRow>
               ))
             ) : (
-              <DashboardPanelEmpty message="No unread contact messages" />
+              <DashboardPanelEmpty message="None" />
             )}
           </DashboardPanel>
 
@@ -303,7 +278,7 @@ export function SpxPrincipalDashboard() {
                 </DashboardPanelRow>
               ))
             ) : (
-              <DashboardPanelEmpty message="No farm estates configured yet" />
+              <DashboardPanelEmpty message="None" />
             )}
           </DashboardPanel>
 
@@ -323,21 +298,22 @@ export function SpxPrincipalDashboard() {
                 ),
               )
             ) : (
-              <DashboardPanelEmpty message="All vendors compliant" />
+              <DashboardPanelEmpty message="None" />
             )}
           </DashboardPanel>
 
-          <DashboardPanel title="Narrative workspace" viewAllHref="/reports/workspace">
-            <div className="p-4 text-sm text-muted-foreground space-y-2">
-              <p>
-                Draft: {data?.reportWorkspace?.monthlyDraftId ?? "None"} ({data?.reportWorkspace?.monthlyStatus ?? "—"})
-              </p>
-              {data?.reportWorkspace?.needsNarrative ? (
-                <p className="text-amber-700 dark:text-amber-400 font-medium">Narrative required before release.</p>
-              ) : (
-                <p>Write the SPX interpretive layer, then release explicitly.</p>
-              )}
-            </div>
+          <DashboardPanel title="Narrative" viewAllHref="/reports/workspace" noPadding contentClassName="divide-y">
+            <DashboardPanelRow href="/reports/workspace">
+              <span className="flex-1">Monthly draft</span>
+              <span className="text-xs text-muted-foreground">
+                {data?.reportWorkspace?.monthlyStatus ?? "—"}
+              </span>
+            </DashboardPanelRow>
+            {data?.reportWorkspace?.needsNarrative ? (
+              <div className="px-4 py-2.5 text-xs font-medium text-amber-700 dark:text-amber-400">
+                Narrative required
+              </div>
+            ) : null}
           </DashboardPanel>
         </div>
       </div>

@@ -32,14 +32,7 @@ export default function SpendBandsPage() {
 
   return (
     <div className="space-y-6 max-w-5xl">
-      <section className="space-y-1">
-        <h1 className="text-2xl font-bold">Schedule 3 spend bands</h1>
-        <p className="text-sm text-muted-foreground">
-          {canEdit
-            ? "Configure USD thresholds and approval authorities per band. AFE band assignment uses these values automatically."
-            : "Read-only view of spend bands SPX configured for this program. Higher bands require your approval before issue."}
-        </p>
-      </section>
+      <h1 className="text-2xl font-bold">Schedule 3 spend bands</h1>
 
       {error ? (
         <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
@@ -66,7 +59,7 @@ export default function SpendBandsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Band</TableHead>
-                  <TableHead>USD range</TableHead>
+                  <TableHead>ETB range</TableHead>
                   <TableHead>SPX authority</TableHead>
                   <TableHead>{isSilva ? "Your authority" : "Asset owner authority"}</TableHead>
                   <TableHead>Year</TableHead>
@@ -97,13 +90,6 @@ export default function SpendBandsPage() {
           )}
         </CardContent>
       </Card>
-
-      {canEdit ? (
-        <p className="text-xs text-muted-foreground">
-          Band letters (A–D) are fixed per program. SPX adjusts thresholds and authority text — asset owners
-          approve spend against these configured bands, they do not register them.
-        </p>
-      ) : null}
 
       {editBand ? (
         <EditBandModal
@@ -138,16 +124,16 @@ function EditBandModal({
   isPending: boolean;
   onClose: () => void;
   onSave: (dto: {
-    minValueUsd: number;
-    maxValueUsd: number | null;
+    minValueEtb: number;
+    maxValueEtb: number | null;
     spxAuthority: string;
     silvaAuthority: string;
     effectiveYear: number;
   }) => void;
 }) {
-  const [minValueUsd, setMinValueUsd] = useState(String(band.minValueUsd));
-  const [maxValueUsd, setMaxValueUsd] = useState(
-    band.maxValueUsd == null ? "" : String(band.maxValueUsd),
+  const [minValueEtb, setMinValueEtb] = useState(String(band.minValueEtb));
+  const [maxValueEtb, setMaxValueEtb] = useState(
+    band.maxValueEtb == null ? "" : String(band.maxValueEtb),
   );
   const [spxAuthority, setSpxAuthority] = useState(band.spxAuthority);
   const [silvaAuthority, setSilvaAuthority] = useState(band.silvaAuthority);
@@ -158,20 +144,20 @@ function EditBandModal({
       <div className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <Input
-            label="Min USD"
+            label="Min ETB"
             type="number"
             min="0"
             step="0.01"
-            value={minValueUsd}
-            onChange={(e) => setMinValueUsd(e.target.value)}
+            value={minValueEtb}
+            onChange={(e) => setMinValueEtb(e.target.value)}
           />
           <Input
-            label="Max USD (empty = open ended)"
+            label="Max ETB (empty = open ended)"
             type="number"
             min="0"
             step="0.01"
-            value={maxValueUsd}
-            onChange={(e) => setMaxValueUsd(e.target.value)}
+            value={maxValueEtb}
+            onChange={(e) => setMaxValueEtb(e.target.value)}
           />
         </div>
         <Input
@@ -198,8 +184,8 @@ function EditBandModal({
             disabled={isPending}
             onClick={() =>
               onSave({
-                minValueUsd: Number(minValueUsd),
-                maxValueUsd: maxValueUsd.trim() ? Number(maxValueUsd) : null,
+                minValueEtb: Number(minValueEtb),
+                maxValueEtb: maxValueEtb.trim() ? Number(maxValueEtb) : null,
                 spxAuthority,
                 silvaAuthority,
                 effectiveYear: Number(effectiveYear),

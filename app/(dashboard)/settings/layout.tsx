@@ -19,9 +19,9 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
   }, [loading, user, pathname, router]);
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
       <SettingsNav />
-      {children}
+      <div className="min-w-0 flex-1">{children}</div>
     </div>
   );
 }

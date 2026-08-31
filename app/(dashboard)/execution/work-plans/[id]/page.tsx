@@ -33,7 +33,6 @@ type ParsedCategory = {
   afpLineId: string;
   activity: string;
   budgetEtb: number;
-  budgetUsd?: number;
 };
 
 type ParsedPlan = ParsedWorkPlan & {
@@ -148,7 +147,7 @@ export default function WorkPlanDetailPage() {
           />
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
-          {plan.budgetYearLabel} · {plan.vendor?.name} · FX {plan.fxEtbPerUsd} ETB/USD
+          {plan.budgetYearLabel} · {plan.vendor?.name}
           {plan.totalAreaHa != null ? ` · ${plan.totalAreaHa} ha` : null}
         </p>
         {plan.reviewNotes ? (
@@ -212,7 +211,6 @@ export default function WorkPlanDetailPage() {
                   totalAreaHa: plan.totalAreaHa ?? undefined,
                   budgetYearLabel: plan.budgetYearLabel,
                   budgetYearGc: plan.budgetYearGc,
-                  fxEtbPerUsd: String(plan.fxEtbPerUsd),
                 }}
                 onSubmit={(values) => {
                   updateMeta.mutate({
@@ -221,7 +219,6 @@ export default function WorkPlanDetailPage() {
                     totalAreaHa: values.totalAreaHa ? Number(values.totalAreaHa) : null,
                     budgetYearLabel: values.budgetYearLabel,
                     budgetYearGc: values.budgetYearGc,
-                    fxEtbPerUsd: Number(values.fxEtbPerUsd) || 130,
                   });
                 }}
               />
@@ -291,7 +288,6 @@ export default function WorkPlanDetailPage() {
               key={`${plan.id}-${plan.updatedAt}-${plan.farmEstateId}`}
               template={template}
               parsed={parsed}
-              fx={Number(plan.fxEtbPerUsd)}
               farmBlocks={farmBlockCodes}
               readOnly={!canEdit}
               isSaving={updatePlan.isPending}
@@ -305,7 +301,6 @@ export default function WorkPlanDetailPage() {
                       totalAreaHa: plan.totalAreaHa,
                       budgetYearLabel: plan.budgetYearLabel,
                       budgetYearGc: plan.budgetYearGc,
-                      fxEtbPerUsd: Number(plan.fxEtbPerUsd),
                     },
                   },
                   { onSuccess: () => setMode("summary") },
@@ -410,7 +405,9 @@ export default function WorkPlanDetailPage() {
             <div>
               <h2 className="text-sm font-semibold">Finalize plan</h2>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Optional: mark as submitted, or promote directly when ready.
+                {isSpx
+                  ? "Optional: mark as submitted, or promote directly when ready."
+                  : "Submit for SPX review when your plan is complete."}
               </p>
             </div>
             {canSubmit ? (
@@ -419,7 +416,7 @@ export default function WorkPlanDetailPage() {
                 disabled={submitPlan.isPending}
                 onClick={() => submitPlan.mutate(plan.id)}
               >
-                {submitPlan.isPending ? "Saving…" : "Mark as submitted"}
+                {submitPlan.isPending ? "Saving…" : isSpx ? "Mark as submitted" : "Submit for review"}
               </Button>
             ) : (
               <Button disabled variant="outline">

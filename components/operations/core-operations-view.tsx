@@ -158,13 +158,8 @@ type CoreOperationsViewProps = {
 
 export function CoreOperationsView({ view = "all" }: CoreOperationsViewProps) {
   const router = useRouter();
-  const { isSilva, isSpx, isVendor, role } = useRole();
-  const canRequest =
-    isSilva ||
-    role === "vendor_admin" ||
-    role === "vendor_manager" ||
-    role === "vendor_supervisor" ||
-    role === "vendor_field_lead";
+  const { isSilva, isSpx } = useRole();
+  const canRequest = isSilva || isSpx;
 
   const [status, setStatus] = useState<string | undefined>(isSpx ? "submitted" : undefined);
   const [originFilter, setOriginFilter] = useState<string | undefined>(undefined);
@@ -309,7 +304,7 @@ export function CoreOperationsView({ view = "all" }: CoreOperationsViewProps) {
     if (!convertTarget) return;
     setFormError(null);
     try {
-      const result = await convertRequest.mutateAsync({
+      await convertRequest.mutateAsync({
         id: convertTarget.id,
         dto: {
           title: values.title,
@@ -318,7 +313,6 @@ export function CoreOperationsView({ view = "all" }: CoreOperationsViewProps) {
         },
       });
       setConvertTarget(null);
-      router.push(`/planning/cropfort-afe?highlight=${result.cropfortAfe.id}`);
     } catch (err) {
       setFormError(getApiErrorMessage(err, "Could not convert request"));
     }
@@ -338,30 +332,6 @@ export function CoreOperationsView({ view = "all" }: CoreOperationsViewProps) {
 
   const pageTitle =
     view === "intervention" ? "Interventions" : view === "project" ? "Projects" : "Core Operations";
-
-  const subtitle = useMemo(() => {
-    if (view === "intervention") {
-      return isSilva
-        ? "Reactive, short-cycle work outside the annual block plan."
-        : isVendor
-          ? "Submit urgent or out-of-plan field work for SPX to review."
-          : "Triage intervention requests and convert to ETB commitments.";
-    }
-    if (view === "project") {
-      return isSilva
-        ? "Multi-week initiatives with a defined start and end date."
-        : isVendor
-          ? "Propose bounded projects for SPX to scope and commit in ETB."
-          : "Review project requests and activate multi-week execution envelopes.";
-    }
-    if (isSilva) {
-      return "Request interventions or multi-week projects outside the annual block plan.";
-    }
-    if (isVendor) {
-      return "Submit interventions or projects for SPX to review and commit in ETB.";
-    }
-    return "Triage core operations — convert to Cropfort commitments (ETB) or dismiss.";
-  }, [isSilva, isVendor, view]);
 
   const emptyMessage =
     view === "intervention"
@@ -383,7 +353,6 @@ export function CoreOperationsView({ view = "all" }: CoreOperationsViewProps) {
     <PageShell>
       <PageHeader
         title={pageTitle}
-        description={subtitle}
         actions={
           canRequest ? (
             <Button onClick={openCreate}>
@@ -483,12 +452,7 @@ export function CoreOperationsView({ view = "all" }: CoreOperationsViewProps) {
                       {row.requestedBy?.name || "Requester"}
                       {row.submittedAt ? ` · submitted ${new Date(row.submittedAt).toLocaleDateString()}` : ""}
                       {row.convertedCropfortAfeId ? (
-                        <>
-                          {" · "}
-                          <Link className="underline" href={`/planning/cropfort-afe?highlight=${row.convertedCropfortAfeId}`}>
-                            {row.convertedCropfortAfeId}
-                          </Link>
-                        </>
+                        <span className="font-mono"> · {row.convertedCropfortAfeId}</span>
                       ) : null}
                       {row.coreOperationProject?.status === "active" ? (
                         <Badge variant="secondary" className="ml-2">

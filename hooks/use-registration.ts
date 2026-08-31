@@ -7,14 +7,14 @@ export function useSubmitRegistration() {
   return useMutation({
     mutationFn: registrationApi.submit,
     meta: {
-      successMessage: "Application submitted",
-      successDescription: "SPX will review your request.",
-      errorMessage: "Could not submit registration",
+      successMessage: "Registration created",
+      successDescription: "Workspace provisioned and activation invitation sent.",
+      errorMessage: "Could not create registration",
     },
   });
 }
 
-export function useRegistrationRequests(params?: { status?: string; orgType?: string; q?: string }) {
+export function useRegistrationRequests(params?: { lifecycle?: string; orgType?: string; q?: string }) {
   return useQuery({
     queryKey: ["registration-requests", params],
     queryFn: () => registrationApi.list(params),
@@ -33,26 +33,25 @@ export function useApproveRegistration() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, notes }: { id: string; notes?: string }) => registrationApi.approve(id, notes),
-    meta: { successMessage: "Registration approved", errorMessage: "Could not approve registration" },
+    meta: { successMessage: "Invitation sent", errorMessage: "Could not provision registration" },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["registration-requests"] }),
   });
 }
 
-export function useRejectRegistration() {
+export function useCancelRegistration() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, notes }: { id: string; notes: string }) => registrationApi.reject(id, notes),
-    meta: { successMessage: "Registration rejected", errorMessage: "Could not reject registration" },
+    mutationFn: ({ id, notes }: { id: string; notes: string }) => registrationApi.cancel(id, notes),
+    meta: { successMessage: "Registration cancelled", errorMessage: "Could not cancel registration" },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["registration-requests"] }),
   });
 }
 
-export function useMarkRegistrationReview() {
+export function useResendRegistrationActivation() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, notes }: { id: string; notes?: string }) =>
-      registrationApi.markUnderReview(id, notes),
-    meta: { successMessage: "Marked under review", errorMessage: "Could not update registration" },
+    mutationFn: (id: string) => registrationApi.resendActivation(id),
+    meta: { successMessage: "Invitation sent", errorMessage: "Could not send invitation" },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["registration-requests"] }),
   });
 }

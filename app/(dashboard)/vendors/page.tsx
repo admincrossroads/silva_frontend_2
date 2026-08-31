@@ -42,12 +42,6 @@ export default function VendorsPage() {
         ) : undefined
       }
     >
-      {isSilva ? (
-        <p className="mb-4 text-sm text-muted-foreground">
-          Read-only view of execution partners SPX has assigned to your farm areas.
-        </p>
-      ) : null}
-
       {view === "board" ? (
         !isLoading && boardItems.length === 0 ? (
           <div className="py-12 text-center text-sm text-muted-foreground">{emptyMessage}</div>
@@ -59,7 +53,7 @@ export default function VendorsPage() {
       ) : data.length === 0 ? (
         <div className="py-12 text-center text-sm text-muted-foreground">{emptyMessage}</div>
       ) : (
-        <DataTable columns={vendorColumns} data={data} searchKey="name" />
+        <DataTable columns={vendorColumns} data={data} searchKey="name" getRowStatus={(row) => row.status} />
       )}
 
       {isSpx ? (

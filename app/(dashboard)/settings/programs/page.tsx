@@ -39,7 +39,7 @@ type Invite = {
 
 export default function ProgramsSettingsPage() {
   const qc = useQueryClient();
-  const { isSilva, isSpx } = useRole();
+  const { isSpx } = useRole();
   const [selectedId, setSelectedId] = useState<string>("");
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
@@ -96,15 +96,8 @@ export default function ProgramsSettingsPage() {
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">Programs</h1>
-          <p className="text-sm text-muted-foreground">
-            {isSilva
-              ? "View programs and member organizations. SPX manages vendor onboarding and assignment."
-              : "Create programs, manage member orgs, and invite partners by slug."}
-          </p>
-        </div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-bold">Programs</h1>
         <Button variant="outline" asChild>
           <Link href="/settings/programs/accept">Accept invite</Link>
         </Button>

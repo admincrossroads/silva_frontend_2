@@ -17,7 +17,6 @@ import { formatDate, formatCurrency } from "@/lib/utils/format";
 import { usePermissions } from "@/hooks/use-permissions";
 import { useRole } from "@/hooks/use-role";
 import {
-  downloadReportCsv,
   formatReportPeriod,
   getReportBvaRows,
   PERIOD_REPORT_CONFIG,
@@ -68,6 +67,16 @@ export function ReportDetailView({ report, backHref, backLabel }: ReportDetailVi
     }
   };
 
+  const handleCsvDownload = async () => {
+    setDownloading("csv");
+    try {
+      const blob = await exportApi.reportCsv(report.id);
+      downloadBlob(blob, `report-${report.type}-${report.period}.csv`);
+    } finally {
+      setDownloading(null);
+    }
+  };
+
   return (
     <PageShell>
       <DetailPageHeader
@@ -91,10 +100,10 @@ export function ReportDetailView({ report, backHref, backLabel }: ReportDetailVi
                 variant="outline"
                 size="sm"
                 disabled={downloading !== null}
-                onClick={() => downloadReportCsv(report, bvaRows)}
+                onClick={handleCsvDownload}
               >
                 <FileSpreadsheet className="mr-2 h-4 w-4" />
-                Download CSV
+                {downloading === "csv" ? "Preparing…" : "Download CSV"}
               </Button>
             </div>
           ) : undefined
@@ -120,9 +129,9 @@ export function ReportDetailView({ report, backHref, backLabel }: ReportDetailVi
 
       {summary ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <MetricCard label="Budget (USD)" value={formatCurrency(summary.budget)} />
-          <MetricCard label="Committed (USD)" value={formatCurrency(summary.committed)} />
-          <MetricCard label="Actual (USD)" value={formatCurrency(summary.actual)} />
+          <MetricCard label="Budget (ETB)" value={formatCurrency(summary.budget)} />
+          <MetricCard label="Committed (ETB)" value={formatCurrency(summary.committed)} />
+          <MetricCard label="Actual (ETB)" value={formatCurrency(summary.actual)} />
           <MetricCard label="Utilization" value={`${summary.utilization}%`} />
         </div>
       ) : null}
@@ -197,9 +206,9 @@ export function ReportDetailView({ report, backHref, backLabel }: ReportDetailVi
                 <Download className="mr-2 h-4 w-4" />
                 Download PDF
               </Button>
-              <Button className="w-full" variant="outline" onClick={() => downloadReportCsv(report, bvaRows)}>
+              <Button className="w-full" variant="outline" disabled={downloading !== null} onClick={handleCsvDownload}>
                 <FileSpreadsheet className="mr-2 h-4 w-4" />
-                Download CSV
+                {downloading === "csv" ? "Preparing…" : "Download CSV"}
               </Button>
             </div>
           ) : (

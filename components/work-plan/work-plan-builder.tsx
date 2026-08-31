@@ -17,14 +17,13 @@ import {
 type Props = {
   template: WorkPlanTemplate;
   parsed: ParsedWorkPlan | null;
-  fx: number;
   farmBlocks?: string[];
   readOnly?: boolean;
   onSave: (parsed: ParsedWorkPlan) => void;
   isSaving?: boolean;
 };
 
-export function WorkPlanBuilder({ template, parsed, fx, farmBlocks, readOnly, onSave, isSaving }: Props) {
+export function WorkPlanBuilder({ template, parsed, farmBlocks, readOnly, onSave, isSaving }: Props) {
   const [sections, setSections] = useState<WorkPlanSectionDraft[]>(() =>
     initSectionsFromTemplate(template, parsed),
   );
@@ -82,7 +81,7 @@ export function WorkPlanBuilder({ template, parsed, fx, farmBlocks, readOnly, on
         <div className="flex flex-wrap items-center justify-end gap-3 border-t px-5 py-4">
           <Button
             disabled={isSaving || grandTotal <= 0}
-            onClick={() => onSave(buildParsedFromSections(sections, fx, "form"))}
+            onClick={() => onSave(buildParsedFromSections(sections, "form"))}
           >
             {isSaving ? "Saving…" : "Save plan draft"}
           </Button>

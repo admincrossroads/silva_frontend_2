@@ -33,12 +33,7 @@ export default function AcceptProgramInvitePage() {
 
   return (
     <div className="mx-auto max-w-lg space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Accept program invite</h1>
-        <p className="text-sm text-muted-foreground">
-          Paste the invite token from email or your partner, then join the program.
-        </p>
-      </div>
+      <h1 className="text-2xl font-bold">Accept program invite</h1>
 
       <Card>
         <CardHeader>

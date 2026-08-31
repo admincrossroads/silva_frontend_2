@@ -1,5 +1,5 @@
-import { RegistrationWizard } from "@/components/auth/registration-wizard";
+import { redirect } from "next/navigation";
 
 export default function RegisterAssetOwnerPage() {
-  return <RegistrationWizard orgType="silva" />;
+  redirect("/login");
 }

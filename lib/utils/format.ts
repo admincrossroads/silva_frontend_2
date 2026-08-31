@@ -1,27 +1,43 @@
-export function formatCurrency(amount: number | null | undefined, currency = "USD", fallback = "—") {
+const ETB = "ETB";
+
+export function formatCurrency(amount: number | null | undefined, _currency = ETB, fallback = "—") {
   if (amount == null || Number.isNaN(Number(amount))) return fallback;
-  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(Number(amount));
+  return new Intl.NumberFormat("en-ET", {
+    style: "currency",
+    currency: ETB,
+    maximumFractionDigits: 0,
+  }).format(Number(amount));
 }
 
-export function formatDate(date: string | Date | null | undefined, fallback = "—") {
-  if (date == null || date === "") return fallback;
-  const d = date instanceof Date ? date : new Date(date);
-  if (Number.isNaN(d.getTime())) return fallback;
-  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(d);
+export function formatEtb(amount: number | null | undefined, fallback = "—") {
+  return formatCurrency(amount, ETB, fallback);
 }
 
-export function formatDateTime(date: string | Date | null | undefined, fallback = "—") {
-  if (date == null || date === "") return fallback;
-  const d = date instanceof Date ? date : new Date(date);
-  if (Number.isNaN(d.getTime())) return fallback;
-  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" }).format(d);
+export function formatOptionalNumber(value: number | null | undefined, fallback = "—") {
+  if (value == null || Number.isNaN(Number(value))) return fallback;
+  return Number(value).toLocaleString();
 }
 
-export function formatNumber(n: number) {
-  return new Intl.NumberFormat("en-US").format(n);
+export function formatDate(value: string | Date | null | undefined, fallback = "—") {
+  if (!value) return fallback;
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return fallback;
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(date);
 }
 
-export function formatOptionalNumber(n: number | null | undefined, fallback = "—") {
-  if (n == null || Number.isNaN(n)) return fallback;
-  return formatNumber(n);
+export function formatDateTime(value: string | Date | null | undefined, fallback = "—") {
+  if (!value) return fallback;
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return fallback;
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
 }

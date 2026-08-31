@@ -55,7 +55,7 @@ const afpSchema = z.object({
   year: z.coerce.number().min(2020).max(2100),
   operatingDiscipline: z.string().min(1, "Required"),
   activity: z.string().min(1, "Required"),
-  budgetAllocatedUsd: z.coerce.number().positive("Must be positive"),
+  budgetAllocatedEtb: z.coerce.number().positive("Must be positive"),
   kpiTarget: z.string().min(1, "Required"),
   notes: z.string().optional(),
 });
@@ -77,7 +77,7 @@ export function AfpForm({ onSuccess, defaultValues }: AfpFormProps) {
       year: new Date().getFullYear(),
       operatingDiscipline: "",
       activity: "",
-      budgetAllocatedUsd: 0,
+      budgetAllocatedEtb: 0,
       kpiTarget: "",
       notes: "",
       ...defaultValues,
@@ -169,10 +169,10 @@ export function AfpForm({ onSuccess, defaultValues }: AfpFormProps) {
 
         <FormField
           control={form.control}
-          name="budgetAllocatedUsd"
+          name="budgetAllocatedEtb"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Budget Allocated (USD)</FormLabel>
+              <FormLabel>Budget (ETB)</FormLabel>
               <FormControl>
                 <Input type="number" step="0.01" {...field} />
               </FormControl>

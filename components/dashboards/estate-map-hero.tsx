@@ -55,8 +55,8 @@ function fillFor(health: string) {
 export function EstateMapHero({ map }: { map: EstateMapData | null | undefined }) {
   if (!map) {
     return (
-      <div className="rounded-2xl border bg-muted/30 p-8 text-sm text-muted-foreground">
-        No farm estate map available for this program yet.
+      <div className="rounded-2xl border border-border/80 bg-muted/30 p-8 text-center text-sm text-muted-foreground">
+        No estate map
       </div>
     );
   }
@@ -225,9 +225,6 @@ export function EstateMapHero({ map }: { map: EstateMapData | null | undefined }
               </div>
             </div>
           </div>
-          <p className="text-[11px] leading-relaxed text-emerald-100/50">
-            Block tint reflects SPX-issued work only — not raw vendor tickets.
-          </p>
         </div>
       </div>
     </div>

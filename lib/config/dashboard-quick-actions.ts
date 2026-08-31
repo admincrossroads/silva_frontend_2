@@ -23,17 +23,17 @@ export function quickActionsFor(user: User): QuickAction[] {
       { label: "Interventions", href: "/operations/interventions", icon: ClipboardList },
       { label: "Projects", href: "/operations/projects", icon: FileCheck },
       { label: "Validation queue", href: "/validation/queue", icon: FileCheck },
-      { label: "Block plan", href: "/planning/afp-blocks", icon: Wallet },
+      { label: "Budget", href: "/planning/afp", icon: Wallet },
     ];
   }
 
   if (isSpxRole(role)) {
     return [
-      { label: "Weekly entry", href: "/execution/weekly-entry", icon: ClipboardList },
+      { label: "Field tickets", href: "/execution/field-tickets", icon: ClipboardList },
       { label: "Validation queue", href: "/validation/queue", icon: FileCheck },
       { label: "Interventions", href: "/operations/interventions", icon: ClipboardList },
       { label: "Projects", href: "/operations/projects", icon: FileCheck },
-      { label: "Block plan", href: "/planning/afp-blocks", icon: FileText },
+      { label: "Budget", href: "/planning/afp", icon: FileText },
     ];
   }
 
@@ -41,16 +41,14 @@ export function quickActionsFor(user: User): QuickAction[] {
     return [
       { label: "New intervention", href: "/operations/interventions", icon: PlusCircle },
       { label: "New project", href: "/operations/projects", icon: FileCheck },
-      { label: "Rate approvals", href: "/planning/rate-card-approvals", icon: FileCheck },
-      { label: "Commitments (ETB)", href: "/planning/cropfort-afe-approvals", icon: BarChart3 },
+      { label: "Commitments", href: "/planning/afe", icon: FileCheck },
+      { label: "Budget vs actual", href: "/reports/budget-vs-actual", icon: BarChart3 },
     ];
   }
 
   if (isVendorRole(role)) {
     const actions: QuickAction[] = [
-      { label: "Weekly entry", href: "/execution/weekly-entry", icon: LayoutDashboard },
-      { label: "Interventions", href: "/operations/interventions", icon: PlusCircle },
-      { label: "Projects", href: "/operations/projects", icon: FileCheck },
+      { label: "Field tickets", href: "/execution/field-tickets", icon: LayoutDashboard },
       { label: "New ticket", href: "/execution/field-tickets", icon: PlusCircle },
     ];
     if (role !== "vendor_worker") {

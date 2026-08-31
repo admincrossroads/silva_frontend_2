@@ -100,7 +100,7 @@ export default function WorkOrdersPage() {
       ) : isLoading ? (
         <p className="text-muted-foreground">Loading…</p>
       ) : (
-        <DataTable columns={workOrderColumns} data={workOrders} searchKey="activity" />
+        <DataTable columns={workOrderColumns} data={workOrders} searchKey="activity" getRowStatus={(row) => row.status} />
       )}
 
       {canManageWo ? (

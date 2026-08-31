@@ -7,40 +7,35 @@ import { StatusBadge } from "@/components/badges/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils/format";
-import { Eye } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { TableChip, TableMuted, TablePrimaryCell } from "../data-table-cells";
 
 export const vendorColumns: ColumnDef<Vendor, unknown>[] = [
   {
-    accessorKey: "id",
-    header: "ID",
-    cell: ({ row }) => (
-      <span className="font-mono text-xs">{row.original.id.slice(0, 8)}</span>
-    ),
-  },
-  {
     accessorKey: "name",
-    header: "Name",
-    cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
-  },
-  {
-    accessorKey: "category",
-    header: "Category",
+    header: "Vendor",
     cell: ({ row }) => (
-      <span className="capitalize">{row.original.category.replace(/_/g, " ")}</span>
+      <TablePrimaryCell
+        href={`/vendors/${row.original.id}`}
+        title={row.original.name}
+        subtitle={row.original.category.replace(/_/g, " ")}
+      />
     ),
   },
   {
     accessorKey: "servicesProvided",
     header: "Services",
     cell: ({ row }) => (
-      <span className="max-w-[200px] truncate block">{row.original.servicesProvided}</span>
+      <TableMuted className="line-clamp-2 block max-w-[14rem]">
+        {row.original.servicesProvided || "—"}
+      </TableMuted>
     ),
   },
   {
     accessorKey: "prequalified",
     header: "Prequalified",
     cell: ({ row }) => (
-      <Badge variant={row.original.prequalified ? "default" : "secondary"}>
+      <Badge variant={row.original.prequalified ? "default" : "secondary"} className="text-[11px]">
         {row.original.prequalified ? "Yes" : "No"}
       </Badge>
     ),
@@ -55,20 +50,19 @@ export const vendorColumns: ColumnDef<Vendor, unknown>[] = [
     header: "Insurance",
     cell: ({ row }) =>
       row.original.insuranceOnFile ? (
-        <span className="text-xs">
-          Expires {row.original.insuranceExpiry ? formatDate(row.original.insuranceExpiry) : "N/A"}
-        </span>
+        <TableChip>Exp. {row.original.insuranceExpiry ? formatDate(row.original.insuranceExpiry) : "N/A"}</TableChip>
       ) : (
-        <span className="text-xs text-muted-foreground">None</span>
+        <span className="text-sm text-muted-foreground">None</span>
       ),
   },
   {
     id: "actions",
-    header: "Actions",
+    header: "",
     cell: ({ row }) => (
       <Link href={`/vendors/${row.original.id}`}>
-        <Button variant="ghost" size="sm">
-          <Eye className="h-4 w-4" />
+        <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs text-muted-foreground hover:text-primary">
+          Open
+          <ArrowUpRight className="h-3.5 w-3.5" />
         </Button>
       </Link>
     ),

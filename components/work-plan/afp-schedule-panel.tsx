@@ -57,8 +57,7 @@ export function AfpSchedulePanel({ afpLineId }: AfpSchedulePanelProps) {
         ))}
       </div>
       <p className="mt-3 text-xs text-muted-foreground">
-        Annual plan: {data.budgetAllocatedEtb?.toLocaleString() ?? "—"} ETB ·{" "}
-        {data.budgetAllocatedUsd != null ? data.budgetAllocatedUsd.toLocaleString() : "—"} USD
+        Annual plan: {data.budgetAllocatedEtb?.toLocaleString() ?? "—"} ETB
       </p>
     </Card>
   );

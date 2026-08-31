@@ -240,7 +240,6 @@ export default function ExecutionCalendarPage() {
     <PageShell>
       <PageHeader
         title="Season calendar"
-        description="SPX lays out week windows for prune, fertilize, harvest, and infra then issues them to the field. Vendors start and complete against issued windows."
         actions={
           canManage ? (
             <Button onClick={() => setCalModalOpen(true)}>

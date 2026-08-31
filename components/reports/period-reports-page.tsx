@@ -61,7 +61,6 @@ export function PeriodReportsPage({ type, generate }: PeriodReportsPageProps) {
     <PageShell>
       <PageHeader
         title={config.title}
-        description={isSilva ? "Released reports from SPX with budget summary and narrative." : config.subtitle}
         actions={
           canDraft ? (
             <Button onClick={() => generateMutation.mutate()} disabled={generateMutation.isPending}>

@@ -26,13 +26,11 @@ export function DashboardPanel({
   noPadding,
 }: DashboardPanelProps) {
   return (
-    <Card className={cn("dashboard-panel overflow-hidden", className)}>
-      <div className="flex items-center justify-between gap-3 border-b bg-muted/30 px-4 py-3">
-        <div className="min-w-0">
-          <h3 className="text-sm font-semibold text-foreground">{title}</h3>
-        </div>
+    <Card className={cn("dashboard-panel overflow-hidden rounded-2xl border-border/80 shadow-sm", className)}>
+      <div className="flex items-center justify-between gap-3 border-b border-border/80 bg-muted/30 px-4 py-3">
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
         {viewAllHref ? (
-          <Button variant="ghost" size="sm" className="h-8 shrink-0 text-xs gap-1" asChild>
+          <Button variant="ghost" size="sm" className="h-8 shrink-0 gap-1 text-xs" asChild>
             <Link href={viewAllHref}>
               {viewAllLabel}
               <ChevronRight className="h-3.5 w-3.5" />
@@ -46,7 +44,7 @@ export function DashboardPanel({
 }
 
 export function DashboardPanelEmpty({ message }: { message: string }) {
-  return <p className="px-4 py-8 text-sm text-muted-foreground text-center">{message}</p>;
+  return <p className="px-4 py-8 text-center text-sm text-muted-foreground">{message}</p>;
 }
 
 export function DashboardPanelRow({
@@ -59,8 +57,8 @@ export function DashboardPanelRow({
   className?: string;
 }) {
   const rowClass = cn(
-    "flex items-center gap-3 px-4 py-2.5 text-sm border-b last:border-0 transition-colors",
-    href && "hover:bg-muted/50",
+    "flex items-center gap-3 border-b border-border/50 px-4 py-2.5 text-sm transition-colors last:border-0",
+    href && "hover:bg-primary/[0.04]",
     className,
   );
 

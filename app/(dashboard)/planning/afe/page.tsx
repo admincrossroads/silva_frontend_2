@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { DollarSign, FileCheck, Layers, Shield } from "lucide-react";
 import { useAfes } from "@/hooks/use-afes";
 import { afeColumns } from "@/components/data-table/columns/afe-columns";
 import { DataTable } from "@/components/data-table/data-table";
@@ -17,17 +18,15 @@ import {
 import { Plus } from "lucide-react";
 import { ModulePageShell } from "@/components/items/module-page-shell";
 import { DraggableBoardView } from "@/components/items/draggable-board-view";
+import { BoardSummaryStrip } from "@/components/items/board-summary-strip";
 import { DEFAULT_WORKFLOW } from "@/lib/config/procore-modules";
 import { afeToBoardItem, BOARD_TRANSITIONS, boardTransitionKey } from "@/lib/items/board-adapters";
 import type { ModuleViewMode } from "@/lib/config/procore-modules";
 import type { BoardItem } from "@/components/items/types";
-import {
-  useSubmitAfe,
-  useValidateAfe,
-  useApproveAfe,
-} from "@/hooks/use-afes";
+import { useSubmitAfe, useValidateAfe, useApproveAfe } from "@/hooks/use-afes";
 import { useRole } from "@/hooks/use-role";
 import { usePermissions } from "@/hooks/use-permissions";
+import { formatEtb } from "@/lib/utils/format";
 
 const STATUSES = ["draft", "submitted", "validated", "approved", "rejected", "closed"];
 const BANDS = ["A", "B", "C", "D"];
@@ -48,6 +47,20 @@ export default function AfePage() {
   const validateAfe = useValidateAfe();
   const approveAfe = useApproveAfe();
   const boardItems = afes.map(afeToBoardItem);
+
+  const totalEstimate = useMemo(
+    () => afes.reduce((sum, row) => sum + (row.estimatedCostEtb ?? 0), 0),
+    [afes],
+  );
+
+  const columnSummaries = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const col of BOARD_COLUMNS) {
+      const total = afes.filter((row) => row.status === col).reduce((sum, row) => sum + (row.estimatedCostEtb ?? 0), 0);
+      if (total > 0) map[col] = formatEtb(total);
+    }
+    return map;
+  }, [afes]);
 
   const handleMove = (item: BoardItem, toStatus: string) => {
     const action = BOARD_TRANSITIONS.afe[boardTransitionKey(item.status, toStatus)];
@@ -75,7 +88,7 @@ export default function AfePage() {
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="all">All statuses</SelectItem>
               {STATUSES.map((s) => (
                 <SelectItem key={s} value={s}>
                   {s.charAt(0).toUpperCase() + s.slice(1)}
@@ -88,7 +101,7 @@ export default function AfePage() {
               <SelectValue placeholder="Band" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Bands</SelectItem>
+              <SelectItem value="all">All bands</SelectItem>
               {BANDS.map((b) => (
                 <SelectItem key={b} value={b}>
                   Band {b}
@@ -99,11 +112,56 @@ export default function AfePage() {
         </>
       }
     >
-      {view === "board" ? (
-        <DraggableBoardView columns={BOARD_COLUMNS} items={boardItems} loading={isLoading} onItemMove={handleMove} />
-      ) : (
-        <DataTable columns={afeColumns} data={afes} searchKey="description" />
-      )}
+      <div className="space-y-5">
+        <BoardSummaryStrip
+          stats={[
+            {
+              label: "Commitments",
+              value: String(afes.length),
+              sublabel: "Total AFE lines",
+              icon: Layers,
+              tone: "primary",
+            },
+            {
+              label: "Estimated spend",
+              value: formatEtb(totalEstimate),
+              sublabel: "All bands",
+              icon: DollarSign,
+            },
+            {
+              label: "Approved",
+              value: String(afes.filter((r) => r.status === "approved").length),
+              sublabel: "Ready to issue",
+              icon: FileCheck,
+              tone: "emerald",
+            },
+            {
+              label: "Band C/D",
+              value: String(afes.filter((r) => r.band === "C" || r.band === "D").length),
+              sublabel: "Higher authority",
+              icon: Shield,
+              tone: "amber",
+            },
+          ]}
+        />
+        {view === "board" ? (
+          <DraggableBoardView
+            columns={BOARD_COLUMNS}
+            items={boardItems}
+            loading={isLoading}
+            columnSummaries={columnSummaries}
+            onItemMove={handleMove}
+            emptyMessage="No AFE commitments yet. Create an authorization to commit spend against the program."
+          />
+        ) : (
+          <DataTable
+            columns={afeColumns}
+            data={afes}
+            searchKey="description"
+            getRowStatus={(row) => row.status}
+          />
+        )}
+      </div>
 
       <Modal open={open} onClose={() => setOpen(false)} title="Create AFE">
         <AfeForm onSuccess={() => setOpen(false)} />

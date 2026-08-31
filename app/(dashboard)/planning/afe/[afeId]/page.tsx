@@ -32,12 +32,7 @@ import {
 
 const STATUS_STEPS = ["draft", "submitted", "validated", "approved", "closed"] as const;
 
-function formatUsd(value: number | null | undefined) {
-  if (value == null || Number.isNaN(Number(value))) return "—";
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 }).format(
-    Number(value),
-  );
-}
+import { formatEtb } from "@/lib/utils/format";
 
 export default function AfeDetailPage() {
   const { afeId } = useParams<{ afeId: string }>();
@@ -105,7 +100,7 @@ export default function AfeDetailPage() {
         <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Estimated cost</p>
-            <p className="mt-1 font-display text-3xl font-semibold tabular-nums">{formatUsd(afe.estimatedCostUsd)}</p>
+            <p className="mt-1 font-display text-3xl font-semibold tabular-nums">{formatEtb(afe.estimatedCostEtb)}</p>
             <p className="mt-1 text-sm text-muted-foreground">{afe.operatingDiscipline} · Band {afe.band}</p>
           </div>
           <Badge variant="outline" className="gap-1 py-1">
@@ -131,7 +126,7 @@ export default function AfeDetailPage() {
                 value={afe.planningMode === "ad_hoc" ? "Ad-hoc (outside annual plan)" : "Planned"}
               />
               <InfoRow icon={FileText} label="Description" value={afe.description} className="sm:col-span-2" />
-              <InfoRow icon={DollarSign} label="Estimated cost" value={formatUsd(afe.estimatedCostUsd)} />
+              <InfoRow icon={DollarSign} label="Estimated cost" value={formatEtb(afe.estimatedCostEtb)} />
               <InfoRow icon={Shield} label="Silva approval" value={afe.silvaApprovalRequired ? "Required" : "Not required"} />
               <InfoRow icon={Calendar} label="AFP line" value={afe.afpLineId || "— (standalone)"} className="sm:col-span-2" />
             </dl>

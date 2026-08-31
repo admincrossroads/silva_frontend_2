@@ -1,16 +1,14 @@
 import type { Schedule3Threshold } from "@/types";
+import { formatEtb } from "@/lib/utils/format";
 
-/** Mirror server computeBand — resolves band letter from program thresholds. */
-export function computeBandFromThresholds(
-  estimatedCostUsd: number,
-  thresholds: Schedule3Threshold[],
-): string {
-  const amount = Number(estimatedCostUsd);
-  const sorted = [...thresholds].sort((a, b) => a.minValueUsd - b.minValueUsd);
+/** Resolve band letter from program thresholds (amounts in ETB). */
+export function computeBandFromThresholds(estimatedCostEtb: number, thresholds: Schedule3Threshold[]): string {
+  const amount = Number(estimatedCostEtb);
+  const sorted = [...thresholds].sort((a, b) => a.minValueEtb - b.minValueEtb);
 
   const match = sorted.find((t) => {
-    const min = t.minValueUsd;
-    const max = t.maxValueUsd;
+    const min = t.minValueEtb;
+    const max = t.maxValueEtb;
     if (max == null) return amount >= min;
     return amount >= min && amount <= max;
   });
@@ -19,12 +17,12 @@ export function computeBandFromThresholds(
 }
 
 export function formatBandRange(threshold: Schedule3Threshold): string {
-  const { minValueUsd, maxValueUsd } = threshold;
-  if (maxValueUsd == null) {
-    return minValueUsd <= 0 ? "Open ended" : `≥ $${minValueUsd.toLocaleString()}`;
+  const { minValueEtb, maxValueEtb } = threshold;
+  if (maxValueEtb == null) {
+    return minValueEtb <= 0 ? "Open ended" : `≥ ${formatEtb(minValueEtb)}`;
   }
-  if (minValueUsd <= 0) return `≤ $${maxValueUsd.toLocaleString()}`;
-  return `$${minValueUsd.toLocaleString()} – $${maxValueUsd.toLocaleString()}`;
+  if (minValueEtb <= 0) return `≤ ${formatEtb(maxValueEtb)}`;
+  return `${formatEtb(minValueEtb)} – ${formatEtb(maxValueEtb)}`;
 }
 
 export function bandRangeLabel(band: string, thresholds?: Schedule3Threshold[]): string {

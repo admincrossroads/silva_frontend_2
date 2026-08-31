@@ -1,11 +1,9 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { FieldTicket } from "@/types";
 import { StatusBadge } from "@/components/badges/status-badge";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +17,13 @@ import {
   useVendorReviewFieldTicket,
 } from "@/hooks/use-field-tickets";
 import { getApiErrorMessage } from "@/lib/api/errors";
+import { formatDate } from "@/lib/utils/format";
+import {
+  TableChip,
+  TableIdLink,
+  TablePrimaryCell,
+  TableRowActionsTrigger,
+} from "../data-table-cells";
 
 function FtRowActions({ ft }: { ft: FieldTicket }) {
   const submit = useSubmitFieldTicket();
@@ -38,18 +43,16 @@ function FtRowActions({ ft }: { ft: FieldTicket }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" disabled={busy}>
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
+        <TableRowActionsTrigger disabled={busy} />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem asChild>
-          <Link href={`/execution/field-tickets/${ft.id}`}>View</Link>
+          <Link href={`/execution/field-tickets/${ft.id}`}>View details</Link>
         </DropdownMenuItem>
-        {ft.status === "draft" && (
+        {ft.status === "draft" ? (
           <DropdownMenuItem onClick={() => run(() => submit.mutateAsync(ft.id))}>Submit</DropdownMenuItem>
-        )}
-        {ft.status === "submitted" && (
+        ) : null}
+        {ft.status === "submitted" ? (
           <>
             <DropdownMenuItem onClick={() => run(() => review.mutateAsync(ft.id))}>Vendor review</DropdownMenuItem>
             <DropdownMenuItem
@@ -59,8 +62,8 @@ function FtRowActions({ ft }: { ft: FieldTicket }) {
               Reject
             </DropdownMenuItem>
           </>
-        )}
-        {ft.status === "vendor_reviewed" && (
+        ) : null}
+        {ft.status === "vendor_reviewed" ? (
           <>
             <DropdownMenuItem onClick={() => run(() => validate.mutateAsync({ id: ft.id, comment: "" }))}>
               SPX validate
@@ -72,7 +75,7 @@ function FtRowActions({ ft }: { ft: FieldTicket }) {
               Reject
             </DropdownMenuItem>
           </>
-        )}
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -80,34 +83,32 @@ function FtRowActions({ ft }: { ft: FieldTicket }) {
 
 export const fieldTicketColumns: ColumnDef<FieldTicket>[] = [
   {
-    accessorKey: "id",
-    header: "ID",
+    accessorKey: "activityRecorded",
+    header: "Activity",
     cell: ({ row }) => (
-      <Link href={`/execution/field-tickets/${row.original.id}`} className="font-mono text-xs text-primary hover:underline">
-        {row.original.id}
-      </Link>
+      <TablePrimaryCell
+        href={`/execution/field-tickets/${row.original.id}`}
+        title={row.original.activityRecorded}
+        subtitle={formatDate(row.original.ticketDate)}
+      />
     ),
   },
   {
     accessorKey: "workOrderId",
-    header: "Work Order",
+    header: "Work order",
     cell: ({ row }) => (
-      <Link href={`/execution/work-orders/${row.original.workOrderId}`} className="font-mono text-xs hover:underline">
-        {row.original.workOrderId}
-      </Link>
+      <TableIdLink href={`/execution/work-orders/${row.original.workOrderId}`} id={row.original.workOrderId} />
     ),
   },
-  { accessorKey: "activityRecorded", header: "Activity" },
   {
     accessorKey: "areaHa",
-    header: "Area (ha)",
-    cell: ({ row }) => row.original.areaHa.toFixed(2),
+    header: "Area",
+    cell: ({ row }) => <TableChip>{row.original.areaHa.toFixed(2)} ha</TableChip>,
   },
-  { accessorKey: "laborCount", header: "Labor" },
   {
-    accessorKey: "ticketDate",
-    header: "Date",
-    cell: ({ row }) => new Date(row.original.ticketDate).toLocaleDateString(),
+    accessorKey: "laborCount",
+    header: "Labor",
+    cell: ({ row }) => <span className="text-sm font-semibold tabular-nums">{row.original.laborCount}</span>,
   },
   {
     accessorKey: "status",
@@ -116,6 +117,7 @@ export const fieldTicketColumns: ColumnDef<FieldTicket>[] = [
   },
   {
     id: "actions",
+    header: "",
     cell: ({ row }) => <FtRowActions ft={row.original} />,
   },
 ];

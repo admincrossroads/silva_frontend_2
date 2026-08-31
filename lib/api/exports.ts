@@ -12,6 +12,9 @@ export const exportApi = {
   reportPdf: (reportId: string) =>
     api.get(`/exports/reports/${reportId}/pdf`, { responseType: "blob" }).then((r) => r.data as Blob),
 
+  reportCsv: (reportId: string) =>
+    api.get(`/exports/reports/${reportId}/csv`, { responseType: "blob" }).then((r) => r.data as Blob),
+
   silvaGlDrop: (period: string) =>
     api.post<{ data: { exportId: string; fileName: string; filePath: string; rowCount: number } }>(
       "/exports/silva-gl-drop",

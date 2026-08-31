@@ -47,7 +47,7 @@ const afeSchema = z.object({
   afpLineId: z.string().min(1, "Required"),
   operatingDiscipline: z.string().min(1, "Required"),
   description: z.string().min(1, "Required"),
-  estimatedCostUsd: z.coerce.number().positive("Must be positive"),
+  estimatedCostEtb: z.coerce.number().positive("Must be positive"),
 });
 
 type AfeFormValues = z.infer<typeof afeSchema>;
@@ -68,12 +68,12 @@ export function AfeForm({ onSuccess, defaultValues }: AfeFormProps) {
       afpLineId: "",
       operatingDiscipline: "",
       description: "",
-      estimatedCostUsd: 0,
+      estimatedCostEtb: 0,
       ...defaultValues,
     },
   });
 
-  const costValue = useWatch({ control: form.control, name: "estimatedCostUsd" });
+  const costValue = useWatch({ control: form.control, name: "estimatedCostEtb" });
   const currentBand = computeBand(Number(costValue) || 0, schedule3);
 
   async function onSubmit(values: AfeFormValues) {
@@ -150,10 +150,10 @@ export function AfeForm({ onSuccess, defaultValues }: AfeFormProps) {
 
         <FormField
           control={form.control}
-          name="estimatedCostUsd"
+          name="estimatedCostEtb"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Estimated Cost (USD)</FormLabel>
+              <FormLabel>Estimated cost (ETB)</FormLabel>
               <FormControl>
                 <Input type="number" step="0.01" {...field} />
               </FormControl>

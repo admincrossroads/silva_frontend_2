@@ -16,6 +16,11 @@ import {
 } from "@/components/auth/registration-shell";
 import { getApiErrorMessage } from "@/lib/api/errors";
 import { useSubmitRegistration } from "@/hooks/use-registration";
+import {
+  REGISTRATION_ACTIVATION_STORAGE_KEY,
+  activationNote,
+  fullActivationUrl,
+} from "@/lib/api/registration";
 import { siteConfig } from "@/lib/config/site";
 import type { RegistrationOrgType, RegistrationSubmitDto } from "@/lib/api/registration";
 
@@ -56,9 +61,11 @@ function stepsFor(orgType: RegistrationOrgType): RegistrationStep[] {
 
 type Props = {
   orgType: RegistrationOrgType;
+  /** SPX admin intake inside settings (not public self-service). */
+  internal?: boolean;
 };
 
-export function RegistrationWizard({ orgType }: Props) {
+export function RegistrationWizard({ orgType, internal = false }: Props) {
   const router = useRouter();
   const submit = useSubmitRegistration();
   const steps = stepsFor(orgType);
@@ -70,22 +77,38 @@ export function RegistrationWizard({ orgType }: Props) {
 
   const title =
     orgType === "silva"
-      ? ["Your organization", "Primary contact", "Asset profile", "Review application"][step]
-      : ["Your organization", "Primary contact", "Vendor profile", "Review application"][step];
+      ? ["Organization", "Primary contact", "Asset profile", "Review registration"][step]
+      : ["Organization", "Primary contact", "Vendor profile", "Review registration"][step];
 
   const subtitle =
     orgType === "silva"
       ? [
-          "Tell us about the asset owner company applying for a governance workspace.",
-          "Who should SPX contact about this application?",
-          "Describe the estates and governance context SPX should know.",
-          "Check everything before submitting to SPX for review.",
+          internal
+            ? "Enter the asset owner company details for this registration."
+            : "Tell us about the asset owner company applying for a governance workspace.",
+          internal
+            ? "Who will be the primary administrator for this workspace?"
+            : "Who should SPX contact about this application?",
+          internal
+            ? "Estate and governance context for SPX records."
+            : "Describe the estates and governance context SPX should know.",
+          internal
+            ? "Confirm details before creating the registration record."
+            : "Check everything before submitting to SPX for review.",
         ][step]
       : [
-          "Tell us about the execution vendor company applying for a field workspace.",
-          "Who should SPX contact about this application?",
-          "Describe the services and field capacity you provide.",
-          "Check everything before submitting to SPX for review.",
+          internal
+            ? "Enter the execution vendor company details for this registration."
+            : "Tell us about the execution vendor company applying for a field workspace.",
+          internal
+            ? "Who will be the primary administrator for this workspace?"
+            : "Who should SPX contact about this application?",
+          internal
+            ? "Services and field capacity for SPX records."
+            : "Describe the services and field capacity you provide.",
+          internal
+            ? "Confirm details before creating the registration record."
+            : "Check everything before submitting to SPX for review.",
         ][step];
 
   const next = () => {
@@ -117,35 +140,59 @@ export function RegistrationWizard({ orgType }: Props) {
         legalName: form.legalName?.trim() || undefined,
         estimatedHectares: form.estimatedHectares ? Number(form.estimatedHectares) : undefined,
       };
-      await submit.mutateAsync(payload);
-      router.push(`/register/submitted?type=${orgType === "silva" ? "asset-owner" : "vendor"}`);
+      const result = await submit.mutateAsync(payload);
+      if (internal) {
+        sessionStorage.setItem(
+          REGISTRATION_ACTIVATION_STORAGE_KEY,
+          JSON.stringify({
+            url: result.activationUrl || fullActivationUrl(result.activationPath),
+            emailNote: activationNote(result.emailDelivery),
+          }),
+        );
+        router.push("/settings/registrations");
+      } else {
+        router.push(`/register/submitted?type=${orgType === "silva" ? "asset-owner" : "vendor"}`);
+      }
     } catch (err) {
       setError(getApiErrorMessage(err, "Could not submit registration."));
     }
   };
 
   const typeLabel = orgType === "silva" ? "Asset owner" : "Execution vendor";
+  const backHref = internal ? "/settings/registrations/new" : "/register";
 
-  return (
+  const wizardBody = (
     <>
-      <RegistrationHeader
-        right={
-          <Link href="/register" className="text-sm text-muted-foreground hover:text-foreground">
-            Change type
-          </Link>
-        }
-      />
-      <RegistrationMobileProgress steps={steps} currentStep={step} />
+      {!internal ? <RegistrationMobileProgress steps={steps} currentStep={step} /> : null}
 
-      <div className="flex flex-1">
-        <RegistrationStepSidebar steps={steps} currentStep={step} />
+      <div className={internal ? "" : "flex flex-1"}>
+        {!internal ? <RegistrationStepSidebar steps={steps} currentStep={step} /> : null}
 
-        <div className="flex min-h-0 flex-1 flex-col">
-          <main className="flex-1 px-5 py-8 sm:px-8 sm:py-12 lg:px-12">
-            <div className="mx-auto max-w-2xl">
-              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-primary">{typeLabel} application</p>
-              <h1 className="mt-3 font-display text-3xl tracking-tight sm:text-4xl">{title}</h1>
-              <p className="mt-3 text-base leading-relaxed text-[hsl(160_12%_38%)]">{subtitle}</p>
+        <div className={internal ? "" : "flex min-h-0 flex-1 flex-col"}>
+          <main className={internal ? "" : "flex-1 px-5 py-8 sm:px-8 sm:py-12 lg:px-12"}>
+            <div className={internal ? "" : "mx-auto max-w-2xl"}>
+              {internal ? (
+                <div className="mb-6 flex flex-wrap gap-2">
+                  {steps.map((s, i) => (
+                    <span
+                      key={s.label}
+                      className={`rounded-full px-3 py-1 text-xs font-medium ${
+                        i === step ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {i + 1}. {s.label}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-primary">{typeLabel} application</p>
+              )}
+              <h1 className={internal ? "text-xl font-semibold tracking-tight" : "mt-3 font-display text-3xl tracking-tight sm:text-4xl"}>
+                {title}
+              </h1>
+              <p className={internal ? "mt-2 text-sm text-muted-foreground" : "mt-3 text-base leading-relaxed text-[hsl(160_12%_38%)]"}>
+                {subtitle}
+              </p>
 
               {error ? (
                 <div className="mt-6 rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -213,7 +260,9 @@ export function RegistrationWizard({ orgType }: Props) {
                     {orgType === "silva" && form.assetInterests ? <ReviewRow label="Assets" value={form.assetInterests} /> : null}
                     {orgType === "vendor" && form.servicesProvided ? <ReviewRow label="Services" value={form.servicesProvided} /> : null}
                     <p className="border-t pt-4 text-xs leading-relaxed text-muted-foreground">
-                      By submitting, you request access to {siteConfig.name}. The team will contact you before activating your workspace.
+                      {internal
+                        ? `This provisions the ${siteConfig.name} workspace and emails an activation link to the primary contact.`
+                        : `By submitting, you request access to ${siteConfig.name}. The team will contact you before activating your workspace.`}
                     </p>
                   </dl>
                 ) : null}
@@ -221,11 +270,17 @@ export function RegistrationWizard({ orgType }: Props) {
             </div>
           </main>
 
-          <footer className="sticky bottom-0 border-t border-[hsl(150_14%_86%)] bg-white/95 px-5 py-4 backdrop-blur-sm sm:px-8 lg:px-12">
-            <div className="mx-auto flex max-w-2xl items-center justify-between gap-3">
+          <footer
+            className={
+              internal
+                ? "mt-6 flex items-center justify-between gap-3 border-t pt-4"
+                : "sticky bottom-0 border-t border-[hsl(150_14%_86%)] bg-white/95 px-5 py-4 backdrop-blur-sm sm:px-8 lg:px-12"
+            }
+          >
+            <div className={internal ? "flex w-full items-center justify-between gap-3" : "mx-auto flex max-w-2xl items-center justify-between gap-3"}>
               {step === 0 ? (
                 <Button type="button" variant="outline" asChild>
-                  <Link href="/register">
+                  <Link href={backHref}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back
                   </Link>
@@ -243,13 +298,30 @@ export function RegistrationWizard({ orgType }: Props) {
                 </Button>
               ) : (
                 <Button type="button" disabled={submit.isPending} onClick={handleSubmit}>
-                  {submit.isPending ? "Submitting…" : "Submit application"}
+                  {submit.isPending ? "Sending…" : internal ? "Create & send invitation" : "Submit application"}
                 </Button>
               )}
             </div>
           </footer>
         </div>
       </div>
+    </>
+  );
+
+  if (internal) {
+    return wizardBody;
+  }
+
+  return (
+    <>
+      <RegistrationHeader
+        right={
+          <Link href="/register" className="text-sm text-muted-foreground hover:text-foreground">
+            Change type
+          </Link>
+        }
+      />
+      {wizardBody}
     </>
   );
 }
