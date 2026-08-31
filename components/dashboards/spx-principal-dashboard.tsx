@@ -11,6 +11,7 @@ import { DashboardPanel, DashboardPanelEmpty, DashboardPanelRow } from "@/compon
 import { ActionQueueCard } from "@/components/dashboard/action-queue-card";
 import { HealthBadge } from "@/components/badges/health-badge";
 import { CropfortDashboardSection } from "@/components/dashboards/cropfort-dashboard-section";
+import { useCoreOperationStats } from "@/hooks/use-ad-hoc-requests";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils/format";
 import {
@@ -74,6 +75,9 @@ export function SpxPrincipalDashboard() {
   const pendingAfe = data?.silva?.afePipeline?.pendingSilvaApprovalCount ?? 0;
   const awaitingFt = data?.fieldTicketQueue?.awaitingSignOffCount ?? 0;
   const exceptions = data?.exceptions?.length ?? 0;
+  const { data: coreOpsStats } = useCoreOperationStats();
+  const coreOpsQueue =
+    (coreOpsStats?.submittedInterventions ?? 0) + (coreOpsStats?.submittedProjects ?? 0);
 
   return (
     <div className="space-y-6">
@@ -128,6 +132,14 @@ export function SpxPrincipalDashboard() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <KpiStatCard
+          label="Core ops queue"
+          value={String(coreOpsQueue)}
+          sublabel={`${coreOpsStats?.activeProjects ?? 0} active projects`}
+          icon={ClipboardList}
+          tone={coreOpsQueue > 0 ? "amber" : "slate"}
+          href="/operations/interventions"
+        />
         <KpiStatCard
           label="Silva AFE queue"
           value={String(pendingAfe)}

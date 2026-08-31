@@ -124,12 +124,12 @@ export function SilvaDashboard() {
             </Button>
           </DashboardPanel>
 
-          <DashboardPanel title="Ad-hoc work" viewAllHref="/planning/intake" contentClassName="p-4">
+          <DashboardPanel title="Core Operations" viewAllHref="/operations/interventions" contentClassName="p-4">
             <p className="text-sm text-muted-foreground">
-              Need work that was not in the annual plan? Submit an ad-hoc request for SPX to convert into an AFE.
+              Submit interventions or multi-week projects outside the annual block plan for SPX to commit in ETB.
             </p>
             <Button variant="outline" size="sm" className="mt-3" asChild>
-              <Link href="/planning/intake">Request ad-hoc work</Link>
+              <Link href="/operations/interventions">Open core operations</Link>
             </Button>
           </DashboardPanel>
         </div>

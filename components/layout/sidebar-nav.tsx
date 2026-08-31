@@ -32,7 +32,11 @@ export function SidebarNav({
   const logoUrl = tenant?.branding?.logoUrl;
   const [openSections, setOpenSections] = useState<string[]>(() =>
     items
-      .filter((item) => item.children?.some((c) => pathname.startsWith(c.href)))
+      .filter((item) =>
+        item.children?.some(
+          (c) => pathname === c.href || (c.href !== "/" && pathname.startsWith(`${c.href}/`)),
+        ),
+      )
       .map((item) => item.label),
   );
 
@@ -130,7 +134,9 @@ export function SidebarNav({
           }
 
           const isOpen = openSections.includes(item.label);
-          const childActive = item.children?.some((c) => pathname === c.href || pathname.startsWith(`${c.href}/`));
+          const childActive = item.children?.some(
+            (c) => pathname === c.href || (c.href !== "/" && pathname.startsWith(`${c.href}/`)),
+          );
           const Icon = item.icon;
 
           return (
@@ -163,7 +169,9 @@ export function SidebarNav({
               {!collapsed && isOpen && item.children && (
                 <div className="ml-3 mt-0.5 space-y-0.5 border-l border-sidebar-border pl-2.5">
                   {item.children.map((child) => {
-                    const active = pathname === child.href || pathname.startsWith(`${child.href}/`);
+                    const active =
+                      pathname === child.href ||
+                      (child.href !== "/" && pathname.startsWith(`${child.href}/`));
                     return (
                       <Link
                         key={child.href}

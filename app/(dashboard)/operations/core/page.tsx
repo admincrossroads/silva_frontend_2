@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
-export default function LegacyIntakeRedirectPage() {
+export default function LegacyCoreOperationsRedirectPage() {
   redirect("/operations/interventions");
 }

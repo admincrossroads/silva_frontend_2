@@ -2,7 +2,7 @@ import api from "../index";
 
 export type CropfortAfeStatus = "draft" | "submitted" | "approved" | "returned";
 export type CropfortAfeBand = "A" | "B" | "C" | "D";
-export type CropfortAfeSourceType = "afp_line" | "weekly_submission" | "intervention" | "manual";
+export type CropfortAfeSourceType = "afp_line" | "weekly_submission" | "intervention" | "project" | "manual";
 
 export interface CropfortAfe {
   id: string;

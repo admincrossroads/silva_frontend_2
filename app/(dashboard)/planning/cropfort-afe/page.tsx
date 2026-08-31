@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Plus, Send } from "lucide-react";
 import {
   useCropfortAfes,
@@ -23,10 +25,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { CreateCropfortAfeDto, CropfortAfeSourceType } from "@/lib/api/cropfort/afes";
+import { cn } from "@/lib/utils";
 
 const STATUSES = ["draft", "submitted", "approved", "returned"] as const;
 const BANDS = ["A", "B", "C", "D"] as const;
-const SOURCE_TYPES: CropfortAfeSourceType[] = ["manual", "afp_line", "weekly_submission", "intervention"];
+const SOURCE_TYPES: CropfortAfeSourceType[] = ["manual", "afp_line", "weekly_submission", "intervention", "project"];
+
+function sourceLabel(sourceType: CropfortAfeSourceType) {
+  if (sourceType === "intervention") return "Intervention";
+  if (sourceType === "project") return "Project";
+  return sourceType.replace(/_/g, " ");
+}
 
 function formatEtb(value: number) {
   return new Intl.NumberFormat("en-ET", { style: "currency", currency: "ETB", maximumFractionDigits: 0 }).format(
@@ -41,6 +50,8 @@ const emptyForm: CreateCropfortAfeDto = {
 };
 
 export default function CropfortAfePage() {
+  const searchParams = useSearchParams();
+  const highlightId = searchParams.get("highlight");
   const { isSpx, isSystemAdmin } = useRole();
   const canEdit = isSpx || isSystemAdmin;
   const [statusFilter, setStatusFilter] = useState<string | undefined>();
@@ -126,34 +137,52 @@ export default function CropfortAfePage() {
                 <th className="px-3 py-2 font-medium">Band</th>
                 <th className="px-3 py-2 font-medium">Source</th>
                 <th className="px-3 py-2 font-medium">Status</th>
+                <th className="px-3 py-2 font-medium">Link</th>
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td colSpan={5} className="px-3 py-8 text-center text-muted-foreground">
+                  <td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">
                     Loading AFEs…
                   </td>
                 </tr>
               ) : afes.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-3 py-8 text-center text-muted-foreground">
+                  <td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">
                     No Cropfort AFEs yet.
                   </td>
                 </tr>
               ) : (
                 afes.map((afe) => (
-                  <tr key={afe.id} className="border-b last:border-0 hover:bg-muted/30">
+                  <tr
+                    key={afe.id}
+                    className={cn(
+                      "border-b last:border-0 hover:bg-muted/30",
+                      highlightId === afe.id && "bg-primary/5",
+                    )}
+                  >
                     <td className="px-3 py-2">{afe.title}</td>
                     <td className="px-3 py-2 text-right font-medium">{formatEtb(afe.amountEtb)}</td>
                     <td className="px-3 py-2">
                       <Badge variant="outline">Band {afe.band}</Badge>
                     </td>
-                    <td className="px-3 py-2 text-muted-foreground">{afe.sourceType.replace(/_/g, " ")}</td>
+                    <td className="px-3 py-2 text-muted-foreground capitalize">
+                      {sourceLabel(afe.sourceType)}
+                    </td>
                     <td className="px-3 py-2">
                       <Badge variant="outline" className="capitalize">
                         {afe.status}
                       </Badge>
+                    </td>
+                    <td className="px-3 py-2 text-sm">
+                      {(afe.sourceType === "intervention" || afe.sourceType === "project") && afe.sourceId ? (
+                        <Link className="text-primary underline" href="/operations/interventions">
+                          Core op
+                        </Link>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -203,7 +232,7 @@ export default function CropfortAfePage() {
               <SelectContent>
                 {SOURCE_TYPES.map((s) => (
                   <SelectItem key={s} value={s}>
-                    {s.replace(/_/g, " ")}
+                    {sourceLabel(s)}
                   </SelectItem>
                 ))}
               </SelectContent>

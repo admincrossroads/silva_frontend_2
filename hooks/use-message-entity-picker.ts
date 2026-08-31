@@ -198,7 +198,7 @@ export const MESSAGE_ENTITY_TYPE_OPTIONS: Array<{
   { value: "work_order", label: "Work order", roles: "all" },
   { value: "field_ticket", label: "Field ticket", roles: "execution" },
   { value: "work_plan_submission", label: "Work plan", roles: "execution" },
-  { value: "ad_hoc_request", label: "Ad-hoc request", roles: "all" },
+  { value: "ad_hoc_request", label: "Core operation", roles: "all" },
   { value: "farm_estate", label: "Farm estate", roles: "spx_silva" },
   { value: "payment_request", label: "Payment request", roles: "execution" },
   { value: "owner_settlement", label: "Settlement", roles: "spx_silva" },

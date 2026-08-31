@@ -7,6 +7,7 @@ import { DashboardPanel, DashboardPanelEmpty, DashboardPanelRow } from "@/compon
 import { ActionQueueCard } from "@/components/dashboard/action-queue-card";
 import { HealthBadge } from "@/components/badges/health-badge";
 import { CropfortDashboardSection } from "@/components/dashboards/cropfort-dashboard-section";
+import { useCoreOperationStats } from "@/hooks/use-ad-hoc-requests";
 import { ClipboardList, FileText, AlertTriangle } from "lucide-react";
 import { usePermissions } from "@/hooks/use-permissions";
 import { formatCurrency } from "@/lib/utils/format";
@@ -23,17 +24,20 @@ export function SpxDashboard() {
   const pendingAfe = data?.silva?.afePipeline?.pendingSilvaApprovalCount ?? 0;
   const awaitingFt = data?.fieldTicketQueue?.awaitingSignOffCount ?? 0;
   const exceptions = data?.exceptions?.length ?? 0;
+  const { data: coreOpsStats } = useCoreOperationStats();
+  const interventionQueue =
+    (coreOpsStats?.submittedInterventions ?? 0) + (coreOpsStats?.submittedProjects ?? 0);
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiStatCard
-          label="Ad-hoc intake"
-          value="Open"
-          sublabel="Silva & vendor requests"
+          label="Core ops queue"
+          value={String(interventionQueue)}
+          sublabel={`${coreOpsStats?.activeProjects ?? 0} active projects`}
           icon={ClipboardList}
-          tone="amber"
-          href="/planning/intake"
+          tone={interventionQueue > 0 ? "amber" : "slate"}
+          href="/operations/interventions"
         />
         <KpiStatCard
           label="Silva AFE queue"

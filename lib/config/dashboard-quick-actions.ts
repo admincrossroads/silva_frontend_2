@@ -20,41 +20,43 @@ export function quickActionsFor(user: User): QuickAction[] {
 
   if (role === "spx_principal" || role === "system_admin") {
     return [
-      { label: "Registrations", href: "/settings/registrations", icon: ClipboardCheck },
-      { label: "Farm estates", href: "/settings/farm-estates", icon: MapPin },
-      { label: "Field tickets", href: "/execution/field-tickets", icon: FileText },
-      { label: "Revenue ledger", href: "/reports/revenue", icon: Wallet },
+      { label: "Interventions", href: "/operations/interventions", icon: ClipboardList },
+      { label: "Projects", href: "/operations/projects", icon: FileCheck },
+      { label: "Validation queue", href: "/validation/queue", icon: FileCheck },
+      { label: "Block plan", href: "/planning/afp-blocks", icon: Wallet },
     ];
   }
 
   if (isSpxRole(role)) {
     return [
-      { label: "Ad-hoc intake", href: "/planning/intake", icon: ClipboardList },
-      { label: "AFE register", href: "/planning/afe", icon: FileCheck },
-      { label: "Work orders", href: "/execution/work-orders", icon: ClipboardList },
-      { label: "Field tickets", href: "/execution/field-tickets", icon: FileText },
+      { label: "Weekly entry", href: "/execution/weekly-entry", icon: ClipboardList },
+      { label: "Validation queue", href: "/validation/queue", icon: FileCheck },
+      { label: "Interventions", href: "/operations/interventions", icon: ClipboardList },
+      { label: "Projects", href: "/operations/projects", icon: FileCheck },
+      { label: "Block plan", href: "/planning/afp-blocks", icon: FileText },
     ];
   }
 
   if (isSilvaRole(role)) {
     return [
-      { label: "Commitments", href: "/planning/afe", icon: FileCheck },
-      { label: "Request ad-hoc", href: "/planning/intake", icon: PlusCircle },
-      { label: "Review AFP", href: "/planning/afp", icon: Wallet },
-      { label: "Budget vs actual", href: "/reports/budget-vs-actual", icon: BarChart3 },
+      { label: "New intervention", href: "/operations/interventions", icon: PlusCircle },
+      { label: "New project", href: "/operations/projects", icon: FileCheck },
+      { label: "Rate approvals", href: "/planning/rate-card-approvals", icon: FileCheck },
+      { label: "Commitments (ETB)", href: "/planning/cropfort-afe-approvals", icon: BarChart3 },
     ];
   }
 
   if (isVendorRole(role)) {
     const actions: QuickAction[] = [
-      { label: "Field forms", href: "/execution/forms", icon: LayoutDashboard },
+      { label: "Weekly entry", href: "/execution/weekly-entry", icon: LayoutDashboard },
+      { label: "Interventions", href: "/operations/interventions", icon: PlusCircle },
+      { label: "Projects", href: "/operations/projects", icon: FileCheck },
       { label: "New ticket", href: "/execution/field-tickets", icon: PlusCircle },
-      { label: "Work orders", href: "/execution/work-orders", icon: ClipboardList },
-      { label: "Payments", href: "/payments/payment-requests", icon: Wallet },
     ];
     if (role !== "vendor_worker") {
-      actions.unshift({ label: "Request ad-hoc", href: "/planning/intake", icon: PlusCircle });
+      actions.push({ label: "Work orders", href: "/execution/work-orders", icon: ClipboardList });
     }
+    actions.push({ label: "Payments", href: "/payments/payment-requests", icon: Wallet });
     return actions;
   }
 

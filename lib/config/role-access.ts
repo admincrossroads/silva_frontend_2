@@ -248,11 +248,15 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
     role === "vendor_supervisor" ||
     role === "vendor_field_lead"
   ) {
+    const coreOpsChildren: NavItem["children"] = [
+      { label: "Interventions", procoreLabel: "Budget", href: "/operations/interventions" },
+      { label: "Projects", procoreLabel: "Budget", href: "/operations/projects" },
+    ];
     items.push({
-      label: "Ad-hoc intake",
+      label: "Core Operations",
       procoreLabel: "Budget",
-      href: "/planning/intake",
-      icon: ClipboardCheck,
+      icon: ClipboardList,
+      children: coreOpsChildren,
     });
   }
 

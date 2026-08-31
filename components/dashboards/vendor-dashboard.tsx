@@ -27,8 +27,8 @@ export function VendorDashboard() {
       <div className="grid grid-cols-2 gap-2 md:hidden">
         {[
           {
-            href: "/planning/intake",
-            label: "Ad-hoc",
+            href: "/operations/interventions",
+            label: "Core ops",
             icon: ClipboardList,
           },
           {

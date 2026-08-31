@@ -1,18 +1,33 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { adHocRequestsApi, type AdHocRequest } from "@/lib/api/ad-hoc-requests";
+import {
+  adHocRequestsApi,
+  type AdHocRequest,
+  type CoreOperationKind,
+  type CoreOperationStats,
+} from "@/lib/api/ad-hoc-requests";
 
-interface AdHocFilters {
+interface CoreOperationFilters {
   status?: string;
   urgency?: string;
   origin?: string;
+  operationKind?: CoreOperationKind;
+  dateFrom?: string;
+  dateTo?: string;
   page?: number;
   pageSize?: number;
 }
 
-export function useAdHocRequests(filters?: AdHocFilters) {
+export function useAdHocRequests(filters?: CoreOperationFilters) {
   return useQuery<AdHocRequest[]>({
     queryKey: ["ad-hoc-requests", filters],
     queryFn: () => adHocRequestsApi.findAll(filters),
+  });
+}
+
+export function useCoreOperationStats() {
+  return useQuery<CoreOperationStats>({
+    queryKey: ["core-operation-stats"],
+    queryFn: () => adHocRequestsApi.stats(),
   });
 }
 
@@ -28,8 +43,11 @@ export function useCreateAdHocRequest() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (dto: Record<string, unknown>) => adHocRequestsApi.create(dto),
-    meta: { successMessage: "Ad-hoc request created", errorMessage: "Could not create request" },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["ad-hoc-requests"] }),
+    meta: { successMessage: "Core operation submitted", errorMessage: "Could not create request" },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ad-hoc-requests"] });
+      qc.invalidateQueries({ queryKey: ["core-operation-stats"] });
+    },
   });
 }
 
@@ -47,7 +65,10 @@ export function useDismissAdHocRequest() {
   return useMutation({
     mutationFn: ({ id, notes }: { id: string; notes: string }) => adHocRequestsApi.dismiss(id, notes),
     meta: { successMessage: "Request dismissed", errorMessage: "Could not dismiss request" },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["ad-hoc-requests"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ad-hoc-requests"] });
+      qc.invalidateQueries({ queryKey: ["core-operation-stats"] });
+    },
   });
 }
 
@@ -60,6 +81,25 @@ export function useConvertAdHocRequest() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["ad-hoc-requests"] });
       qc.invalidateQueries({ queryKey: ["afes"] });
+    },
+  });
+}
+
+export function useConvertCoreOperationToCropfort() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      dto,
+    }: {
+      id: string;
+      dto: { title?: string; amountEtb?: number; notes?: string };
+    }) => adHocRequestsApi.convertCropfort(id, dto),
+    meta: { successMessage: "Converted to Cropfort AFE", errorMessage: "Could not convert request" },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ad-hoc-requests"] });
+      qc.invalidateQueries({ queryKey: ["cropfort-afes"] });
+      qc.invalidateQueries({ queryKey: ["core-operation-stats"] });
     },
   });
 }
