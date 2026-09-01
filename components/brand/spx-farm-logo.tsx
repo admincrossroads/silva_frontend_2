@@ -10,6 +10,8 @@ type BrandLogoProps = {
   tone?: "default" | "inverse" | "sidebar";
   wordmarkClassName?: string;
   titleClassName?: string;
+  /** Pulse + spiral stroke animation (loaders) */
+  animated?: boolean;
 };
 
 const sizeMap = {
@@ -23,13 +25,13 @@ const sizeMap = {
  * Cropfort mark — SPX Africa spiral growing from a farm stem.
  * Spiral = brand mark; stem + field line = estate / farm.
  */
-export function SpxFarmMark({ className }: { className?: string }) {
+export function SpxFarmMark({ className, animated = false }: { className?: string; animated?: boolean }) {
   return (
     <svg
       viewBox="0 0 32 32"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("shrink-0", className)}
+      className={cn("shrink-0", animated && "brand-loader-spiral", className)}
       aria-hidden
     >
       <path
@@ -47,6 +49,7 @@ export function SpxFarmMark({ className }: { className?: string }) {
         strokeLinecap="round"
       />
       <path
+        className={animated ? "brand-loader-spiral-path" : undefined}
         d="M16 17.1
            c1.55 0 2.75-1.2 2.75-2.65
            0-2.15-1.8-3.85-4.05-3.85
@@ -77,6 +80,7 @@ export function BrandLogo({
   tone = "default",
   wordmarkClassName,
   titleClassName,
+  animated = false,
 }: BrandLogoProps) {
   const s = sizeMap[size];
 
@@ -96,8 +100,16 @@ export function BrandLogo({
 
   return (
     <span className={cn("inline-flex items-center gap-2.5", className)}>
-      <span className={cn("inline-flex shrink-0 items-center justify-center", s.box, boxTone)}>
-        <SpxFarmMark className={s.icon} />
+      <span
+        className={cn(
+          "relative inline-flex shrink-0 items-center justify-center",
+          s.box,
+          boxTone,
+          animated && "brand-loader-box",
+        )}
+      >
+        {animated ? <span className="brand-loader-ring" aria-hidden /> : null}
+        <SpxFarmMark className={cn(s.icon, animated && "relative z-[1]")} animated={animated} />
       </span>
       {withWordmark ? (
         <span className={cn("min-w-0", wordmarkClassName)}>

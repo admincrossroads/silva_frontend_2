@@ -295,10 +295,94 @@
   }
 }
 
-/* Landing section spacing helper (py-22 not in default Tailwind) */
+/* py-22 not in default Tailwind) */
 .py-22 {
   padding-top: 5.5rem;
   padding-bottom: 5.5rem;
+}
+
+/* Brand loader — animated CropFort mark */
+@keyframes brand-loader-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0.2);
+  }
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 0 0 10px hsl(var(--primary) / 0);
+  }
+}
+
+@keyframes brand-loader-ring {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.55;
+  }
+  70% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+@keyframes brand-loader-spiral {
+  0% {
+    stroke-dashoffset: 72;
+    opacity: 0.55;
+  }
+  50% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: -72;
+    opacity: 0.55;
+  }
+}
+
+@keyframes brand-loader-label {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.brand-loader-box {
+  animation: brand-loader-pulse 2.2s ease-in-out infinite;
+}
+
+.brand-loader-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  border: 2px solid hsl(var(--primary) / 0.35);
+  animation: brand-loader-ring 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  pointer-events: none;
+}
+
+.brand-loader-spiral-path {
+  stroke-dasharray: 72;
+  animation: brand-loader-spiral 2.4s ease-in-out infinite;
+}
+
+.brand-loader-label {
+  animation: brand-loader-label 2.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-loader-box,
+  .brand-loader-ring,
+  .brand-loader-spiral-path,
+  .brand-loader-label {
+    animation: none !important;
+  }
 }
 
 

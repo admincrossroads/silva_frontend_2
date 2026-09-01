@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BrandLoader } from "@/components/brand/brand-loader";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -109,14 +110,7 @@ export function DetailPageHeader({
 }
 
 export function PageLoading({ label = "Loading…" }: { label?: string }) {
-  return (
-    <div className="space-y-4 animate-pulse">
-      <div className="h-8 w-48 rounded bg-muted" />
-      <div className="h-4 w-96 max-w-full rounded bg-muted" />
-      <div className="h-64 rounded-xl bg-muted/60" />
-      <p className="sr-only">{label}</p>
-    </div>
-  );
+  return <BrandLoader label={label} variant="centered" size="lg" withWordmark showTagline={false} />;
 }
 
 export function DetailSection({
