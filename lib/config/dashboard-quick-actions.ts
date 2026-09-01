@@ -22,7 +22,6 @@ export function quickActionsFor(user: User): QuickAction[] {
     return [
       { label: "Interventions", href: "/operations/interventions", icon: ClipboardList },
       { label: "Projects", href: "/operations/projects", icon: FileCheck },
-      { label: "Validation queue", href: "/validation/queue", icon: FileCheck },
       { label: "Budget", href: "/planning/afp", icon: Wallet },
     ];
   }
@@ -30,7 +29,6 @@ export function quickActionsFor(user: User): QuickAction[] {
   if (isSpxRole(role)) {
     return [
       { label: "Field tickets", href: "/execution/field-tickets", icon: ClipboardList },
-      { label: "Validation queue", href: "/validation/queue", icon: FileCheck },
       { label: "Interventions", href: "/operations/interventions", icon: ClipboardList },
       { label: "Projects", href: "/operations/projects", icon: FileCheck },
       { label: "Budget", href: "/planning/afp", icon: FileText },

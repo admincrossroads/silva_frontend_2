@@ -230,15 +230,6 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
     });
   }
 
-  if (isSpxRole(role) || role === "system_admin") {
-    items.push({
-      label: "Validation Queue",
-      procoreLabel: "Daily Log",
-      href: "/validation/queue",
-      icon: ShieldCheck,
-    });
-  }
-
   // Billing
   if (isSpxRole(role) || isSilvaRole(role) || role === "vendor_admin" || role === "vendor_field_lead") {
     const billingChildren: NavItem["children"] = [];

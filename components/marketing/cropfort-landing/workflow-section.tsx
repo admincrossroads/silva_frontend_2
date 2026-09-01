@@ -17,7 +17,7 @@ const STEPS = [
     step: "01",
     label: "Budget",
     icon: Wallet,
-    desc: "Annual AFP register — discipline lines and ETB allocations",
+    desc: "Annual AFP register discipline lines and ETB allocations",
     route: "/planning/afp",
   },
   {
@@ -31,7 +31,7 @@ const STEPS = [
     step: "03",
     label: "Core operations",
     icon: ClipboardList,
-    desc: "Interventions and projects — intake before field work",
+    desc: "Interventions and projects intake before field work",
     route: "/operations/interventions",
   },
   {

@@ -117,7 +117,7 @@ export function CropfortDashboardSection() {
           </DashboardTable>
         </DashboardPanel>
 
-        <DashboardPanel title="Weekly rollup" viewAllHref="/validation/queue">
+        <DashboardPanel title="Weekly rollup">
           <DashboardTable>
             <DashboardTableHead>
               <DashboardTableTh>Week ending</DashboardTableTh>
