@@ -8,6 +8,7 @@ import { authApi } from "@/lib/api/auth";
 import { getApiErrorMessage } from "@/lib/api/errors";
 import { useActivateAccount } from "@/hooks/use-registration";
 import { useAuthStore } from "@/stores/auth-store";
+import { postAuthRedirect } from "@/lib/utils/onboarding";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -60,7 +61,7 @@ function ActivateForm() {
         activeProgram: me.activeProgram,
         programs: me.programs,
       });
-      router.push(me.activeProgram ? "/dashboard" : "/onboarding");
+      router.push(postAuthRedirect(me));
     } catch (err) {
       setError(getApiErrorMessage(err, "Activation failed."));
     }

@@ -26,6 +26,7 @@ export function VendorDashboard() {
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-2 md:hidden">
         {[
+          { href: "/operations/interventions", label: "Core ops", icon: ClipboardList },
           { href: "/execution/field-tickets?new=1", label: "Log ticket", icon: FilePlus2 },
           { href: "/execution/work-orders", label: "Schedule", icon: ClipboardList },
           { href: "/execution/calendar", label: "Calendar", icon: CalendarDays },

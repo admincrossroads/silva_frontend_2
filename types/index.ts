@@ -15,6 +15,7 @@ export interface TenantBranding {
   logoUrl?: string;
   primaryColor?: string;
   tagline?: string;
+  onboardingCompletedAt?: string;
 }
 
 export interface TenantInfo {

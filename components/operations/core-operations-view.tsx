@@ -158,8 +158,14 @@ type CoreOperationsViewProps = {
 
 export function CoreOperationsView({ view = "all" }: CoreOperationsViewProps) {
   const router = useRouter();
-  const { isSilva, isSpx } = useRole();
-  const canRequest = isSilva || isSpx;
+  const { isSilva, isSpx, role } = useRole();
+  const canRequest =
+    isSilva ||
+    isSpx ||
+    role === "vendor_admin" ||
+    role === "vendor_manager" ||
+    role === "vendor_supervisor" ||
+    role === "vendor_field_lead";
 
   const [status, setStatus] = useState<string | undefined>(isSpx ? "submitted" : undefined);
   const [originFilter, setOriginFilter] = useState<string | undefined>(undefined);

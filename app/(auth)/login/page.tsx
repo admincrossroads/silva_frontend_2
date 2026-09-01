@@ -16,6 +16,7 @@ import { AuthRedirectLoader } from "@/components/layout/workspace-loader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { postAuthRedirect } from "@/lib/utils/onboarding";
 import type { LoginResponse } from "@/types";
 
 const schema = z.object({
@@ -59,7 +60,7 @@ export default function LoginPage() {
   const router = useRouter();
   const accessToken = useAuthStore((s) => s.accessToken);
   const user = useAuthStore((s) => s.user);
-  const activeProgram = useAuthStore((s) => s.activeProgram);
+  const tenant = useAuthStore((s) => s.tenant);
   const { setTokens, setSession } = useAuthStore();
   const [mounted, setMounted] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
@@ -105,9 +106,12 @@ export default function LoginPage() {
   useEffect(() => {
     if (mounted && accessToken && user) {
       setRedirecting(true);
-      router.replace(activeProgram ? "/dashboard" : "/onboarding");
+      const completed = Boolean(
+        (tenant?.branding as { onboardingCompletedAt?: string } | null)?.onboardingCompletedAt,
+      );
+      router.replace(completed ? "/dashboard" : "/onboarding");
     }
-  }, [mounted, accessToken, user, activeProgram, router]);
+  }, [mounted, accessToken, user, tenant, router]);
 
   const completeSession = async (res: LoginResponse) => {
     if (!res.accessToken || !res.refreshToken) {
@@ -120,7 +124,7 @@ export default function LoginPage() {
       activeProgram: me.activeProgram,
       programs: me.programs,
     });
-    router.replace(me.activeProgram ? "/dashboard" : "/onboarding");
+    router.replace(postAuthRedirect(me));
   };
 
   const resetMfaFlow = () => {

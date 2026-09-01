@@ -115,8 +115,7 @@ export function canAccessSettingsRoute(pathname: string, user: AuthUser): boolea
       role === "system_admin" ||
       role === "spx_principal" ||
       role === "silva_owner" ||
-      role === "silva_country_manager" ||
-      role === "vendor_admin"
+      role === "silva_country_manager"
     );
   }
   if (pathname.startsWith("/settings/governance/bands")) {
@@ -187,7 +186,14 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
     }
   }
 
-  if (isSilvaRole(role) || isSpxRole(role)) {
+  if (
+    isSilvaRole(role) ||
+    isSpxRole(role) ||
+    role === "vendor_admin" ||
+    role === "vendor_manager" ||
+    role === "vendor_supervisor" ||
+    role === "vendor_field_lead"
+  ) {
     const coreOpsChildren: NavItem["children"] = [
       { label: "Interventions", procoreLabel: "Budget", href: "/operations/interventions" },
       { label: "Projects", procoreLabel: "Budget", href: "/operations/projects" },

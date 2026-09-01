@@ -35,6 +35,9 @@ export const authApi = {
   updateTenantBranding: (body: { displayName?: string; branding?: Record<string, unknown> }) =>
     api.patch<{ data: TenantInfo }>("/auth/tenant/branding", body).then((r) => r.data.data),
 
+  completeOnboarding: (body?: { displayName?: string; branding?: Record<string, unknown> }) =>
+    api.post<{ data: TenantInfo }>("/auth/onboarding/complete", body ?? {}).then((r) => r.data.data),
+
   verifyOtp: (otpChallengeToken: string, code: string, deviceLabel?: string) =>
     api
       .post<{ data: LoginResponse }>("/auth/otp/verify", { otpChallengeToken, code, deviceLabel })

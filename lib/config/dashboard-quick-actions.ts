@@ -47,6 +47,8 @@ export function quickActionsFor(user: User): QuickAction[] {
   if (isVendorRole(role)) {
     const actions: QuickAction[] = [
       { label: "Field tickets", href: "/execution/field-tickets", icon: LayoutDashboard },
+      { label: "Interventions", href: "/operations/interventions", icon: PlusCircle },
+      { label: "Projects", href: "/operations/projects", icon: FileCheck },
       { label: "New ticket", href: "/execution/field-tickets", icon: PlusCircle },
     ];
     if (role !== "vendor_worker") {

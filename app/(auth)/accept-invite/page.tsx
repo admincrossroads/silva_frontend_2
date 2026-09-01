@@ -7,6 +7,7 @@ import { inviteApi } from "@/lib/api/invites";
 import { authApi } from "@/lib/api/auth";
 import { getApiErrorMessage } from "@/lib/api/errors";
 import { useAuthStore } from "@/stores/auth-store";
+import { postAuthRedirect } from "@/lib/utils/onboarding";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -58,7 +59,11 @@ function AcceptInviteForm() {
         activeProgram: me.activeProgram,
         programs: me.programs,
       });
-      router.push(me.activeProgram ? "/dashboard" : "/onboarding");
+      router.push(
+        me.user.role === "vendor_admin" || me.user.role === "spx_principal"
+          ? postAuthRedirect(me)
+          : "/dashboard",
+      );
     } catch (err) {
       setError(getApiErrorMessage(err, "Could not accept invitation."));
     } finally {

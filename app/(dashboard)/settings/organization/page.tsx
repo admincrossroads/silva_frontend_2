@@ -68,16 +68,18 @@ export default function OrganizationPage() {
     queryFn: () => platformApi.listUsers(),
   });
 
+  const organizationId = user?.organizationId || tenant?.id;
+
   const invitesQuery = useQuery<OrgInvite[]>({
-    queryKey: ["org-invites", user?.organizationId],
-    queryFn: () => platformApi.listInvites(user!.organizationId!),
-    enabled: Boolean(canManageMembers && user?.organizationId),
+    queryKey: ["org-invites", organizationId],
+    queryFn: () => platformApi.listInvites(organizationId!),
+    enabled: Boolean(canManageMembers && organizationId),
   });
 
   const invite = useMutation({
     mutationFn: () => {
-      if (!user?.organizationId) throw new Error("Missing organization");
-      return platformApi.createOrganizationInvite(user.organizationId, {
+      if (!organizationId) throw new Error("Missing organization");
+      return platformApi.createOrganizationInvite(organizationId, {
         email,
         role: inviteRole,
       });

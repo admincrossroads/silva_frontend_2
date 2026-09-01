@@ -43,7 +43,7 @@ function replyFor(input: string): string {
     return "Scroll to Contact on the landing page and send a message. The platform team will follow up by email.";
   }
   if (/(cookie|privacy)/.test(q)) {
-    return "We use essential cookies for sign-in sessions and optional analytics cookies only if you accept them on the cookie banner.";
+    return "We use essential session storage to keep you signed in. Contact us from the site if you have privacy questions.";
   }
   if (/(spx|manager|program)/.test(q)) {
     return "Program managers operate the platform: review registrations, issue authorizations, oversee vendors, and release reports to asset owners.";
