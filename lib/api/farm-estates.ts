@@ -6,6 +6,19 @@ export type FarmEstateBlock = {
   label: string;
   areaHa: number | null;
   treeCount: number | null;
+  varietyPlanted?: string | null;
+  plantingDate?: string | null;
+  status?: "active" | "inactive";
+};
+
+export type FarmBlockUpdateDto = {
+  code?: string;
+  label?: string;
+  areaHa?: number | null;
+  treeCount?: number | null;
+  varietyPlanted?: string | null;
+  plantingDate?: string | null;
+  status?: "active" | "inactive";
 };
 
 export type FarmEstateVendor = {
@@ -27,6 +40,10 @@ export type FarmEstate = {
   location: string | null;
   notes: string | null;
   status: "active" | "inactive";
+  termStartDate: string | null;
+  approverUserId: string | null;
+  fieldManagerUserId: string | null;
+  coreBundleElected: boolean | null;
   ownerOrganizationId: string | null;
   ownerOrganization: FarmEstateOwner | null;
   createdAt: string;
@@ -61,6 +78,10 @@ export const farmEstatesApi = {
     dto: {
       name?: string;
       ownerOrganizationId?: string | null;
+      approverUserId?: string | null;
+      fieldManagerUserId?: string | null;
+      termStartDate?: string | null;
+      coreBundleElected?: boolean | null;
       totalAreaHa?: number | null;
       location?: string | null;
       notes?: string | null;
@@ -75,6 +96,11 @@ export const farmEstatesApi = {
     id: string,
     dto: { code: string; label?: string; areaHa?: number; treeCount?: number },
   ) => api.post<{ data: FarmEstateBlock }>(`/farm-estates/${id}/blocks`, dto).then((r) => r.data.data),
+
+  updateBlock: (id: string, blockId: string, dto: FarmBlockUpdateDto) =>
+    api
+      .patch<{ data: FarmEstateBlock }>(`/farm-estates/${id}/blocks/${blockId}`, dto)
+      .then((r) => r.data.data),
 
   removeBlock: (id: string, blockId: string) =>
     api.delete(`/farm-estates/${id}/blocks/${blockId}`).then((r) => r.data),

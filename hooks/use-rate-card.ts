@@ -59,3 +59,12 @@ export function useReturnRateCardLine() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["cropfort-rate-card"] }),
   });
 }
+
+export function useReopenRateCardLine() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (lineId: string) => rateCardApi.reopenLine(lineId),
+    meta: { successMessage: "Line reopened as draft", errorMessage: "Could not reopen line" },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["cropfort-rate-card"] }),
+  });
+}

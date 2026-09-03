@@ -9,6 +9,8 @@ import { ActionQueueCard } from "@/components/dashboard/action-queue-card";
 import { HealthBadge } from "@/components/badges/health-badge";
 import { EstateMapHero } from "@/components/dashboards/estate-map-hero";
 import { CropfortDashboardSection } from "@/components/dashboards/cropfort-dashboard-section";
+import { RateCardApprovalsPanel } from "@/components/cropfort/rate-card-approvals-panel";
+import { AfpBlockApprovalsPanel } from "@/components/cropfort/afp-block-approvals-panel";
 import { Wallet, CreditCard, Wheat, ScrollText } from "lucide-react";
 
 export function SilvaDashboard() {
@@ -110,6 +112,8 @@ export function SilvaDashboard() {
 
         <div className="space-y-4">
           <ActionQueueCard title="Approval queue" />
+          <RateCardApprovalsPanel />
+          <AfpBlockApprovalsPanel />
 
           <DashboardPanel title="Payments & reports" noPadding contentClassName="divide-y">
             <DashboardPanelRow href="/payments/settlements">Settlements</DashboardPanelRow>

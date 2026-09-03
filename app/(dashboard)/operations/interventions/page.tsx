@@ -1,5 +1,5 @@
-import { CoreOperationsView } from "@/components/operations/core-operations-view";
+import { OperationsHub } from "@/components/operations/operations-hub";
 
 export default function InterventionsPage() {
-  return <CoreOperationsView view="intervention" />;
+  return <OperationsHub coreView="intervention" />;
 }

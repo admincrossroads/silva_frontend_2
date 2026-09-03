@@ -1,16 +1,19 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { MapPin } from "lucide-react";
 import { dashboardApi } from "@/lib/api/dashboard";
 import { KpiStatCard } from "@/components/dashboard/kpi-stat-card";
 import { DashboardPanel, DashboardPanelRow } from "@/components/dashboard/dashboard-panel";
 import { ActionQueueCard } from "@/components/dashboard/action-queue-card";
+import { useActiveFarmEstate } from "@/hooks/use-active-farm-estate";
 import { useVendorLocale } from "@/hooks/use-vendor-locale";
 import { CalendarDays, ClipboardList, FilePlus2, FileText, Star, Wallet } from "lucide-react";
 import Link from "next/link";
 
 export function VendorDashboard() {
   const { t } = useVendorLocale();
+  const { activeFarmEstate, isLoading: estateLoading, emptyMessage } = useActiveFarmEstate();
   const { data, isLoading } = useQuery({
     queryKey: ["dashboard", "vendor-field"],
     queryFn: () => dashboardApi.vendorField(),
@@ -47,6 +50,34 @@ export function VendorDashboard() {
           );
         })}
       </div>
+
+      <DashboardPanel title={t("nav.farmArea") || "Farm area"}>
+        {estateLoading ? (
+          <p className="p-4 text-sm text-muted-foreground">Loading farm area…</p>
+        ) : activeFarmEstate ? (
+          <div className="flex items-start gap-3 p-4">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <MapPin className="h-5 w-5" />
+            </span>
+            <div className="min-w-0">
+              <p className="font-semibold">{activeFarmEstate.name}</p>
+              {activeFarmEstate.location ? (
+                <p className="text-sm text-muted-foreground">{activeFarmEstate.location}</p>
+              ) : null}
+              <p className="mt-1 text-xs text-muted-foreground">
+                {activeFarmEstate.blocks.length} blocks
+                {activeFarmEstate.totalAreaHa != null
+                  ? ` · ${activeFarmEstate.totalAreaHa} ha`
+                  : null}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <p className="p-4 text-sm text-muted-foreground">
+            {emptyMessage ?? "No farm area assigned yet."}
+          </p>
+        )}
+      </DashboardPanel>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <KpiStatCard

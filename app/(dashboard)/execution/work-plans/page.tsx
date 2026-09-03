@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useWorkPlans, useCreateWorkPlan, useWorkPlanTemplate } from "@/hooks/use-work-plans";
-import { useFarmEstates } from "@/hooks/use-farm-estates";
+import { useVendorFarmEstates } from "@/hooks/use-vendor-farm-estates";
 import { useRole } from "@/hooks/use-role";
 import { getApiErrorMessage } from "@/lib/api/errors";
 import { Card } from "@/components/ui/card";
@@ -25,7 +25,12 @@ export default function WorkPlansPage() {
   const { isSpx, canManageWorkPlan } = useRole();
   const { data: plans = [], isLoading } = useWorkPlans();
   const { data: template } = useWorkPlanTemplate();
-  const { data: estates = [], isLoading: estatesLoading } = useFarmEstates({ status: "active" });
+  const {
+    estates,
+    isLoading: estatesLoading,
+    reason: estatesReason,
+    tenantName,
+  } = useVendorFarmEstates({ status: "active" });
   const createPlan = useCreateWorkPlan();
 
   const handleCreate = async (values: WorkPlanSetupValues) => {
@@ -131,6 +136,8 @@ export default function WorkPlansPage() {
         <WorkPlanSetupForm
           estates={estates}
           estatesLoading={estatesLoading}
+          estatesReason={estatesReason}
+          tenantName={tenantName}
           template={template}
           submitLabel={createPlan.isPending ? "Creating…" : "Create work plan"}
           isPending={createPlan.isPending}

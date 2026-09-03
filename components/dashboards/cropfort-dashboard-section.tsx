@@ -47,7 +47,7 @@ export function CropfortDashboardSection() {
           icon={Wallet}
           tone="primary"
           loading={isLoading}
-          href="/planning/afp"
+          href="/operations/interventions?tab=block-afp"
         />
         <KpiStatCard
           label="Actual"
@@ -55,7 +55,7 @@ export function CropfortDashboardSection() {
           icon={Coins}
           tone="primary"
           loading={isLoading}
-          href="/execution/field-tickets"
+          href="/operations/interventions?tab=weekly-entry"
         />
         <KpiStatCard
           label="Variance"
@@ -117,7 +117,7 @@ export function CropfortDashboardSection() {
           </DashboardTable>
         </DashboardPanel>
 
-        <DashboardPanel title="Weekly rollup">
+        <DashboardPanel title="Weekly rollup" viewAllHref="/dashboard#cropfort-validation">
           <DashboardTable>
             <DashboardTableHead>
               <DashboardTableTh>Week ending</DashboardTableTh>

@@ -6,6 +6,8 @@ import { NativeSelect as Select } from "@/components/ui/select-native";
 import { Button } from "@/components/ui/button";
 import type { WorkPlanTemplate } from "@/lib/work-plan/builder";
 import type { FarmEstate } from "@/lib/api/farm-estates";
+import type { VendorFarmEstatesReason } from "@/hooks/use-vendor-farm-estates";
+import { farmEstatesEmptyMessage } from "@/hooks/use-vendor-farm-estates";
 
 export type WorkPlanSetupValues = {
   farmEstateId: string;
@@ -24,6 +26,8 @@ export const DEFAULT_BUDGET_YEARS = [
 type Props = {
   estates?: FarmEstate[];
   estatesLoading?: boolean;
+  estatesReason?: VendorFarmEstatesReason;
+  tenantName?: string;
   template?: Pick<WorkPlanTemplate, "budgetYears"> | null;
   initial?: {
     farmEstateId?: string | null;
@@ -41,6 +45,8 @@ type Props = {
 export function WorkPlanSetupForm({
   estates = [],
   estatesLoading,
+  estatesReason = null,
+  tenantName = "your organization",
   template,
   initial,
   readOnly,
@@ -106,7 +112,8 @@ export function WorkPlanSetupForm({
         <p className="text-sm text-muted-foreground">Loading farm estates…</p>
       ) : estates.length === 0 && !readOnly ? (
         <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-          No farm estates are assigned to your vendor. Ask SPX to create an estate and map your organization.
+          {farmEstatesEmptyMessage(estatesReason, tenantName) ??
+            "No farm estates are assigned to your vendor. Ask SPX to create an estate and map your organization."}
         </p>
       ) : readOnly && farmEstateId && !selectedEstate ? (
         <Input

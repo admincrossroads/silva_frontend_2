@@ -71,3 +71,12 @@ export function useReturnAfpBlockLine() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["cropfort-afp-blocks"] }),
   });
 }
+
+export function useReopenAfpBlockLine() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (lineId: string) => afpBlocksApi.reopenLine(lineId),
+    meta: { successMessage: "Line reopened as draft", errorMessage: "Could not reopen line" },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["cropfort-afp-blocks"] }),
+  });
+}

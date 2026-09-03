@@ -55,4 +55,7 @@ export const rateCardApi = {
     api
       .post<{ data: RateCardLine }>(`/cropfort/rate-card/${lineId}/return`, { comment })
       .then((r) => r.data.data),
+
+  reopenLine: (lineId: string) =>
+    api.post<{ data: RateCardLine }>(`/cropfort/rate-card/${lineId}/reopen`).then((r) => r.data.data),
 };

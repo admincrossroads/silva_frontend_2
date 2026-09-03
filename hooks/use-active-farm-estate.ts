@@ -1,19 +1,20 @@
 "use client";
 
 import { useEffect } from "react";
-import { useFarmEstates } from "@/hooks/use-farm-estates";
-import { useAuthStore } from "@/stores/auth-store";
+import {
+  farmEstatesEmptyMessage,
+  useVendorFarmEstates,
+} from "@/hooks/use-vendor-farm-estates";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 
 export function useActiveFarmEstate() {
-  const activeProgram = useAuthStore((s) => s.activeProgram);
   const activeFarmEstateId = useWorkspaceStore((s) => s.activeFarmEstateId);
   const setActiveFarmEstateId = useWorkspaceStore((s) => s.setActiveFarmEstateId);
   const resetForProgram = useWorkspaceStore((s) => s.resetForProgram);
 
-  const { data: estates = [], isLoading } = useFarmEstates(
-    activeProgram ? { status: "active", enabled: true } : { enabled: false },
-  );
+  const { estates, isLoading, reason, activeProgram, tenantName } = useVendorFarmEstates({
+    status: "active",
+  });
 
   useEffect(() => {
     resetForProgram(activeProgram?.id ?? null);
@@ -29,6 +30,7 @@ export function useActiveFarmEstate() {
   }, [estates, activeFarmEstateId, setActiveFarmEstateId]);
 
   const activeFarmEstate = estates.find((e) => e.id === activeFarmEstateId) ?? null;
+  const emptyMessage = farmEstatesEmptyMessage(reason, tenantName);
 
   return {
     estates,
@@ -36,5 +38,7 @@ export function useActiveFarmEstate() {
     activeFarmEstateId,
     setActiveFarmEstateId,
     isLoading,
+    reason,
+    emptyMessage,
   };
 }

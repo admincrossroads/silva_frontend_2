@@ -8,6 +8,7 @@ import { DashboardStatGrid } from "@/components/dashboard/dashboard-stat-grid";
 import { ActionQueueCard } from "@/components/dashboard/action-queue-card";
 import { HealthBadge } from "@/components/badges/health-badge";
 import { CropfortDashboardSection } from "@/components/dashboards/cropfort-dashboard-section";
+import { ValidationQueuePanel } from "@/components/cropfort/validation-queue-panel";
 import { useCoreOperationStats } from "@/hooks/use-ad-hoc-requests";
 import { ClipboardList, FileText, AlertTriangle } from "lucide-react";
 import { usePermissions } from "@/hooks/use-permissions";
@@ -110,6 +111,7 @@ export function SpxDashboard() {
 
         <div className="space-y-4">
           <ActionQueueCard title="Action queue" />
+          <ValidationQueuePanel />
 
           <DashboardPanel title="Vendor insurance" viewAllHref="/vendors" contentClassName="divide-y" noPadding>
             {(data?.vendorInsurance?.alerts ?? []).length ? (

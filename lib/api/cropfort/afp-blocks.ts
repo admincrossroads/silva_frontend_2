@@ -67,4 +67,7 @@ export const afpBlocksApi = {
     api
       .post<{ data: AfpBlockLine }>(`/cropfort/afp-blocks/${lineId}/return`, { comment })
       .then((r) => r.data.data),
+
+  reopenLine: (lineId: string) =>
+    api.post<{ data: AfpBlockLine }>(`/cropfort/afp-blocks/${lineId}/reopen`).then((r) => r.data.data),
 };

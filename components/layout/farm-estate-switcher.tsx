@@ -18,7 +18,8 @@ type FarmEstateSwitcherProps = {
 };
 
 export function FarmEstateSwitcher({ compact = false }: FarmEstateSwitcherProps) {
-  const { estates, activeFarmEstate, setActiveFarmEstateId, isLoading } = useActiveFarmEstate();
+  const { estates, activeFarmEstate, setActiveFarmEstateId, isLoading, emptyMessage } =
+    useActiveFarmEstate();
   const { isVendor, t } = useVendorLocale();
 
   if (isLoading) {
@@ -35,14 +36,17 @@ export function FarmEstateSwitcher({ compact = false }: FarmEstateSwitcherProps)
   }
 
   if (!estates.length) {
+    const message =
+      emptyMessage ?? (isVendor ? t("nav.noFarmArea") : "No farm area assigned");
     return (
       <span
         className={cn(
-          "max-w-[180px] truncate text-xs text-muted-foreground",
+          "max-w-[220px] truncate text-xs text-muted-foreground",
           !compact && "hidden md:inline",
         )}
+        title={message}
       >
-        {isVendor ? t("nav.noFarmArea") : "No farm area assigned"}
+        {message}
       </span>
     );
   }

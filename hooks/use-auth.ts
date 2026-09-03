@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/auth-store";
 import { authApi } from "@/lib/api/auth";
@@ -62,6 +62,30 @@ export function useAuth() {
       cancelled = true;
     };
   }, [hydrated, accessToken, user, permissions.length, tenant, setSession, logout, router]);
+
+  const autoProgramAttempted = useRef(false);
+  useEffect(() => {
+    if (!hydrated || !accessToken || !user || !tenant) return;
+    if (activeProgram || programs.length !== 1 || autoProgramAttempted.current) return;
+    autoProgramAttempted.current = true;
+    authApi
+      .switchProgram(programs[0].id)
+      .then((data) => {
+        if (data.accessToken && data.refreshToken) {
+          setTokens(data.accessToken, data.refreshToken);
+        }
+        if (data.me) {
+          setSession(data.me.user, data.me.permissions, {
+            tenant: data.me.tenant,
+            activeProgram: data.me.activeProgram,
+            programs: data.me.programs,
+          });
+        }
+      })
+      .catch(() => {
+        autoProgramAttempted.current = false;
+      });
+  }, [hydrated, accessToken, user, tenant, activeProgram, programs, setSession, setTokens]);
 
   const loading =
     !hydrated || (!!accessToken && (!user || permissions.length === 0 || !tenant));

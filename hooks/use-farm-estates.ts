@@ -75,6 +75,23 @@ export function useAddFarmEstateBlock() {
   });
 }
 
+export function useUpdateFarmEstateBlock() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      estateId,
+      blockId,
+      ...dto
+    }: { estateId: string; blockId: string } & Parameters<typeof farmEstatesApi.updateBlock>[2]) =>
+      farmEstatesApi.updateBlock(estateId, blockId, dto),
+    meta: { successMessage: "Block updated", errorMessage: "Could not update block" },
+    onSuccess: (_, { estateId }) => {
+      qc.invalidateQueries({ queryKey: ["farm-estates"] });
+      qc.invalidateQueries({ queryKey: ["farm-estates", estateId] });
+    },
+  });
+}
+
 export function useRemoveFarmEstateBlock() {
   const qc = useQueryClient();
   return useMutation({

@@ -29,7 +29,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useRole } from "@/hooks/use-role";
-import { useFarmEstates } from "@/hooks/use-farm-estates";
+import { useVendorFarmEstates } from "@/hooks/use-vendor-farm-estates";
 import { useActivityMaster } from "@/hooks/use-activity-master";
 import { useCropfortAfeBandPreview } from "@/hooks/use-cropfort-afes";
 import {
@@ -41,7 +41,7 @@ import {
 import type { AdHocRequest, CoreOperationKind } from "@/lib/api/ad-hoc-requests";
 import { StartMessageButton } from "@/components/messages/start-message-button";
 import { getApiErrorMessage } from "@/lib/api/errors";
-import { cn } from "@/lib/utils";
+import { BlockActivityEstimateSection } from "@/components/operations/block-activity-estimate-section";
 
 const DISCIPLINES = [
   "Agronomy",
@@ -68,6 +68,8 @@ const interventionSchema = z.object({
   urgency: z.enum(URGENCIES),
   estimatedAmountEtb: z.string().optional(),
   farmEstateId: z.string().optional(),
+  blockIds: z.array(z.string()).optional().default([]),
+  activityIds: z.array(z.string()).optional().default([]),
 });
 
 const projectSchema = z
@@ -154,9 +156,11 @@ export type CoreOperationsViewMode = "all" | CoreOperationKind;
 
 type CoreOperationsViewProps = {
   view?: CoreOperationsViewMode;
+  /** When true, omit outer PageShell (parent provides layout). */
+  embedded?: boolean;
 };
 
-export function CoreOperationsView({ view = "all" }: CoreOperationsViewProps) {
+export function CoreOperationsView({ view = "all", embedded = false }: CoreOperationsViewProps) {
   const router = useRouter();
   const { isSilva, isSpx, role } = useRole();
   const canRequest =
@@ -188,7 +192,7 @@ export function CoreOperationsView({ view = "all" }: CoreOperationsViewProps) {
   };
 
   const { data: requests = [], isLoading } = useAdHocRequests(filters);
-  const { data: estates = [] } = useFarmEstates({ status: "active" });
+  const { estates } = useVendorFarmEstates({ status: "active" });
   const { data: activities = [] } = useActivityMaster();
   const createRequest = useCreateAdHocRequest();
   const dismissRequest = useDismissAdHocRequest();
@@ -208,6 +212,8 @@ export function CoreOperationsView({ view = "all" }: CoreOperationsViewProps) {
       urgency: "normal",
       estimatedAmountEtb: "",
       farmEstateId: "",
+      blockIds: [],
+      activityIds: [],
     },
   });
 
@@ -276,6 +282,8 @@ export function CoreOperationsView({ view = "all" }: CoreOperationsViewProps) {
             ? Number(values.estimatedAmountEtb)
             : null,
         farmEstateId: values.farmEstateId || null,
+        blockIds: values.blockIds,
+        activityIds: values.activityIds,
         submit: true,
       });
       setCreateOpen(false);
@@ -354,9 +362,13 @@ export function CoreOperationsView({ view = "all" }: CoreOperationsViewProps) {
 
   const projectBlockIds = projectForm.watch("blockIds");
   const projectActivityIds = projectForm.watch("activityIds");
+  const projectFarmEstateId = projectForm.watch("farmEstateId");
+  const interventionBlockIds = interventionForm.watch("blockIds");
+  const interventionActivityIds = interventionForm.watch("activityIds");
+  const interventionFarmEstateId = interventionForm.watch("farmEstateId");
 
-  return (
-    <PageShell>
+  const content = (
+    <>
       <PageHeader
         title={pageTitle}
         actions={
@@ -653,6 +665,24 @@ export function CoreOperationsView({ view = "all" }: CoreOperationsViewProps) {
                     </FormItem>
                   )}
                 />
+                <BlockActivityEstimateSection
+                  farmEstateId={interventionFarmEstateId || undefined}
+                  blockIds={interventionBlockIds ?? []}
+                  activityIds={interventionActivityIds ?? []}
+                  blocks={blocks}
+                  activities={activities}
+                  onBlockIdsChange={(ids) =>
+                    interventionForm.setValue("blockIds", ids, { shouldValidate: true })
+                  }
+                  onActivityIdsChange={(ids) =>
+                    interventionForm.setValue("activityIds", ids, { shouldValidate: true })
+                  }
+                  onEstimatedTotal={(total) => {
+                    if (total != null && total > 0) {
+                      interventionForm.setValue("estimatedAmountEtb", String(Math.round(total)));
+                    }
+                  }}
+                />
                 {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
                 <div className="flex justify-between gap-2">
                   {view === "all" ? (
@@ -795,50 +825,22 @@ export function CoreOperationsView({ view = "all" }: CoreOperationsViewProps) {
                     </FormItem>
                   )}
                 />
-                <FormItem>
-                  <FormLabel>Blocks (optional)</FormLabel>
-                  <div className="flex flex-wrap gap-2">
-                    {blocks.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">No blocks configured.</p>
-                    ) : (
-                      blocks.map((b) => (
-                        <ToggleChip
-                          key={b.id}
-                          label={`${b.code} · ${b.estateName}`}
-                          selected={projectBlockIds.includes(b.id)}
-                          onClick={() => {
-                            const next = projectBlockIds.includes(b.id)
-                              ? projectBlockIds.filter((id) => id !== b.id)
-                              : [...projectBlockIds, b.id];
-                            projectForm.setValue("blockIds", next, { shouldValidate: true });
-                          }}
-                        />
-                      ))
-                    )}
-                  </div>
-                </FormItem>
-                <FormItem>
-                  <FormLabel>Activities (optional)</FormLabel>
-                  <div className="flex flex-wrap gap-2">
-                    {activities.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">No activities in master.</p>
-                    ) : (
-                      activities.map((a) => (
-                        <ToggleChip
-                          key={a.id}
-                          label={a.name}
-                          selected={projectActivityIds.includes(a.id)}
-                          onClick={() => {
-                            const next = projectActivityIds.includes(a.id)
-                              ? projectActivityIds.filter((id) => id !== a.id)
-                              : [...projectActivityIds, a.id];
-                            projectForm.setValue("activityIds", next, { shouldValidate: true });
-                          }}
-                        />
-                      ))
-                    )}
-                  </div>
-                </FormItem>
+                <BlockActivityEstimateSection
+                  farmEstateId={projectFarmEstateId || undefined}
+                  blockIds={projectBlockIds ?? []}
+                  activityIds={projectActivityIds ?? []}
+                  blocks={blocks}
+                  activities={activities}
+                  onBlockIdsChange={(ids) => projectForm.setValue("blockIds", ids, { shouldValidate: true })}
+                  onActivityIdsChange={(ids) =>
+                    projectForm.setValue("activityIds", ids, { shouldValidate: true })
+                  }
+                  onEstimatedTotal={(total) => {
+                    if (total != null && total > 0) {
+                      projectForm.setValue("estimatedAmountEtb", String(Math.round(total)));
+                    }
+                  }}
+                />
                 {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
                 <div className="flex justify-between gap-2">
                   {view === "all" ? (
@@ -954,6 +956,9 @@ export function CoreOperationsView({ view = "all" }: CoreOperationsViewProps) {
           </div>
         </Modal>
       </PageContent>
-    </PageShell>
+    </>
   );
+
+  if (embedded) return content;
+  return <PageShell>{content}</PageShell>;
 }

@@ -14,7 +14,7 @@ import {
   useUpdateWorkPlan,
   useUpdateWorkPlanMeta,
 } from "@/hooks/use-work-plans";
-import { useFarmEstates } from "@/hooks/use-farm-estates";
+import { useVendorFarmEstates } from "@/hooks/use-vendor-farm-estates";
 import { useRole } from "@/hooks/use-role";
 import { getApiErrorMessage } from "@/lib/api/errors";
 import { Card } from "@/components/ui/card";
@@ -64,7 +64,12 @@ export default function WorkPlanDetailPage() {
   const { canManageWorkPlan, isSpx } = useRole();
   const { data: plan, isLoading } = useWorkPlan(id);
   const { data: template, isLoading: templateLoading } = useWorkPlanTemplate();
-  const { data: estates = [], isLoading: estatesLoading } = useFarmEstates({ status: "active" });
+  const {
+    estates,
+    isLoading: estatesLoading,
+    reason: estatesReason,
+    tenantName,
+  } = useVendorFarmEstates({ status: "active" });
   const submitPlan = useSubmitWorkPlan();
   const acceptPlan = useAcceptWorkPlan();
   const rejectPlan = useRejectWorkPlan();
@@ -202,6 +207,8 @@ export default function WorkPlanDetailPage() {
               <WorkPlanSetupForm
                 estates={estates}
                 estatesLoading={estatesLoading}
+                estatesReason={estatesReason}
+                tenantName={tenantName}
                 template={template}
                 readOnly={!canEdit}
                 isPending={updateMeta.isPending}

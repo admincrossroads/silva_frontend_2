@@ -198,6 +198,24 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
       { label: "Interventions", procoreLabel: "Budget", href: "/operations/interventions" },
       { label: "Projects", procoreLabel: "Budget", href: "/operations/projects" },
     ];
+    if (isSpxRole(role) || role === "system_admin") {
+      coreOpsChildren.push(
+        { label: "Rate card", procoreLabel: "Budget", href: "/operations/interventions?tab=rate-card" },
+        { label: "Block AFP", procoreLabel: "Budget", href: "/operations/interventions?tab=block-afp" },
+      );
+    }
+    coreOpsChildren.push({
+      label: "Farm journey",
+      procoreLabel: "Budget",
+      href: "/cropfort/farms/journey",
+    });
+    if (isVendorRole(role) || isSpxRole(role)) {
+      coreOpsChildren.push({
+        label: "Weekly entry",
+        procoreLabel: "Budget",
+        href: "/operations/interventions?tab=weekly-entry",
+      });
+    }
     items.push({
       label: "Core Operations",
       procoreLabel: "Budget",
