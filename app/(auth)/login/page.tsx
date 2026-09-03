@@ -27,34 +27,31 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 type LoginStep = "credentials" | "enroll" | "otp";
 
-const DEMO_ACCOUNTS: { group: string; emails: string[] }[] = [
-  {
-    group: "Silva",
-    emails: ["owner@silva.example", "naomi@silva.example", "finance@silva.example"],
-  },
-  {
-    group: "SPX",
-    emails: [
-      "principal@spx.example",
-      "handler@spx.example",
-      "supervisor@spx.example",
-      "admin@spx.example",
-    ],
-  },
-  {
-    group: "B-Agro",
-    emails: [
-      "admin@bagro.example",
-      "lead@bagro.example",
-      "supervisor@bagro.example",
-      "worker@bagro.example",
-    ],
-  },
-  {
-    group: "Highland",
-    emails: ["admin@highland.example"],
-  },
+type DemoAccount = {
+  org: string;
+  role: string;
+  email: string;
+};
+
+/** Workflow actors with approve / execute privileges — password Password123! for all */
+const DEMO_ACCOUNTS: DemoAccount[] = [
+  // Silva — govern / approve
+  { org: "Silva", role: "Owner", email: "owner@silva.example" },
+  { org: "Silva", role: "Country manager", email: "naomi@silva.example" },
+  { org: "Silva", role: "Finance", email: "finance@silva.example" },
+  // SPX — plan, validate, issue
+  { org: "SPX", role: "Principal", email: "principal@spx.example" },
+  { org: "SPX", role: "Account handler", email: "handler@spx.example" },
+  { org: "SPX", role: "Field supervisor", email: "supervisor@spx.example" },
+  { org: "SPX", role: "System admin", email: "admin@spx.example" },
+  // B-Agro — execute / vendor review
+  { org: "B-Agro", role: "Admin", email: "admin@bagro.example" },
+  { org: "B-Agro", role: "Field lead", email: "lead@bagro.example" },
+  { org: "B-Agro", role: "Supervisor", email: "supervisor@bagro.example" },
 ];
+
+const DEMO_PASSWORD = "Password123!";
+const DEMO_GROUPS = ["Silva", "SPX", "B-Agro"] as const;
 
 export default function LoginPage() {
   const router = useRouter();
@@ -397,29 +394,29 @@ export default function LoginPage() {
       </AuthCard>
 
       <div className="mt-4 px-1">
-        <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-muted-foreground/80">
-          Demo accounts
-        </p>
-        <div className="space-y-2.5">
-          {DEMO_ACCOUNTS.map((group) => (
-            <div key={group.group}>
-              <p className="mb-0.5 text-[10px] text-muted-foreground/70">{group.group}</p>
-              <ul className="flex flex-wrap gap-x-2 gap-y-0.5">
-                {group.emails.map((email) => (
-                  <li key={email}>
-                    <button
-                      type="button"
-                      className="text-[10px] leading-tight text-muted-foreground/90 underline-offset-2 hover:text-foreground hover:underline"
-                      onClick={() => {
-                        setValue("email", email, { shouldValidate: true });
-                        setValue("password", "Password123!", { shouldValidate: true });
-                      }}
-                    >
-                      {email}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+        <div className="mb-1.5 flex items-baseline justify-between gap-2">
+          <p className="text-xs font-medium text-muted-foreground">Demo accounts</p>
+          <p className="font-mono text-[11px] text-muted-foreground/80">{DEMO_PASSWORD}</p>
+        </div>
+        <div className="space-y-1.5">
+          {DEMO_GROUPS.map((org) => (
+            <div key={org} className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+              <span className="w-12 shrink-0 text-[11px] font-medium text-muted-foreground">{org}</span>
+              {DEMO_ACCOUNTS.filter((a) => a.org === org).map((account) => (
+                <button
+                  key={account.email}
+                  type="button"
+                  title={account.email}
+                  className="rounded-md border bg-background px-2 py-0.5 text-[11px] text-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
+                  onClick={() => {
+                    setValue("email", account.email, { shouldValidate: true });
+                    setValue("password", DEMO_PASSWORD, { shouldValidate: true });
+                    setError("");
+                  }}
+                >
+                  {account.role}
+                </button>
+              ))}
             </div>
           ))}
         </div>
