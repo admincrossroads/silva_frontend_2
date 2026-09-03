@@ -28,12 +28,16 @@ export function afpToBoardItem(row: Afp): BoardItem {
 }
 
 export function afeToBoardItem(row: Afe): BoardItem {
+  const plan = row.afpBlockLine;
+  const planLabel = plan
+    ? `${plan.blockCode || plan.blockLabel || "Block"} · ${plan.activityCode || "Activity"}`
+    : null;
   return {
     id: row.id,
     type: "afe",
     status: row.status,
     title: row.description,
-    subtitle: row.operatingDiscipline,
+    subtitle: planLabel || row.operatingDiscipline,
     href: `/planning/afe/${row.id}`,
     badge: row.band,
     meta: [{ label: "Est.", value: formatEtbAmount(row.estimatedCostEtb) }],

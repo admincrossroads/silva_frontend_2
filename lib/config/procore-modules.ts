@@ -66,7 +66,7 @@ export const PROCORE_MODULES: Record<ProcoreModuleId, ProcoreModuleDef> = {
   budget: {
     id: "budget",
     procoreLabel: "Budget",
-    instrumentLabel: "AFP Register",
+    instrumentLabel: "Annual Plan",
     href: "/planning/afp",
     icon: Wallet,
     workflow: DEFAULT_WORKFLOW,

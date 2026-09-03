@@ -6,14 +6,8 @@ import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Card } from "@/components/ui/card";
+import { SimplePagination, useClientPagination } from "@/components/ui/simple-pagination";
 import {
   useAddFarmEstateBlock,
   useFarmEstate,
@@ -24,7 +18,6 @@ import {
 
 type Props = { farmId: string };
 
-/** The workbook's Master sheet registers blocks as BLK-001…BLK-020. */
 const WORKBOOK_BLOCK_CODE = /^BLK-\d+$/;
 
 type BlockDraft = {
@@ -48,6 +41,9 @@ function toDraft(block: {
   };
 }
 
+const cellInput =
+  "h-8 min-w-0 w-full rounded-md border border-input bg-background px-2 text-sm tabular-nums shadow-none";
+
 export function StageFarmSetup({ farmId }: Props) {
   const qc = useQueryClient();
   const { data: farm, isLoading } = useFarmEstate(farmId);
@@ -64,8 +60,11 @@ export function StageFarmSetup({ farmId }: Props) {
   const [newAreaHa, setNewAreaHa] = useState("");
   const [removeError, setRemoveError] = useState<string | null>(null);
 
+  const blocks = farm?.blocks ?? [];
+  const pagination = useClientPagination(blocks, 10);
+
   if (isLoading || !farm) {
-    return <p className="text-sm text-muted-foreground">Loading farm setup…</p>;
+    return <p className="text-sm text-muted-foreground">Loading…</p>;
   }
 
   const termValue = termStartDate ?? farm.termStartDate ?? "";
@@ -77,7 +76,10 @@ export function StageFarmSetup({ farmId }: Props) {
   const setDraft = (blockId: string, patch: Partial<BlockDraft>) =>
     setDrafts((prev) => ({
       ...prev,
-      [blockId]: { ...(prev[blockId] ?? { areaHa: "", treeCount: "", varietyPlanted: "", plantingDate: "" }), ...patch },
+      [blockId]: {
+        ...(prev[blockId] ?? { areaHa: "", treeCount: "", varietyPlanted: "", plantingDate: "" }),
+        ...patch,
+      },
     }));
 
   const saveBlock = async (blockId: string) => {
@@ -102,7 +104,7 @@ export function StageFarmSetup({ farmId }: Props) {
 
   const onRemoveBlock = async (blockId: string, code: string) => {
     setRemoveError(null);
-    if (!window.confirm(`Remove block ${code}? This cannot be undone.`)) return;
+    if (!window.confirm(`Remove block ${code}?`)) return;
     try {
       await removeBlock.mutateAsync({ estateId: farmId, blockId });
       await refreshGates();
@@ -118,8 +120,7 @@ export function StageFarmSetup({ farmId }: Props) {
     setRemoveError(null);
     const legacy = farm.blocks.filter((b) => !WORKBOOK_BLOCK_CODE.test(b.code));
     if (!legacy.length) return;
-    const codes = legacy.map((b) => b.code).join(", ");
-    if (!window.confirm(`Remove ${legacy.length} block(s) not in the workbook (${codes})?`)) return;
+    if (!window.confirm(`Remove ${legacy.length} non-workbook block(s)?`)) return;
 
     const failed: string[] = [];
     for (const block of legacy) {
@@ -131,7 +132,7 @@ export function StageFarmSetup({ farmId }: Props) {
     }
     await refreshGates();
     if (failed.length) {
-      setRemoveError(`Could not remove ${failed.join(", ")} — still referenced by other records.`);
+      setRemoveError(`Could not remove ${failed.join(", ")}.`);
     }
   };
 
@@ -148,16 +149,17 @@ export function StageFarmSetup({ farmId }: Props) {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2">
+    <div className="space-y-4">
+      <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1">
-          <Label htmlFor="termStartDate">Term start date</Label>
+          <Label htmlFor="termStartDate">Term start</Label>
           <div className="flex gap-2">
             <Input
               id="termStartDate"
               type="date"
               value={termValue}
               onChange={(e) => setTermStartDate(e.target.value)}
+              className="h-8"
             />
             <Button
               size="sm"
@@ -173,24 +175,18 @@ export function StageFarmSetup({ farmId }: Props) {
               Save
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Drives election windows and the master plan calendar.
-          </p>
         </div>
         <div className="space-y-1">
-          <Label>Farm</Label>
-          <p className="text-sm font-medium">{farm.name}</p>
-          <p className="text-xs text-muted-foreground">
-            {farm.blocks.length} block{farm.blocks.length === 1 ? "" : "s"} ·{" "}
-            {blocksMissingArea.length
-              ? `${blocksMissingArea.length} missing hectares`
-              : "all blocks have hectares"}
+          <Label>Summary</Label>
+          <p className="text-sm text-muted-foreground">
+            {farm.blocks.length} blocks
+            {blocksMissingArea.length ? ` · ${blocksMissingArea.length} missing ha` : ""}
           </p>
         </div>
       </div>
 
       <div className="space-y-2">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-3">
           <Label>Blocks</Label>
           {legacyBlocks.length ? (
             <Button
@@ -199,112 +195,141 @@ export function StageFarmSetup({ farmId }: Props) {
               disabled={removeBlock.isPending}
               onClick={onRemoveLegacyBlocks}
             >
-              Remove {legacyBlocks.length} block{legacyBlocks.length === 1 ? "" : "s"} not in
-              workbook
+              Remove {legacyBlocks.length} non-workbook
             </Button>
           ) : null}
         </div>
         {removeError ? <p className="text-sm text-destructive">{removeError}</p> : null}
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Code</TableHead>
-              <TableHead>Hectares</TableHead>
-              <TableHead>Trees</TableHead>
-              <TableHead>Variety</TableHead>
-              <TableHead>Planting date</TableHead>
-              <TableHead />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {farm.blocks.map((block) => {
-              const draft = draftFor(block);
-              const dirty = Boolean(drafts[block.id]);
-              return (
-                <TableRow key={block.id}>
-                  <TableCell className="font-medium">{block.code}</TableCell>
-                  <TableCell>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      className="h-8 w-24"
-                      value={draft.areaHa}
-                      onChange={(e) => setDraft(block.id, { areaHa: e.target.value })}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      type="number"
-                      min="0"
-                      className="h-8 w-24"
-                      value={draft.treeCount}
-                      onChange={(e) => setDraft(block.id, { treeCount: e.target.value })}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      className="h-8 w-32"
-                      value={draft.varietyPlanted}
-                      onChange={(e) => setDraft(block.id, { varietyPlanted: e.target.value })}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      type="date"
-                      className="h-8 w-36"
-                      value={draft.plantingDate}
-                      onChange={(e) => setDraft(block.id, { plantingDate: e.target.value })}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={!dirty || updateBlock.isPending}
-                        onClick={() => saveBlock(block.id)}
-                      >
-                        Save
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-destructive hover:text-destructive"
-                        disabled={removeBlock.isPending}
-                        onClick={() => onRemoveBlock(block.id, block.code)}
-                        aria-label={`Remove block ${block.code}`}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+
+        <Card className="overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[36rem] table-fixed border-collapse text-sm">
+              <colgroup>
+                <col className="w-[14%]" />
+                <col className="w-[12%]" />
+                <col className="w-[12%]" />
+                <col className="w-[22%]" />
+                <col className="w-[18%]" />
+                <col className="w-[22%]" />
+              </colgroup>
+              <thead>
+                <tr className="border-b bg-muted/40 text-left text-muted-foreground">
+                  <th className="px-2 py-2 font-medium">Code</th>
+                  <th className="px-2 py-2 font-medium">Ha</th>
+                  <th className="px-2 py-2 font-medium">Trees</th>
+                  <th className="px-2 py-2 font-medium">Variety</th>
+                  <th className="px-2 py-2 font-medium">Planted</th>
+                  <th className="px-2 py-2 font-medium" />
+                </tr>
+              </thead>
+              <tbody>
+                {pagination.slice.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">
+                      No blocks
+                    </td>
+                  </tr>
+                ) : (
+                  pagination.slice.map((block) => {
+                    const draft = draftFor(block);
+                    const dirty = Boolean(drafts[block.id]);
+                    return (
+                      <tr key={block.id} className="border-b last:border-0">
+                        <td className="px-2 py-1.5 font-medium">{block.code}</td>
+                        <td className="px-2 py-1.5">
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            className={cellInput}
+                            value={draft.areaHa}
+                            onChange={(e) => setDraft(block.id, { areaHa: e.target.value })}
+                          />
+                        </td>
+                        <td className="px-2 py-1.5">
+                          <input
+                            type="number"
+                            min="0"
+                            className={cellInput}
+                            value={draft.treeCount}
+                            onChange={(e) => setDraft(block.id, { treeCount: e.target.value })}
+                          />
+                        </td>
+                        <td className="px-2 py-1.5">
+                          <input
+                            className={cellInput.replace(" tabular-nums", "")}
+                            value={draft.varietyPlanted}
+                            onChange={(e) => setDraft(block.id, { varietyPlanted: e.target.value })}
+                          />
+                        </td>
+                        <td className="px-2 py-1.5">
+                          <input
+                            type="date"
+                            className={cellInput}
+                            value={draft.plantingDate}
+                            onChange={(e) => setDraft(block.id, { plantingDate: e.target.value })}
+                          />
+                        </td>
+                        <td className="px-2 py-1.5">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 px-2"
+                              disabled={!dirty || updateBlock.isPending}
+                              onClick={() => saveBlock(block.id)}
+                            >
+                              Save
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                              disabled={removeBlock.isPending}
+                              onClick={() => onRemoveBlock(block.id, block.code)}
+                              aria-label={`Remove block ${block.code}`}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+          <SimplePagination
+            page={pagination.page}
+            pageSize={pagination.pageSize}
+            total={pagination.total}
+            pageCount={pagination.pageCount}
+            onPageChange={pagination.setPage}
+            onPageSizeChange={pagination.setPageSize}
+          />
+        </Card>
       </div>
 
       <div className="flex flex-wrap items-end gap-2">
         <div className="space-y-1">
-          <Label htmlFor="newBlockCode">New block code</Label>
+          <Label htmlFor="newBlockCode">Code</Label>
           <Input
             id="newBlockCode"
-            className="h-9 w-28"
+            className="h-8 w-24"
             value={newCode}
             onChange={(e) => setNewCode(e.target.value)}
-            placeholder="G"
+            placeholder="BLK-021"
           />
         </div>
         <div className="space-y-1">
-          <Label htmlFor="newBlockArea">Hectares</Label>
+          <Label htmlFor="newBlockArea">Ha</Label>
           <Input
             id="newBlockArea"
             type="number"
             step="0.01"
             min="0"
-            className="h-9 w-28"
+            className="h-8 w-24"
             value={newAreaHa}
             onChange={(e) => setNewAreaHa(e.target.value)}
           />
@@ -315,7 +340,7 @@ export function StageFarmSetup({ farmId }: Props) {
           disabled={!newCode.trim() || addBlock.isPending}
           onClick={onAddBlock}
         >
-          Add block
+          Add
         </Button>
       </div>
     </div>

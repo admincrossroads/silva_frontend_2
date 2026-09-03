@@ -15,24 +15,24 @@ import { cn } from "@/lib/utils";
 const STEPS = [
   {
     step: "01",
-    label: "Budget",
+    label: "Rate card",
     icon: Wallet,
-    desc: "Annual AFP register discipline lines and ETB allocations",
-    route: "/planning/afp",
+    desc: "Approve ETB unit rates before planning quantities",
+    route: "/planning/rate-card",
   },
   {
     step: "02",
+    label: "Annual plan",
+    icon: ClipboardList,
+    desc: "Block AFP — quantities by block and activity, cost from rates",
+    route: "/planning/afp",
+  },
+  {
+    step: "03",
     label: "Commitments",
     icon: FileCheck,
     desc: "AFE authorizations by Schedule 3 spend band",
     route: "/planning/afe",
-  },
-  {
-    step: "03",
-    label: "Core operations",
-    icon: ClipboardList,
-    desc: "Interventions and projects intake before field work",
-    route: "/operations/interventions",
   },
   {
     step: "04",

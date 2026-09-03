@@ -77,7 +77,7 @@ export default function AfePage() {
       actions={
         canCreate ? (
           <Button onClick={() => setOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Create AFE
+            <Plus className="mr-2 h-4 w-4" /> Create commitment
           </Button>
         ) : null
       }
@@ -151,7 +151,7 @@ export default function AfePage() {
             loading={isLoading}
             columnSummaries={columnSummaries}
             onItemMove={handleMove}
-            emptyMessage="No AFE commitments yet. Create an authorization to commit spend against the program."
+            emptyMessage="No commitments yet. Create one against an approved annual plan line."
           />
         ) : (
           <DataTable
@@ -163,7 +163,7 @@ export default function AfePage() {
         )}
       </div>
 
-      <Modal open={open} onClose={() => setOpen(false)} title="Create AFE">
+      <Modal open={open} onClose={() => setOpen(false)} title="Create commitment">
         <AfeForm onSuccess={() => setOpen(false)} />
       </Modal>
     </ModulePageShell>

@@ -118,8 +118,8 @@ export function notificationEntityLabel(entityType: string) {
 export function notificationEmptyCtas(role?: string) {
   if (role?.startsWith("silva_")) {
     return [
-      { href: "/planning/afp", label: "Review AFP" },
-      { href: "/reports/monthly", label: "Open reports" },
+      { href: "/planning/afp", label: "Review annual plan" },
+      { href: "/planning/rate-card", label: "Rate card" },
     ];
   }
   if (role?.startsWith("vendor_")) {

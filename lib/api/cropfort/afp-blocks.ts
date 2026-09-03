@@ -17,6 +17,7 @@ export interface AfpBlockLine {
     laborNorm?: number | null;
     materialNorm?: number | null;
     serviceNorm?: number | null;
+    category?: string | null;
   } | null;
   electionStatus: ElectionStatus;
   sequence: number;

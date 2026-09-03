@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, Lock, ChevronRight, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -43,18 +44,9 @@ function SeedFromWorkbook({ farmId }: { farmId: string }) {
   const election = result?.stages.tier_election;
   const rates = result?.stages.rate_cards_confirmed;
   const benchmarks = result?.stages.benchmark_survey;
-  const notInWorkbook = [
-    ...(rates?.nonWorkbookRateLines ?? []),
-    ...(rates?.nonWorkbookLaborCards ?? []),
-  ];
-  const uniqueNotInWorkbook = [...new Set(notInWorkbook)];
 
   return (
-    <div className="mt-4 border-t pt-4">
-      <p className="mb-2 text-xs text-muted-foreground">
-        Load the Chaka Buna simulator workbook to populate blocks, benchmarks, rate cards, the fee
-        schedule, elections and the activity plan in one pass.
-      </p>
+    <div className="mt-4 border-t pt-4 space-y-2">
       <Button
         size="sm"
         variant="outline"
@@ -65,43 +57,29 @@ function SeedFromWorkbook({ farmId }: { farmId: string }) {
         {seed.isPending ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : null}
         {seed.isPending ? "Importing…" : "Seed from workbook"}
       </Button>
-      {message ? <p className="mt-2 text-xs text-destructive">{message}</p> : null}
+      {message ? <p className="text-xs text-destructive">{message}</p> : null}
       {result ? (
-        <ul className="mt-2 space-y-0.5 text-xs text-muted-foreground">
+        <ul className="space-y-0.5 text-xs text-muted-foreground">
           {setup ? (
             <li>
-              {setup.blocksCreated + setup.blocksUpdated} blocks, term start {setup.termStartDate}
+              {setup.blocksCreated + setup.blocksUpdated} blocks
             </li>
           ) : null}
           {rates ? (
             <li>
-              {rates.laborCards + rates.laborCardsRefreshed} labour rate cards,{" "}
-              {rates.materialServiceLines + rates.materialServiceRefreshed} material/service rates
-              in sync
+              {rates.laborCards + rates.laborCardsRefreshed} labor ·{" "}
+              {rates.materialServiceLines + rates.materialServiceRefreshed} rates
             </li>
           ) : null}
           {benchmarks ? (
             <li>
-              {benchmarks.imported + (benchmarks.refreshed ?? 0) + (benchmarks.unchanged ?? 0)} of{" "}
-              {benchmarks.tier1Total} Tier 1 benchmarks in sync
+              {benchmarks.imported + (benchmarks.refreshed ?? 0) + (benchmarks.unchanged ?? 0)}{" "}
+              benchmarks
             </li>
           ) : null}
           {election ? (
             <li>
-              {election.elections} elections, {election.activityPlans} planned activities
-            </li>
-          ) : null}
-          {result.completedStages?.length ? (
-            <li>{result.completedStages.length} stages marked complete</li>
-          ) : null}
-          {setup?.unmatchedExistingBlocks.length ? (
-            <li className="text-amber-700">
-              Kept pre-existing blocks not in the workbook: {setup.unmatchedExistingBlocks.join(", ")}
-            </li>
-          ) : null}
-          {uniqueNotInWorkbook.length ? (
-            <li className="text-amber-700">
-              Kept rates the workbook does not define: {uniqueNotInWorkbook.join(", ")}
+              {election.elections} elections · {election.activityPlans} plans
             </li>
           ) : null}
         </ul>
@@ -122,7 +100,7 @@ function StageIcon({ status }: { status: WorkflowStage["status"] }) {
 }
 
 function StagePanel({ farmId, stageKey }: { farmId: string; stageKey: string }) {
-  const planYear = 2026;
+  const planYear = new Date().getUTCFullYear();
   const { data: elections } = useFarmElections(
     stageKey === "tier_election" ? farmId : undefined,
     planYear,
@@ -144,65 +122,86 @@ function StagePanel({ farmId, stageKey }: { farmId: string; stageKey: string }) 
   }
   if (stageKey === "rate_cards_confirmed") {
     return (
-      <p className="text-sm text-muted-foreground">
-        Confirm per-farm material, service, and labor rate cards in the Rate Card tab.
-      </p>
+      <div className="space-y-2 text-sm">
+        <p className="text-muted-foreground">Confirm rates on the Rate card page.</p>
+        <Button size="sm" variant="outline" asChild>
+          <Link href="/planning/rate-card">Open Rate card</Link>
+        </Button>
+      </div>
     );
   }
   if (stageKey === "fee_schedule_set") {
-    return (
-      <p className="text-sm text-muted-foreground">
-        Enter Core Services annual fee and elective line items (separate from field opex).
-      </p>
-    );
+    return <p className="text-sm text-muted-foreground">Set Core Services fee schedule.</p>;
   }
   if (stageKey === "tier_election") {
     const elected = elections?.filter((e) => e.elected).length ?? 0;
     return (
       <div className="space-y-2 text-sm">
-        <p>{elected} elected activities</p>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => farmPlatformApi.setCoreBundle(farmId, true)}
-        >
-          Elect core bundle
-        </Button>
+        <p>
+          Elected activities: <span className="font-medium tabular-nums">{elected}</span>
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => farmPlatformApi.setCoreBundle(farmId, true)}
+          >
+            Elect core bundle
+          </Button>
+          <Button size="sm" variant="outline" asChild>
+            <Link href="/planning/afp">Open Annual plan</Link>
+          </Button>
+        </div>
       </div>
     );
   }
   if (stageKey === "activity_plan") {
     const withQty = plans?.filter((p) => p.plannedQty && p.plannedQty > 0).length ?? 0;
-    return <p className="text-sm">Activity plans with quantities: {withQty}</p>;
-  }
-  if (stageKey === "master_plan_calendar") {
     return (
-      <p className="text-sm text-muted-foreground">
-        Read-only calendar generated from term start date and election windows.
+      <p className="text-sm">
+        Plans with qty: <span className="font-medium tabular-nums">{withQty}</span>
       </p>
     );
+  }
+  if (stageKey === "master_plan_calendar") {
+    return <p className="text-sm text-muted-foreground">Calendar from term start and elections.</p>;
   }
   if (stageKey === "supervisor_progress") {
     return (
-      <p className="text-sm text-muted-foreground">
-        Enter weekly % complete (0/25/50/75/100) per elected activity plan.
-      </p>
+      <div className="space-y-2 text-sm">
+        <p className="text-muted-foreground">Track progress via Field Tickets.</p>
+        <Button size="sm" variant="outline" asChild>
+          <Link href="/execution/field-tickets">Open Field Tickets</Link>
+        </Button>
+      </div>
     );
   }
   if (stageKey === "budgets_cash_flow") {
-    const totals = rollup as { totals?: { labor?: number } } | undefined;
+    const totals = rollup as { totals?: { labor?: number; material?: number; service?: number } } | undefined;
+    const labor = totals?.totals?.labor;
+    const material = totals?.totals?.material;
+    const service = totals?.totals?.service;
+    const total =
+      labor != null || material != null || service != null
+        ? Number(labor || 0) + Number(material || 0) + Number(service || 0)
+        : null;
     return (
-      <p className="text-sm">
-        Budget rollup labor ETB: {totals?.totals?.labor?.toLocaleString() ?? "—"}
-      </p>
+      <div className="space-y-1 text-sm">
+        <p>
+          Labor <span className="font-medium tabular-nums">{labor?.toLocaleString() ?? "—"}</span>
+        </p>
+        <p>
+          Material{" "}
+          <span className="font-medium tabular-nums">{material?.toLocaleString() ?? "—"}</span>
+        </p>
+        <p>
+          Total <span className="font-medium tabular-nums">{total?.toLocaleString() ?? "—"}</span>
+        </p>
+      </div>
     );
   }
   if (stageKey === "monthly_client_report") {
-    return (
-      <p className="text-sm text-muted-foreground">
-        Generated report with KPIs, risk register, and standing assurance note. Human review before send.
-      </p>
-    );
+    return <p className="text-sm text-muted-foreground">Monthly client report (review before send).</p>;
   }
   return null;
 }
@@ -216,7 +215,7 @@ export function FarmJourneyShell({ farmId, farmName }: Props) {
   const selected = journey?.stages.find((s) => s.key === activeKey);
 
   if (isLoading) {
-    return <p className="text-sm text-muted-foreground">Loading farm journey…</p>;
+    return <p className="text-sm text-muted-foreground">Loading…</p>;
   }
 
   if (isError || !journey) {
@@ -235,32 +234,38 @@ export function FarmJourneyShell({ farmId, farmName }: Props) {
     );
   }
 
+  const doneCount = journey.stages.filter((s) => s.status === "complete").length;
+
   return (
-    <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-      <Card className="p-4">
-        <h2 className="mb-1 font-semibold">{farmName || "Farm journey"}</h2>
-        <p className="mb-4 text-xs text-muted-foreground">Cropfort Field OS setup</p>
-        <ol className="space-y-2">
+    <div className="grid gap-4 lg:grid-cols-[260px_1fr]">
+      <Card className="p-3">
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <h2 className="text-sm font-semibold">{farmName || "Stages"}</h2>
+          <span className="text-xs text-muted-foreground tabular-nums">
+            {doneCount}/{journey.stages.length}
+          </span>
+        </div>
+        <ol className="space-y-1">
           {journey.stages.map((stage) => (
             <li key={stage.key}>
               <button
                 type="button"
                 disabled={stage.status === "locked"}
                 onClick={() => setSelectedKey(stage.key)}
-                className={`flex w-full items-start gap-2 rounded-md px-2 py-2 text-left text-sm ${
+                className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm ${
                   stage.key === activeKey ? "bg-muted" : ""
                 } ${stage.status === "locked" ? "cursor-not-allowed opacity-50" : "hover:bg-muted/60"}`}
                 title={stage.gateReasons.join(" ") || undefined}
               >
                 <StageIcon status={stage.status} />
-                <span className="flex-1">
-                  <span className="font-medium">{stage.order}. {stage.label}</span>
-                  {stage.status === "complete" ? (
-                    <Badge variant="secondary" className="ml-2 text-xs">
-                      Done
-                    </Badge>
-                  ) : null}
+                <span className="flex-1 truncate">
+                  {stage.order}. {stage.label}
                 </span>
+                {stage.status === "complete" ? (
+                  <Badge variant="secondary" className="text-[10px]">
+                    Done
+                  </Badge>
+                ) : null}
               </button>
             </li>
           ))}
@@ -268,13 +273,13 @@ export function FarmJourneyShell({ farmId, farmName }: Props) {
         <SeedFromWorkbook farmId={farmId} />
       </Card>
 
-      <Card className="p-6">
+      <Card className="p-4">
         {selected ? (
           <>
-            <div className="mb-4 flex items-center justify-between gap-4">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h3 className="text-lg font-semibold">{selected.label}</h3>
-                <p className="text-sm text-muted-foreground capitalize">Status: {selected.status}</p>
+                <h3 className="text-base font-semibold">{selected.label}</h3>
+                <p className="text-xs capitalize text-muted-foreground">{selected.status}</p>
               </div>
               {selected.status === "active" && selected.gatePassed ? (
                 <Button
@@ -282,7 +287,7 @@ export function FarmJourneyShell({ farmId, farmName }: Props) {
                   disabled={completeStage.isPending}
                   onClick={() => completeStage.mutate(selected.key)}
                 >
-                  Mark stage complete
+                  Complete
                 </Button>
               ) : null}
             </div>

@@ -11,7 +11,6 @@ import {
   DashboardTableTh,
 } from "@/components/dashboard/dashboard-table";
 import { KpiStatCard } from "@/components/dashboard/kpi-stat-card";
-import { StatusBadge } from "@/components/badges/status-badge";
 import { Coins, TrendingUp, Wallet } from "lucide-react";
 
 function formatEtb(value: number) {
@@ -47,7 +46,7 @@ export function CropfortDashboardSection() {
           icon={Wallet}
           tone="primary"
           loading={isLoading}
-          href="/operations/interventions?tab=block-afp"
+          href="/planning/afp"
         />
         <KpiStatCard
           label="Actual"
@@ -55,7 +54,7 @@ export function CropfortDashboardSection() {
           icon={Coins}
           tone="primary"
           loading={isLoading}
-          href="/operations/interventions?tab=weekly-entry"
+          href="/execution/field-tickets"
         />
         <KpiStatCard
           label="Variance"
@@ -110,41 +109,6 @@ export function CropfortDashboardSection() {
                     </DashboardTableTd>
                     <DashboardTableTd align="right">{formatEtb(row.budgetEtb)}</DashboardTableTd>
                     <DashboardTableTd align="right">{formatEtb(row.actualEtb)}</DashboardTableTd>
-                  </DashboardTableRow>
-                ))
-              )}
-            </DashboardTableBody>
-          </DashboardTable>
-        </DashboardPanel>
-
-        <DashboardPanel title="Weekly rollup" viewAllHref="/dashboard#cropfort-validation">
-          <DashboardTable>
-            <DashboardTableHead>
-              <DashboardTableTh>Week ending</DashboardTableTh>
-              <DashboardTableTh>Status</DashboardTableTh>
-              <DashboardTableTh align="right">Total ETB</DashboardTableTh>
-            </DashboardTableHead>
-            <DashboardTableBody>
-              {isLoading ? (
-                <tr>
-                  <td colSpan={3} className="px-4 py-8 text-center text-sm text-muted-foreground">
-                    Loading…
-                  </td>
-                </tr>
-              ) : !data?.weeklyRollup.length ? (
-                <tr>
-                  <td colSpan={3}>
-                    <DashboardPanelEmpty message="No submissions yet" />
-                  </td>
-                </tr>
-              ) : (
-                data.weeklyRollup.slice(0, 8).map((week, index) => (
-                  <DashboardTableRow key={week.id} index={index}>
-                    <DashboardTableTd>{week.weekEnding.slice(0, 10)}</DashboardTableTd>
-                    <DashboardTableTd>
-                      <StatusBadge status={week.status} />
-                    </DashboardTableTd>
-                    <DashboardTableTd align="right">{formatEtb(week.totalEtb)}</DashboardTableTd>
                   </DashboardTableRow>
                 ))
               )}

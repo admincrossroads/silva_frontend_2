@@ -81,13 +81,19 @@ export const afeColumns: ColumnDef<Afe>[] = [
   {
     accessorKey: "description",
     header: "Commitment",
-    cell: ({ row }) => (
-      <TablePrimaryCell
-        href={`/planning/afe/${row.original.id}`}
-        title={row.original.description}
-        subtitle={row.original.operatingDiscipline}
-      />
-    ),
+    cell: ({ row }) => {
+      const plan = row.original.afpBlockLine;
+      const subtitle = plan
+        ? `${plan.blockCode || plan.blockLabel || "Block"} · ${plan.activityCode || plan.activityName || "Activity"} · ${plan.planYear}`
+        : row.original.operatingDiscipline;
+      return (
+        <TablePrimaryCell
+          href={`/planning/afe/${row.original.id}`}
+          title={row.original.description}
+          subtitle={subtitle}
+        />
+      );
+    },
   },
   {
     accessorKey: "estimatedCostEtb",

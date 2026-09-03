@@ -22,7 +22,8 @@ export function quickActionsFor(user: User): QuickAction[] {
     return [
       { label: "Interventions", href: "/operations/interventions", icon: ClipboardList },
       { label: "Projects", href: "/operations/projects", icon: FileCheck },
-      { label: "Budget", href: "/planning/afp", icon: Wallet },
+      { label: "Rate card", href: "/planning/rate-card", icon: FileText },
+      { label: "Annual plan", href: "/planning/afp", icon: Wallet },
     ];
   }
 
@@ -30,15 +31,15 @@ export function quickActionsFor(user: User): QuickAction[] {
     return [
       { label: "Field tickets", href: "/execution/field-tickets", icon: ClipboardList },
       { label: "Interventions", href: "/operations/interventions", icon: ClipboardList },
-      { label: "Projects", href: "/operations/projects", icon: FileCheck },
-      { label: "Budget", href: "/planning/afp", icon: FileText },
+      { label: "Rate card", href: "/planning/rate-card", icon: FileText },
+      { label: "Annual plan", href: "/planning/afp", icon: Wallet },
     ];
   }
 
   if (isSilvaRole(role)) {
     return [
-      { label: "New intervention", href: "/operations/interventions", icon: PlusCircle },
-      { label: "New project", href: "/operations/projects", icon: FileCheck },
+      { label: "Rate card", href: "/planning/rate-card", icon: FileText },
+      { label: "Annual plan", href: "/planning/afp", icon: Wallet },
       { label: "Commitments", href: "/planning/afe", icon: FileCheck },
       { label: "Budget vs actual", href: "/reports/budget-vs-actual", icon: BarChart3 },
     ];

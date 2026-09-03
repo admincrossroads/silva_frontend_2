@@ -22,7 +22,6 @@ import { useRole } from "@/hooks/use-role";
 import { usePermissions } from "@/hooks/use-permissions";
 import {
   AlertCircle,
-  Calendar,
   DollarSign,
   FileCheck,
   FileText,
@@ -128,7 +127,22 @@ export default function AfeDetailPage() {
               <InfoRow icon={FileText} label="Description" value={afe.description} className="sm:col-span-2" />
               <InfoRow icon={DollarSign} label="Estimated cost" value={formatEtb(afe.estimatedCostEtb)} />
               <InfoRow icon={Shield} label="Silva approval" value={afe.silvaApprovalRequired ? "Required" : "Not required"} />
-              <InfoRow icon={Calendar} label="AFP line" value={afe.afpLineId || "— (standalone)"} className="sm:col-span-2" />
+              <InfoRow
+                icon={Layers}
+                label="Annual plan line"
+                value={
+                  afe.afpBlockLine
+                    ? `${afe.afpBlockLine.blockCode || afe.afpBlockLine.blockLabel || "Block"} · ${afe.afpBlockLine.activityCode || afe.afpBlockLine.activityName || "Activity"} (${afe.afpBlockLine.planYear})`
+                    : afe.afpBlockLineId || "—"
+                }
+                className="sm:col-span-2"
+              />
+              <InfoRow
+                icon={FileText}
+                label="Budget envelope"
+                value={afe.afpLineId || "—"}
+                className="sm:col-span-2"
+              />
             </dl>
           </Card>
 

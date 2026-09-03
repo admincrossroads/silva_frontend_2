@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { PageShell, PageHeader, PageContent } from "@/components/layout/page-shell";
+import { PageShell } from "@/components/layout/page-shell";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { useFarmEstates } from "@/hooks/use-farm-estates";
 import type { FarmEstate } from "@/lib/api/farm-estates";
 
@@ -19,11 +20,11 @@ export default function CropfortFarmJourneyIndexPage() {
   const { data: estates = [], isLoading, isError, error, refetch } = useFarmEstates({
     status: "active",
   });
-  const target = useMemo(() => pickDefaultFarm(estates), [estates]);
-
-  useEffect(() => {
-    if (target) router.replace(`/cropfort/farms/${target.id}/journey`);
-  }, [target, router]);
+  const sorted = useMemo(
+    () => [...estates].sort((a, b) => a.name.localeCompare(b.name)),
+    [estates],
+  );
+  const preferred = useMemo(() => pickDefaultFarm(estates), [estates]);
 
   const message =
     (error as { response?: { data?: { message?: string } }; message?: string })?.response?.data
@@ -33,44 +34,43 @@ export default function CropfortFarmJourneyIndexPage() {
 
   return (
     <PageShell>
-      <PageHeader
-        title="Cropfort Farm Journey"
-        description="Select a farm to continue progressive Field OS setup."
-      />
-      <PageContent>
-        {isLoading ? (
-          <p className="text-sm text-muted-foreground">Finding your farm…</p>
-        ) : isError ? (
-          <div className="space-y-3 text-sm">
-            <p className="text-destructive">{message}</p>
-            <Button size="sm" variant="outline" onClick={() => refetch()}>
-              Retry
-            </Button>
-          </div>
-        ) : !estates.length ? (
-          <p className="text-sm text-muted-foreground">
-            No farms are available for your role yet. Ask SPX to add a farm estate under Settings →
-            Farm estates.
-          </p>
-        ) : (
-          <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">Opening farm journey…</p>
-            <ul className="flex flex-wrap gap-2">
-              {estates.map((e) => (
-                <li key={e.id}>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => router.push(`/cropfort/farms/${e.id}/journey`)}
-                  >
-                    {e.name}
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </PageContent>
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <h1 className="text-2xl font-semibold">Farm journey</h1>
+        {preferred ? (
+          <Button size="sm" onClick={() => router.push(`/cropfort/farms/${preferred.id}/journey`)}>
+            Open {preferred.name}
+          </Button>
+        ) : null}
+      </div>
+
+      {isLoading ? (
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      ) : isError ? (
+        <div className="space-y-3 text-sm">
+          <p className="text-destructive">{message}</p>
+          <Button size="sm" variant="outline" onClick={() => refetch()}>
+            Retry
+          </Button>
+        </div>
+      ) : !sorted.length ? (
+        <p className="text-sm text-muted-foreground">No farms available.</p>
+      ) : (
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {sorted.map((e) => (
+            <Card
+              key={e.id}
+              className="cursor-pointer p-4 transition-colors hover:bg-muted/40"
+              onClick={() => router.push(`/cropfort/farms/${e.id}/journey`)}
+            >
+              <p className="font-medium">{e.name}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {e.location || "—"} · {e.blocks?.length ?? 0} blocks
+                {e.ownerOrganizationId ? "" : " · no owner"}
+              </p>
+            </Card>
+          ))}
+        </div>
+      )}
     </PageShell>
   );
 }

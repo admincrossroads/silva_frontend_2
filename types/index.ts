@@ -123,6 +123,19 @@ export interface Afp {
 export interface Afe {
   id: string;
   afpLineId: string | null;
+  afpBlockLineId?: string | null;
+  afpBlockLine?: {
+    id: string;
+    planYear: number;
+    blockId: string;
+    blockCode?: string | null;
+    blockLabel?: string | null;
+    activityId: string;
+    activityCode?: string | null;
+    activityName?: string | null;
+    plannedQty?: number | null;
+    status?: string;
+  } | null;
   operatingDiscipline: string;
   description: string;
   estimatedCostEtb: number;
@@ -130,6 +143,7 @@ export interface Afe {
   planningMode?: "planned" | "ad_hoc" | string;
   status: string;
   silvaApprovalRequired: boolean;
+  silvaApproved?: boolean | null;
   createdAt: string;
   updatedAt: string;
 }

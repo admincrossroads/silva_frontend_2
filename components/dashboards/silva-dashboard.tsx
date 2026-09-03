@@ -41,7 +41,7 @@ export function SilvaDashboard() {
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <KpiStatCard
-          label="Budget lines"
+          label="Plan lines"
           value={String(bvaLines.length)}
           icon={Wallet}
           tone="primary"
@@ -104,7 +104,8 @@ export function SilvaDashboard() {
           </DashboardPanel>
 
           <DashboardPanel title="Shortcuts" noPadding contentClassName="divide-y">
-            <DashboardPanelRow href="/planning/afp">AFP register</DashboardPanelRow>
+            <DashboardPanelRow href="/planning/rate-card">Rate card</DashboardPanelRow>
+            <DashboardPanelRow href="/planning/afp">Annual plan</DashboardPanelRow>
             <DashboardPanelRow href="/planning/afe">Commitments (AFE)</DashboardPanelRow>
             <DashboardPanelRow href="/operations/interventions">Core operations</DashboardPanelRow>
           </DashboardPanel>

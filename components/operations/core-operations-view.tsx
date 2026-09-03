@@ -644,16 +644,20 @@ export function CoreOperationsView({ view = "all", embedded = false }: CoreOpera
                     <FormItem>
                       <FormLabel>Farm estate</FormLabel>
                       <Select
-                        onValueChange={(v) => field.onChange(v === "none" ? "" : v)}
-                        value={field.value || "none"}
+                        onValueChange={(v) => {
+                          const next = v === "_none" ? "" : v;
+                          field.onChange(next);
+                          interventionForm.setValue("blockIds", []);
+                        }}
+                        value={field.value || "_none"}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Optional" />
+                            <SelectValue placeholder="Select farm" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="none">None</SelectItem>
+                          <SelectItem value="_none">None</SelectItem>
                           {estates.map((e) => (
                             <SelectItem key={e.id} value={e.id}>
                               {e.name}
@@ -804,16 +808,20 @@ export function CoreOperationsView({ view = "all", embedded = false }: CoreOpera
                     <FormItem>
                       <FormLabel>Farm estate</FormLabel>
                       <Select
-                        onValueChange={(v) => field.onChange(v === "none" ? "" : v)}
-                        value={field.value || "none"}
+                        onValueChange={(v) => {
+                          const next = v === "_none" ? "" : v;
+                          field.onChange(next);
+                          projectForm.setValue("blockIds", []);
+                        }}
+                        value={field.value || "_none"}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Optional" />
+                            <SelectValue placeholder="Select farm" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="none">None</SelectItem>
+                          <SelectItem value="_none">None</SelectItem>
                           {estates.map((e) => (
                             <SelectItem key={e.id} value={e.id}>
                               {e.name}

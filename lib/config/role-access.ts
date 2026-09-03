@@ -167,23 +167,26 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
     { label: "Dashboard", procoreLabel: "Home", href: "/dashboard", icon: LayoutDashboard },
   ];
 
-  // Budget + Commitments (planning) — vendors see Budget only via vendor_admin;
-  // Silva governs AFP and reviews/approves Band C/D commitments.
-  if (!isVendorRole(role) || role === "vendor_admin") {
+  // Planning workflow: Rate card → Annual plan (Block AFP) → Commitments (AFE)
+  if (isSpxRole(role) || isSilvaRole(role) || role === "system_admin") {
     items.push({
-      label: "Budget",
+      label: "Rate card",
+      procoreLabel: "Budget",
+      href: "/planning/rate-card",
+      icon: FileText,
+    });
+    items.push({
+      label: "Annual plan",
       procoreLabel: "Budget",
       href: "/planning/afp",
       icon: Wallet,
     });
-    if (!isVendorRole(role)) {
-      items.push({
-        label: "Commitments",
-        procoreLabel: "Commitments",
-        href: "/planning/afe",
-        icon: FileCheck,
-      });
-    }
+    items.push({
+      label: "Commitments",
+      procoreLabel: "Commitments",
+      href: "/planning/afe",
+      icon: FileCheck,
+    });
   }
 
   if (
@@ -198,24 +201,11 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
       { label: "Interventions", procoreLabel: "Budget", href: "/operations/interventions" },
       { label: "Projects", procoreLabel: "Budget", href: "/operations/projects" },
     ];
-    if (isSpxRole(role) || role === "system_admin") {
-      coreOpsChildren.push(
-        { label: "Rate card", procoreLabel: "Budget", href: "/operations/interventions?tab=rate-card" },
-        { label: "Block AFP", procoreLabel: "Budget", href: "/operations/interventions?tab=block-afp" },
-      );
-    }
     coreOpsChildren.push({
       label: "Farm journey",
       procoreLabel: "Budget",
       href: "/cropfort/farms/journey",
     });
-    if (isVendorRole(role) || isSpxRole(role)) {
-      coreOpsChildren.push({
-        label: "Weekly entry",
-        procoreLabel: "Budget",
-        href: "/operations/interventions?tab=weekly-entry",
-      });
-    }
     items.push({
       label: "Core Operations",
       procoreLabel: "Budget",

@@ -37,12 +37,14 @@ export interface BudgetEstimateInput {
 export interface BudgetPreviewRow {
   programId: string;
   planYear: number;
+  lineId?: string;
   blockId: string;
   blockCode: string;
   blockLabel?: string | null;
   activityId: string;
   activityCode: string;
   activityName: string;
+  electionStatus?: string;
   budgetMonth?: string | null;
   plannedQty: number;
   rateEtb?: number;
@@ -50,6 +52,7 @@ export interface BudgetPreviewRow {
   materialCostEtb: number;
   serviceCostEtb?: number;
   totalCostEtb: number;
+  warnings?: string[];
 }
 
 export interface BudgetPreview {

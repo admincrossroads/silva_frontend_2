@@ -437,7 +437,7 @@ export default function WorkPlanDetailPage() {
       {plan.status === "accepted" ? (
         <Card className="mt-6 p-5">
           <Link href="/planning/afp" className="text-sm text-primary hover:underline">
-            View budget lines →
+            View annual plan →
           </Link>
         </Card>
       ) : null}
