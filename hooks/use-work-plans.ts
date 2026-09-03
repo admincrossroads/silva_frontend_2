@@ -35,7 +35,7 @@ export function useSubmitWorkPlan() {
     mutationFn: workPlansApi.submit,
     meta: {
       successMessage: "Work plan submitted",
-      successDescription: "Plan marked submitted. You can still promote it to AFP.",
+      successDescription: "Plan marked submitted. Promote when ready to create Annual plan drafts.",
       errorMessage: "Could not submit work plan",
     },
     onSuccess: (_, id) => {
@@ -50,14 +50,15 @@ export function useAcceptWorkPlan() {
   return useMutation({
     mutationFn: ({ id, notes }: { id: string; notes?: string }) => workPlansApi.accept(id, { notes }),
     meta: {
-      successMessage: "Work plan accepted",
-      successDescription: "Promoted to AFP lines and activity catalog.",
-      errorMessage: "Could not accept work plan",
+      successMessage: "Draft Annual plan created",
+      successDescription: "Elect lines on Annual plan, then submit for Silva approval.",
+      errorMessage: "Could not promote work plan",
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["work-plans"] });
+      qc.invalidateQueries({ queryKey: ["cropfort-afp-blocks"] });
       qc.invalidateQueries({ queryKey: ["afps"] });
-      qc.invalidateQueries({ queryKey: ["activity-catalog"] });
+      qc.invalidateQueries({ queryKey: ["activity-master"] });
     },
   });
 }

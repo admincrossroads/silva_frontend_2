@@ -311,7 +311,7 @@ export function AfeForm({ onSuccess, defaultValues }: AfeFormProps) {
           disabled={createAfe.isPending || electedLines.length === 0}
           className="w-full"
         >
-          {createAfe.isPending ? "Creating..." : "Create commitment"}
+          {createAfe.isPending ? "Creating..." : "Create AFE"}
         </Button>
       </form>
     </Form>

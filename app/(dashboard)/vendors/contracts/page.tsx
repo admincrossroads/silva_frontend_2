@@ -8,9 +8,10 @@ import { getApiErrorMessage } from "@/lib/api/errors";
 import { useVendors } from "@/hooks/use-vendors";
 import { useAfes } from "@/hooks/use-afes";
 import { useRole } from "@/hooks/use-role";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { NativeSelect as Select } from "@/components/ui/select-native";
 import { Modal } from "@/components/ui/modal";
 import {
@@ -21,7 +22,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { StatusBadge } from "@/components/badges/status-badge";
 import { PageShell, PageHeader, PageContent } from "@/components/layout/page-shell";
 import { formatCurrency, formatDate } from "@/lib/utils/format";
 
@@ -71,9 +71,20 @@ function routeLabel(value: string) {
   return PROCUREMENT_ROUTES.find((r) => r.value === value)?.label ?? value.replace(/_/g, " ");
 }
 
+function tenderLabel(value: string) {
+  return TENDER_STATUSES.find((s) => s.value === value)?.label ?? value.replace(/_/g, " ");
+}
+
+function afeParts(label: string, fallbackId: string) {
+  const text = label || fallbackId;
+  const sep = text.indexOf(" — ");
+  if (sep === -1) return { code: text, detail: "" };
+  return { code: text.slice(0, sep), detail: text.slice(sep + 3) };
+}
+
 export default function VendorContractsPage() {
   const qc = useQueryClient();
-  const { isSilva, isSpx } = useRole();
+  const { isSpx } = useRole();
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState<ContractFormState>(EMPTY_FORM);
   const [error, setError] = useState("");
@@ -151,12 +162,6 @@ export default function VendorContractsPage() {
         }
       />
 
-      {isSilva ? (
-        <p className="text-sm text-muted-foreground">
-          Read-only view of contracts for vendors assigned to your farm areas.
-        </p>
-      ) : null}
-
       {error && !modalOpen ? (
         <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error}
@@ -164,62 +169,114 @@ export default function VendorContractsPage() {
       ) : null}
 
       <PageContent>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Contracts</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <p className="text-sm text-muted-foreground">Loading…</p>
-            ) : contracts.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No contracts yet.</p>
-            ) : (
-              <div className="overflow-x-auto">
+        <Card className="overflow-hidden border-border/80 shadow-sm">
+          {isLoading ? (
+            <p className="px-4 py-10 text-center text-sm text-muted-foreground">Loading…</p>
+          ) : contracts.length === 0 ? (
+            <p className="px-4 py-10 text-center text-sm text-muted-foreground">No contracts yet.</p>
+          ) : (
+            <>
+              <ul className="divide-y md:hidden">
+                {contracts.map((c) => {
+                  const afe = afeParts(afeLabelById.get(c.afeId) ?? "", c.afeId);
+                  return (
+                    <li key={c.id} className="space-y-2.5 px-4 py-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium">
+                            {vendorNameById.get(c.vendorId) ?? c.vendorId}
+                          </p>
+                          <p className="mt-0.5 font-mono text-[11px] text-muted-foreground">{c.id}</p>
+                        </div>
+                        <p className="shrink-0 whitespace-nowrap tabular-nums text-sm font-semibold">
+                          {formatCurrency(Number(c.contractValueEtb))}
+                        </p>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-mono text-xs text-muted-foreground">{afe.code}</p>
+                        {afe.detail ? (
+                          <p className="truncate text-sm text-foreground">{afe.detail}</p>
+                        ) : null}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                        <span>{routeLabel(c.procurementRoute)}</span>
+                        <span aria-hidden>·</span>
+                        <span className="whitespace-nowrap">
+                          {formatDate(c.contractStart)} – {formatDate(c.contractEnd)}
+                        </span>
+                      </div>
+                      {isSpx ? (
+                        <Select
+                          value={c.tenderStatus}
+                          onChange={(e) =>
+                            patchStatus.mutate({ id: c.id, tenderStatus: e.target.value })
+                          }
+                          className="h-9 w-full"
+                        >
+                          {TENDER_STATUSES.map((s) => (
+                            <option key={s.value} value={s.value}>
+                              {s.label}
+                            </option>
+                          ))}
+                        </Select>
+                      ) : (
+                        <Badge variant="outline" className="font-normal">
+                          {tenderLabel(c.tenderStatus)}
+                        </Badge>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+
+              <div className="hidden overflow-x-auto md:block">
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>ID</TableHead>
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead className="w-[7rem]">Contract</TableHead>
                       <TableHead>Vendor</TableHead>
-                      <TableHead>AFE</TableHead>
+                      <TableHead className="min-w-[14rem]">AFE</TableHead>
                       <TableHead className="text-right">Value</TableHead>
                       <TableHead>Route</TableHead>
-                      <TableHead>Tender</TableHead>
-                      <TableHead>Dates</TableHead>
+                      <TableHead className="w-[9rem]">Tender</TableHead>
+                      <TableHead className="whitespace-nowrap">Period</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {contracts.map((c) => (
-                      <TableRow key={c.id}>
-                        <TableCell className="font-mono text-xs">{c.id}</TableCell>
-                        <TableCell>
-                          <div className="min-w-0">
-                            <p className="truncate font-medium">
+                    {contracts.map((c) => {
+                      const afe = afeParts(afeLabelById.get(c.afeId) ?? "", c.afeId);
+                      return (
+                        <TableRow key={c.id}>
+                          <TableCell className="font-mono text-xs text-muted-foreground">
+                            {c.id}
+                          </TableCell>
+                          <TableCell className="max-w-[14rem] font-medium">
+                            <span className="line-clamp-2">
                               {vendorNameById.get(c.vendorId) ?? c.vendorId}
-                            </p>
-                            {!vendorNameById.has(c.vendorId) ? null : (
-                              <p className="font-mono text-[10px] text-muted-foreground">{c.vendorId}</p>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="max-w-[220px]">
-                          <p className="truncate text-sm" title={afeLabelById.get(c.afeId) ?? c.afeId}>
-                            {afeLabelById.get(c.afeId) ?? c.afeId}
-                          </p>
-                        </TableCell>
-                        <TableCell className="text-right tabular-nums">
-                          {formatCurrency(Number(c.contractValueEtb))}
-                        </TableCell>
-                        <TableCell>{routeLabel(c.procurementRoute)}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <StatusBadge status={c.tenderStatus} />
+                            </span>
+                          </TableCell>
+                          <TableCell className="max-w-[18rem]">
+                            <p className="font-mono text-xs text-muted-foreground">{afe.code}</p>
+                            {afe.detail ? (
+                              <p className="line-clamp-2 text-sm" title={afe.detail}>
+                                {afe.detail}
+                              </p>
+                            ) : null}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap text-right tabular-nums font-medium">
+                            {formatCurrency(Number(c.contractValueEtb))}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                            {routeLabel(c.procurementRoute)}
+                          </TableCell>
+                          <TableCell>
                             {isSpx ? (
                               <Select
                                 value={c.tenderStatus}
                                 onChange={(e) =>
                                   patchStatus.mutate({ id: c.id, tenderStatus: e.target.value })
                                 }
-                                className="h-8 w-36"
+                                className="h-8 w-[8.5rem]"
                               >
                                 {TENDER_STATUSES.map((s) => (
                                   <option key={s.value} value={s.value}>
@@ -227,19 +284,23 @@ export default function VendorContractsPage() {
                                   </option>
                                 ))}
                               </Select>
-                            ) : null}
-                          </div>
-                        </TableCell>
-                        <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
-                          {formatDate(c.contractStart)} → {formatDate(c.contractEnd)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                            ) : (
+                              <Badge variant="outline" className="font-normal">
+                                {tenderLabel(c.tenderStatus)}
+                              </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
+                            {formatDate(c.contractStart)} – {formatDate(c.contractEnd)}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
-            )}
-          </CardContent>
+            </>
+          )}
         </Card>
       </PageContent>
 
@@ -250,7 +311,6 @@ export default function VendorContractsPage() {
           setError("");
         }}
         title="New vendor contract"
-        description="Link a vendor and AFE, then set procurement route and contract dates."
       >
         <form
           className="space-y-4"
@@ -268,12 +328,10 @@ export default function VendorContractsPage() {
             disabled={vendorsLoading}
             required
           >
-            <option value="">
-              {vendorsLoading ? "Loading vendors…" : "Select vendor"}
-            </option>
+            <option value="">{vendorsLoading ? "Loading vendors…" : "Select vendor"}</option>
             {vendors.map((v) => (
               <option key={v.id} value={v.id}>
-                {v.name} ({v.id})
+                {v.name}
               </option>
             ))}
           </Select>
@@ -303,7 +361,7 @@ export default function VendorContractsPage() {
             required
           />
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             <Select
               label="Procurement route"
               value={form.procurementRoute}
@@ -338,7 +396,7 @@ export default function VendorContractsPage() {
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             <Input
               label="Start date"
               type="date"
@@ -355,7 +413,7 @@ export default function VendorContractsPage() {
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
             <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>
               Cancel
             </Button>

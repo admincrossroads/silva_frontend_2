@@ -77,7 +77,7 @@ export default function AfePage() {
       actions={
         canCreate ? (
           <Button onClick={() => setOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Create commitment
+            <Plus className="mr-2 h-4 w-4" />             Create AFE
           </Button>
         ) : null
       }
@@ -116,9 +116,9 @@ export default function AfePage() {
         <BoardSummaryStrip
           stats={[
             {
-              label: "Commitments",
+              label: "AFEs",
               value: String(afes.length),
-              sublabel: "Total AFE lines",
+              sublabel: "Total lines",
               icon: Layers,
               tone: "primary",
             },
@@ -151,7 +151,7 @@ export default function AfePage() {
             loading={isLoading}
             columnSummaries={columnSummaries}
             onItemMove={handleMove}
-            emptyMessage="No commitments yet. Create one against an approved annual plan line."
+            emptyMessage="No AFEs yet. Create one against an approved annual plan line."
           />
         ) : (
           <DataTable
@@ -163,7 +163,7 @@ export default function AfePage() {
         )}
       </div>
 
-      <Modal open={open} onClose={() => setOpen(false)} title="Create commitment">
+      <Modal open={open} onClose={() => setOpen(false)} title="Create AFE">
         <AfeForm onSuccess={() => setOpen(false)} />
       </Modal>
     </ModulePageShell>

@@ -80,7 +80,7 @@ function AfeRowActions({ afe }: { afe: Afe }) {
 export const afeColumns: ColumnDef<Afe>[] = [
   {
     accessorKey: "description",
-    header: "Commitment",
+    header: "AFE",
     cell: ({ row }) => {
       const plan = row.original.afpBlockLine;
       const subtitle = plan

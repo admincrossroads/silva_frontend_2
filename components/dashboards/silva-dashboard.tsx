@@ -106,7 +106,7 @@ export function SilvaDashboard() {
           <DashboardPanel title="Shortcuts" noPadding contentClassName="divide-y">
             <DashboardPanelRow href="/planning/rate-card">Rate card</DashboardPanelRow>
             <DashboardPanelRow href="/planning/afp">Annual plan</DashboardPanelRow>
-            <DashboardPanelRow href="/planning/afe">Commitments (AFE)</DashboardPanelRow>
+            <DashboardPanelRow href="/planning/afe">AFEs</DashboardPanelRow>
             <DashboardPanelRow href="/operations/interventions">Core operations</DashboardPanelRow>
           </DashboardPanel>
         </div>

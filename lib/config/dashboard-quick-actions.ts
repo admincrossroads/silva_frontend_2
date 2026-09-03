@@ -40,7 +40,7 @@ export function quickActionsFor(user: User): QuickAction[] {
     return [
       { label: "Rate card", href: "/planning/rate-card", icon: FileText },
       { label: "Annual plan", href: "/planning/afp", icon: Wallet },
-      { label: "Commitments", href: "/planning/afe", icon: FileCheck },
+      { label: "AFEs", href: "/planning/afe", icon: FileCheck },
       { label: "Budget vs actual", href: "/reports/budget-vs-actual", icon: BarChart3 },
     ];
   }

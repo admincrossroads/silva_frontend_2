@@ -194,7 +194,7 @@ export const MESSAGE_ENTITY_TYPE_OPTIONS: Array<{
   roles: "all" | "spx_silva" | "execution";
 }> = [
   { value: "afp_line", label: "AFP line", roles: "spx_silva" },
-  { value: "afe", label: "AFE / Commitment", roles: "spx_silva" },
+  { value: "afe", label: "AFE", roles: "spx_silva" },
   { value: "work_order", label: "Work order", roles: "all" },
   { value: "field_ticket", label: "Field ticket", roles: "execution" },
   { value: "work_plan_submission", label: "Work plan", roles: "execution" },

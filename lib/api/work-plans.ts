@@ -88,10 +88,23 @@ export const workPlansApi = {
     api.post<{ data: WorkPlanSubmission }>(`/work-plans/${id}/reject`, { notes }).then((r) => r.data.data),
 
   accept: (id: string, body?: { notes?: string; year?: number }) =>
-    api.post<{ data: { submission: WorkPlanSubmission; promote: { afpCount: number; blockCount: number } } }>(
-      `/work-plans/${id}/accept`,
-      body,
-    ).then((r) => r.data.data),
+    api
+      .post<{
+        data: {
+          submission: WorkPlanSubmission;
+          promote: {
+            annualPlanLines: number;
+            activities: number;
+            blocks: number;
+            planYear: number;
+            annualPlanHref: string;
+            blockLineIds: string[];
+            afpCount: number;
+            blockCount: number;
+          };
+        };
+      }>(`/work-plans/${id}/accept`, body)
+      .then((r) => r.data.data),
 };
 
 export type AfpLineSchedule = {

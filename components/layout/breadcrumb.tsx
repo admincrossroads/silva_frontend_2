@@ -6,7 +6,7 @@ import { ChevronRight, Home } from "lucide-react";
 
 const LABELS: Record<string, string> = {
   dashboard: "Home",
-  planning: "Budget & Commitments",
+  planning: "Planning",
   execution: "Field Operations",
   payments: "Billing",
   vendors: "Directory",
@@ -15,7 +15,7 @@ const LABELS: Record<string, string> = {
   notifications: "Notifications",
   onboarding: "Project Setup",
   afp: "Annual plan",
-  afe: "Commitments (AFE)",
+  afe: "AFEs",
   intake: "Ad-hoc intake",
   "work-orders": "Schedule",
   "field-tickets": "Daily Log",

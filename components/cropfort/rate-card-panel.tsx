@@ -83,11 +83,6 @@ function formatEtb(value: number | string | null | undefined): string {
   return n.toLocaleString(undefined, { maximumFractionDigits: 4 });
 }
 
-function formatPct(value: number | null | undefined): string {
-  if (value == null || Number.isNaN(value)) return "—";
-  return `${value.toFixed(1)}%`;
-}
-
 function normalizeSearch(value: string): string {
   return value.trim().toLowerCase();
 }
@@ -512,7 +507,7 @@ function RateCardBuilder() {
           />
         }
       >
-        <table className="w-full min-w-[56rem] text-sm">
+        <table className="w-full min-w-[48rem] text-sm">
           <thead>
             <tr className={TABLE_HEAD}>
               <th className={cn(TABLE_CELL, "w-8")} />
@@ -520,8 +515,6 @@ function RateCardBuilder() {
               <th className={TABLE_CELL}>Resource</th>
               <th className={TABLE_CELL}>Type</th>
               <th className={TABLE_CELL}>Rate</th>
-              <th className={TABLE_CELL}>Bench A/B</th>
-              <th className={TABLE_CELL}>Variance</th>
               <th className={TABLE_CELL}>Status</th>
               <th className={TABLE_CELL}>Note</th>
               <th className={TABLE_CELL} />
@@ -530,13 +523,13 @@ function RateCardBuilder() {
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan={10}>
+                <td colSpan={8}>
                   <EmptyState icon={FileText} title="Loading rate lines…" />
                 </td>
               </tr>
             ) : pagination.slice.length === 0 ? (
               <tr>
-                <td colSpan={10}>
+                <td colSpan={8}>
                   <EmptyState icon={Package} title="No matching lines" />
                 </td>
               </tr>
@@ -574,21 +567,15 @@ function RateCardBuilder() {
                   <td className={cn(TABLE_CELL, "tabular-nums font-medium")}>
                     {formatEtb(line.rateEtb)}
                   </td>
-                  <td className={cn(TABLE_CELL, "tabular-nums text-muted-foreground")}>
-                    {formatEtb(line.benchmarkFarmARate)} / {formatEtb(line.benchmarkFarmBRate)}
-                  </td>
                   <td className={TABLE_CELL}>
                     <div className="flex flex-wrap items-center gap-1">
-                      <span className="tabular-nums">{formatPct(line.variancePct)}</span>
+                      <StatusBadge status={line.status} />
                       {line.isFlagged ? (
                         <Badge variant="outline" className="border-amber-500/40 bg-amber-500/10 text-amber-800">
                           Flagged
                         </Badge>
                       ) : null}
                     </div>
-                  </td>
-                  <td className={TABLE_CELL}>
-                    <StatusBadge status={line.status} />
                   </td>
                   <td className={cn(TABLE_CELL, "max-w-[12rem] text-xs text-muted-foreground")}>
                     {line.spxJustificationNote || "—"}
@@ -747,13 +734,11 @@ function RateCardApprovals() {
               />
             }
           >
-            <table className="w-full min-w-[48rem] text-sm">
+            <table className="w-full min-w-[40rem] text-sm">
               <thead>
                 <tr className={TABLE_HEAD}>
                   <th className={TABLE_CELL}>Resource</th>
                   <th className={TABLE_CELL}>Rate</th>
-                  <th className={TABLE_CELL}>Benchmarks</th>
-                  <th className={TABLE_CELL}>Variance</th>
                   <th className={TABLE_CELL}>Justification</th>
                   <th className={TABLE_CELL}>Actions</th>
                 </tr>
@@ -761,13 +746,13 @@ function RateCardApprovals() {
               <tbody>
                 {loadingSubmitted ? (
                   <tr>
-                    <td colSpan={6}>
+                    <td colSpan={4}>
                       <EmptyState icon={ClipboardList} title="Loading pending lines…" />
                     </td>
                   </tr>
                 ) : pendingPage.slice.length === 0 ? (
                   <tr>
-                    <td colSpan={6}>
+                    <td colSpan={4}>
                       <EmptyState icon={CheckCircle2} title="Nothing pending" />
                     </td>
                   </tr>
@@ -775,27 +760,23 @@ function RateCardApprovals() {
                   pendingPage.slice.map((line) => (
                     <tr key={line.id} className={TABLE_ROW}>
                       <td className={TABLE_CELL}>
-                        <p className="font-medium">{line.resourceName}</p>
+                        <div className="flex flex-wrap items-center gap-1">
+                          <p className="font-medium">{line.resourceName}</p>
+                          {line.isFlagged ? (
+                            <Badge
+                              variant="outline"
+                              className="border-amber-500/40 bg-amber-500/10 text-amber-800"
+                            >
+                              Flagged
+                            </Badge>
+                          ) : null}
+                        </div>
                         <p className="text-xs text-muted-foreground">
                           {line.resourceCode} · {line.unitOfMeasure}
                         </p>
                       </td>
                       <td className={cn(TABLE_CELL, "tabular-nums font-medium")}>
                         {formatEtb(line.rateEtb)}
-                      </td>
-                      <td className={cn(TABLE_CELL, "tabular-nums text-muted-foreground")}>
-                        {formatEtb(line.benchmarkFarmARate)} / {formatEtb(line.benchmarkFarmBRate)}
-                      </td>
-                      <td className={TABLE_CELL}>
-                        <span className="tabular-nums">{formatPct(line.variancePct)}</span>
-                        {line.isFlagged ? (
-                          <Badge
-                            variant="outline"
-                            className="ml-1 border-amber-500/40 bg-amber-500/10 text-amber-800"
-                          >
-                            Flagged
-                          </Badge>
-                        ) : null}
                       </td>
                       <td className={cn(TABLE_CELL, "max-w-[14rem] text-xs text-muted-foreground")}>
                         {line.spxJustificationNote || "—"}

@@ -33,21 +33,13 @@ type DemoAccount = {
   email: string;
 };
 
-/** Workflow actors with approve / execute privileges — password Password123! for all */
+/** Core workflow demos — password Password123! for all */
 const DEMO_ACCOUNTS: DemoAccount[] = [
-  // Silva — govern / approve
   { org: "Silva", role: "Owner", email: "owner@silva.example" },
-  { org: "Silva", role: "Country manager", email: "naomi@silva.example" },
-  { org: "Silva", role: "Finance", email: "finance@silva.example" },
-  // SPX — plan, validate, issue
   { org: "SPX", role: "Principal", email: "principal@spx.example" },
   { org: "SPX", role: "Account handler", email: "handler@spx.example" },
-  { org: "SPX", role: "Field supervisor", email: "supervisor@spx.example" },
-  { org: "SPX", role: "System admin", email: "admin@spx.example" },
-  // B-Agro — execute / vendor review
   { org: "B-Agro", role: "Admin", email: "admin@bagro.example" },
   { org: "B-Agro", role: "Field lead", email: "lead@bagro.example" },
-  { org: "B-Agro", role: "Supervisor", email: "supervisor@bagro.example" },
 ];
 
 const DEMO_PASSWORD = "Password123!";

@@ -167,7 +167,7 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
     { label: "Dashboard", procoreLabel: "Home", href: "/dashboard", icon: LayoutDashboard },
   ];
 
-  // Planning workflow: Rate card → Annual plan (Block AFP) → Commitments (AFE)
+  // Planning workflow: Rate card → Plan builder → Annual plan → AFEs
   if (isSpxRole(role) || isSilvaRole(role) || role === "system_admin") {
     items.push({
       label: "Rate card",
@@ -175,6 +175,14 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
       href: "/planning/rate-card",
       icon: FileText,
     });
+    if (isSpxRole(role) || role === "system_admin") {
+      items.push({
+        label: "Plan builder",
+        procoreLabel: "Budget",
+        href: "/execution/work-plans",
+        icon: ClipboardList,
+      });
+    }
     items.push({
       label: "Annual plan",
       procoreLabel: "Budget",
@@ -182,8 +190,8 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
       icon: Wallet,
     });
     items.push({
-      label: "Commitments",
-      procoreLabel: "Commitments",
+      label: "AFEs",
+      procoreLabel: "AFEs",
       href: "/planning/afe",
       icon: FileCheck,
     });
@@ -197,20 +205,23 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
     role === "vendor_supervisor" ||
     role === "vendor_field_lead"
   ) {
-    const coreOpsChildren: NavItem["children"] = [
+    const operationsChildren: NavItem["children"] = [
       { label: "Interventions", procoreLabel: "Budget", href: "/operations/interventions" },
       { label: "Projects", procoreLabel: "Budget", href: "/operations/projects" },
     ];
-    coreOpsChildren.push({
-      label: "Farm journey",
-      procoreLabel: "Budget",
-      href: "/cropfort/farms/journey",
-    });
+    // Vendors build plans here; SPX uses Planning → Plan builder
+    if (role === "vendor_admin" || role === "vendor_manager") {
+      operationsChildren.push({
+        label: "Plan builder",
+        procoreLabel: "Budget",
+        href: "/execution/work-plans",
+      });
+    }
     items.push({
-      label: "Core Operations",
+      label: "Operations",
       procoreLabel: "Budget",
       icon: ClipboardList,
-      children: coreOpsChildren,
+      children: operationsChildren,
     });
   }
 
@@ -219,9 +230,6 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
     { label: "Work Orders", procoreLabel: "Schedule", href: "/execution/work-orders" },
     { label: "Season Calendar", procoreLabel: "Schedule", href: "/execution/calendar" },
   ];
-  if (isSpxRole(role) || role === "vendor_admin" || role === "vendor_manager") {
-    scheduleChildren.push({ label: "Work Plan", procoreLabel: "Schedule", href: "/execution/work-plans" });
-  }
   const dailyLogChildren: NavItem["children"] = [];
   if (!isSilvaRole(role)) {
     dailyLogChildren.push({ label: "Field Tickets", procoreLabel: "Daily Log", href: "/execution/field-tickets" });

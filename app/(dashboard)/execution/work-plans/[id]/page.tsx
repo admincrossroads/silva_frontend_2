@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { FileSpreadsheet, Keyboard, CheckCircle2, Upload } from "lucide-react";
 import {
@@ -56,6 +56,7 @@ type BuildMode = "choose" | "form" | "excel" | "summary";
 
 export default function WorkPlanDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const [reviewNotes, setReviewNotes] = useState("");
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -136,11 +137,11 @@ export default function WorkPlanDetailPage() {
     <PageShell>
       <div className="mb-6">
         <Link href="/execution/work-plans" className="text-sm text-muted-foreground hover:text-foreground">
-          ← Work plans
+          ← Plan builder
         </Link>
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight">{plan.farmName || "Annual work plan"}</h1>
+            <h1 className="text-2xl font-bold tracking-tight">{plan.farmName || "Work plan"}</h1>
             <Badge variant="outline" className="capitalize">
               {plan.status.replace(/_/g, " ")}
             </Badge>
@@ -164,10 +165,7 @@ export default function WorkPlanDetailPage() {
 
       {canReview || canPromote ? (
         <Card className="mb-6 p-5">
-          <h2 className="text-sm font-semibold">Promote to AFP</h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            SPX owns the annual work plan. Accept promotes activities into AFP lines and the activity catalog.
-          </p>
+          <h2 className="text-sm font-semibold">Annual plan drafts</h2>
           <Textarea
             label="Notes"
             className="mt-3"
@@ -178,9 +176,19 @@ export default function WorkPlanDetailPage() {
           <div className="mt-4 flex flex-wrap gap-2">
             <Button
               disabled={acceptPlan.isPending || !canPromote}
-              onClick={() => acceptPlan.mutate({ id: plan.id, notes: reviewNotes || undefined })}
+              onClick={() =>
+                acceptPlan.mutate(
+                  { id: plan.id, notes: reviewNotes || undefined },
+                  {
+                    onSuccess: (data) => {
+                      const href = data?.promote?.annualPlanHref || `/planning/afp?year=${plan.budgetYearGc}`;
+                      router.push(href);
+                    },
+                  },
+                )
+              }
             >
-              {acceptPlan.isPending ? "Promoting…" : "Accept & promote to AFP"}
+              {acceptPlan.isPending ? "Creating drafts…" : "Accept → Annual plan drafts"}
             </Button>
             {canReview ? (
               <Button
@@ -191,6 +199,19 @@ export default function WorkPlanDetailPage() {
                 Reject
               </Button>
             ) : null}
+          </div>
+        </Card>
+      ) : null}
+
+      {plan.status === "accepted" && plan.promotedAt ? (
+        <Card className="mb-6 border-emerald-200 bg-emerald-50/80 p-5 dark:border-emerald-900/40 dark:bg-emerald-950/30">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">
+              Annual plan
+            </h2>
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/planning/afp?year=${plan.budgetYearGc}`}>Open</Link>
+            </Button>
           </div>
         </Card>
       ) : null}
@@ -345,9 +366,6 @@ export default function WorkPlanDetailPage() {
                   <option value="materials">Materials</option>
                   <option value="salary">Salary &amp; Admin</option>
                 </select>
-                <p className="mt-1.5 text-xs text-muted-foreground">
-                  Choose the operation that matches this file so Young Coffee is not imported as Nursery.
-                </p>
               </div>
 
               <input
@@ -410,12 +428,7 @@ export default function WorkPlanDetailPage() {
         <Card className="mb-6 p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-sm font-semibold">Finalize plan</h2>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                {isSpx
-                  ? "Optional: mark as submitted, or promote directly when ready."
-                  : "Submit for SPX review when your plan is complete."}
-              </p>
+              <h2 className="text-sm font-semibold">Finalize</h2>
             </div>
             {canSubmit ? (
               <Button

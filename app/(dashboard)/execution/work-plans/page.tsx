@@ -22,7 +22,7 @@ export default function WorkPlansPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const { isSpx, canManageWorkPlan } = useRole();
+  const { canManageWorkPlan } = useRole();
   const { data: plans = [], isLoading } = useWorkPlans();
   const { data: template } = useWorkPlanTemplate();
   const {
@@ -55,11 +55,11 @@ export default function WorkPlansPage() {
       <FarmAreaScopeBanner />
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Annual work plans</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Plan builder</h1>
         </div>
         {canManageWorkPlan ? (
           <Button disabled={createPlan.isPending} onClick={() => setModalOpen(true)}>
-            New work plan
+            New
           </Button>
         ) : null}
       </div>
@@ -92,8 +92,7 @@ export default function WorkPlansPage() {
             ) : plans.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
-                  No work plan submissions yet.
-                  {canManageWorkPlan ? " Click New work plan to start." : null}
+                  No work plans
                 </td>
               </tr>
             ) : (
@@ -122,16 +121,10 @@ export default function WorkPlansPage() {
         </table>
       </Card>
 
-      {isSpx ? (
-        <p className="mt-4 text-xs text-muted-foreground">
-          {/* Submitted plans appear in your dashboard action queue for review and promotion. */}
-        </p>
-      ) : null}
-
       <Modal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        title="New annual work plan"
+        title="New work plan"
       >
         <WorkPlanSetupForm
           estates={estates}

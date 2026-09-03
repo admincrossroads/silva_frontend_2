@@ -74,8 +74,8 @@ export const PROCORE_MODULES: Record<ProcoreModuleId, ProcoreModuleDef> = {
   },
   commitments: {
     id: "commitments",
-    procoreLabel: "Commitments",
-    instrumentLabel: "AFE Register",
+    procoreLabel: "AFEs",
+    instrumentLabel: "AFEs",
     href: "/planning/afe",
     icon: FileCheck,
     workflow: DEFAULT_WORKFLOW,

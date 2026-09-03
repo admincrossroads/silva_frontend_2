@@ -46,7 +46,7 @@ export default function AfeDetailPage() {
   if (isLoading || !afe) {
     return (
       <PageShell>
-        <PageLoading label="Loading commitment…" />
+        <PageLoading label="Loading AFE…" />
       </PageShell>
     );
   }
@@ -83,7 +83,7 @@ export default function AfeDetailPage() {
       <DetailPageHeader
         title={afe.description}
         backHref="/planning/afe"
-        backLabel="AFE register"
+        backLabel="AFEs"
         badges={
           <>
             <Badge variant="outline" className="font-mono text-[10px] font-normal">{afe.id}</Badge>

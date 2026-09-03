@@ -129,7 +129,7 @@ export function notificationEmptyCtas(role?: string) {
     ];
   }
   return [
-    { href: "/planning/afe", label: "AFE register" },
+    { href: "/planning/afe", label: "AFEs" },
     { href: "/vendors", label: "Vendor directory" },
     { href: "/settings/registrations", label: "Registrations" },
   ];
