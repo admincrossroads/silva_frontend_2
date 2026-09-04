@@ -137,7 +137,7 @@ export default function WorkPlanDetailPage() {
     <PageShell>
       <div className="mb-6">
         <Link href="/execution/work-plans" className="text-sm text-muted-foreground hover:text-foreground">
-          ← Plan builder
+          ← Core Operations
         </Link>
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">

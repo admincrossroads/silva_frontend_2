@@ -1,17 +1,39 @@
 "use client";
 
+/**
+ * Silva owner desk dashboard.
+ * Previous cluttered layout preserved in `silva-dashboard.legacy.tsx`
+ * (export `SilvaDashboardLegacy`) for revert.
+ */
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { dashboardApi } from "@/lib/api/dashboard";
-import { BudgetVsActualChart } from "@/components/charts/budget-vs-actual-chart";
 import { KpiStatCard } from "@/components/dashboard/kpi-stat-card";
 import { DashboardPanel, DashboardPanelEmpty, DashboardPanelRow } from "@/components/dashboard/dashboard-panel";
+import {
+  DashboardTable,
+  DashboardTableBody,
+  DashboardTableHead,
+  DashboardTableRow,
+  DashboardTableTd,
+  DashboardTableTh,
+} from "@/components/dashboard/dashboard-table";
 import { ActionQueueCard } from "@/components/dashboard/action-queue-card";
-import { HealthBadge } from "@/components/badges/health-badge";
 import { EstateMapHero } from "@/components/dashboards/estate-map-hero";
-import { CropfortDashboardSection } from "@/components/dashboards/cropfort-dashboard-section";
 import { RateCardApprovalsPanel } from "@/components/cropfort/rate-card-approvals-panel";
 import { AfpBlockApprovalsPanel } from "@/components/cropfort/afp-block-approvals-panel";
-import { Wallet, CreditCard, Wheat, ScrollText } from "lucide-react";
+import { useCropfortDashboard } from "@/hooks/use-cropfort-dashboard";
+import { useRateCardLines } from "@/hooks/use-rate-card";
+import { useAfpBlockLines } from "@/hooks/use-afp-blocks";
+import { Wallet, Coins, ListTodo, FileText, Users } from "lucide-react";
+
+function formatEtb(value: number) {
+  return new Intl.NumberFormat("en-ET", {
+    style: "currency",
+    currency: "ETB",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
 
 export function SilvaDashboard() {
   const year = new Date().getUTCFullYear();
@@ -19,17 +41,26 @@ export function SilvaDashboard() {
     queryKey: ["dashboard", "silva-owner", year],
     queryFn: () => dashboardApi.silvaOwner(year),
   });
+  const { data: queue } = useQuery({
+    queryKey: ["dashboard", "action-queues"],
+    queryFn: () => dashboardApi.actionQueues(),
+  });
+  const { data: cropfort, isLoading: cropfortLoading } = useCropfortDashboard({ planYear: year });
+  const { data: rateLines = [] } = useRateCardLines("submitted");
+  const { data: planLines = [] } = useAfpBlockLines({ planYear: year, status: "submitted" });
 
-  const bvaLines = data?.budgetVsActual?.lines ?? [];
-  const bvaChartData = bvaLines.map((line: { afpLineId: string; utilizationPercent: number }) => ({
-    discipline: line.afpLineId,
-    budget: 100,
-    actual: line.utilizationPercent,
-  }));
+  const totals = cropfort?.bva.totals;
+  const waitingOnYou = useMemo(() => {
+    const afeQueue = (queue?.items ?? []).length;
+    return afeQueue + rateLines.length + planLines.length;
+  }, [queue?.items, rateLines.length, planLines.length]);
 
-  const overBudget = bvaLines.filter(
-    (line: { health?: string }) => line.health === "over_budget" || line.health === "Over Budget",
-  ).length;
+  const monthlyReady = Boolean(data?.reports?.monthlyReady);
+  const vendorAlerts = data?.vendorPerformance?.belowThresholdCount ?? 0;
+  const reserveLabel =
+    cropfort?.opexReserve.reserveBalanceEtb != null
+      ? formatEtb(cropfort.opexReserve.reserveBalanceEtb)
+      : undefined;
 
   return (
     <div className="space-y-4">
@@ -41,94 +72,108 @@ export function SilvaDashboard() {
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <KpiStatCard
-          label="Plan lines"
-          value={String(bvaLines.length)}
+          label="Budget"
+          value={totals ? formatEtb(totals.budgetEtb) : "—"}
+          sublabel={reserveLabel ? `Reserve ${reserveLabel}` : String(year)}
           icon={Wallet}
           tone="primary"
-          loading={isLoading}
+          loading={cropfortLoading}
           href="/planning/afp"
         />
         <KpiStatCard
-          label="Over watch"
-          value={String(overBudget)}
-          icon={ScrollText}
-          tone={overBudget > 0 ? "amber" : "slate"}
-          loading={isLoading}
+          label="Spent"
+          value={totals ? formatEtb(totals.actualEtb) : "—"}
+          sublabel={totals ? `${totals.variancePct}% vs plan` : undefined}
+          icon={Coins}
+          tone={totals && Math.abs(totals.variancePct) > 20 ? "amber" : "primary"}
+          loading={cropfortLoading}
           href="/reports/budget-vs-actual"
         />
         <KpiStatCard
-          label="Vendor alerts"
-          value={String(data?.vendorPerformance?.belowThresholdCount ?? 0)}
-          icon={CreditCard}
-          tone="rose"
+          label="Waiting on you"
+          value={String(waitingOnYou)}
+          sublabel="Approvals"
+          icon={ListTodo}
+          tone={waitingOnYou > 0 ? "amber" : "slate"}
           loading={isLoading}
-          href="/vendors"
+          href="/planning/afe"
         />
         <KpiStatCard
-          label="Picker productivity"
-          value={String(data?.harvestKpis?.pickerProductivityCurrent ?? "—")}
-          sublabel="kg/day"
-          icon={Wheat}
-          tone="primary"
+          label="Monthly report"
+          value={monthlyReady ? "Ready" : "Pending"}
+          sublabel={String(year)}
+          icon={FileText}
+          tone={monthlyReady ? "primary" : "slate"}
           loading={isLoading}
+          href="/reports/monthly"
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <div className="space-y-4 xl:col-span-2">
-          <DashboardPanel title="Budget utilization" viewAllHref="/reports/budget-vs-actual">
-            <div className="space-y-3 p-4">
-              {isLoading ? (
-                <div className="h-[240px] animate-pulse rounded-lg bg-muted/50" />
-              ) : bvaChartData.length > 0 ? (
-                <>
-                  <BudgetVsActualChart data={bvaChartData} />
-                  <div className="space-y-1 border-t border-border/80 pt-3">
-                    {bvaLines.slice(0, 5).map(
-                      (line: { afpLineId: string; utilizationPercent: number; health?: string }) => (
-                        <div key={line.afpLineId} className="flex items-center justify-between text-xs">
-                          <span className="truncate text-muted-foreground">{line.afpLineId}</span>
-                          <div className="flex shrink-0 items-center gap-2">
-                            <span className="font-mono tabular-nums">{line.utilizationPercent}%</span>
-                            <HealthBadge health={line.health} />
-                          </div>
-                        </div>
-                      ),
-                    )}
-                  </div>
-                </>
-              ) : (
-                <DashboardPanelEmpty message="No budget data" />
-              )}
-            </div>
-          </DashboardPanel>
+      <DashboardPanel title="This year’s farm spend" viewAllHref="/planning/afp">
+        <DashboardTable>
+          <DashboardTableHead>
+            <DashboardTableTh>Block</DashboardTableTh>
+            <DashboardTableTh>Activity</DashboardTableTh>
+            <DashboardTableTh align="right">Budget</DashboardTableTh>
+            <DashboardTableTh align="right">Spent</DashboardTableTh>
+          </DashboardTableHead>
+          <DashboardTableBody>
+            {cropfortLoading ? (
+              <tr>
+                <td colSpan={4} className="px-4 py-8 text-center text-sm text-muted-foreground">
+                  Loading…
+                </td>
+              </tr>
+            ) : !cropfort?.bva.rows.length ? (
+              <tr>
+                <td colSpan={4}>
+                  <DashboardPanelEmpty message="No spend rows yet for this year." />
+                </td>
+              </tr>
+            ) : (
+              cropfort.bva.rows.slice(0, 10).map((row, index) => (
+                <DashboardTableRow key={`${row.blockId}-${row.activityId}`} index={index}>
+                  <DashboardTableTd className="font-medium">{row.blockCode}</DashboardTableTd>
+                  <DashboardTableTd className="max-w-[14rem] truncate text-muted-foreground">
+                    {row.activityName}
+                  </DashboardTableTd>
+                  <DashboardTableTd align="right">{formatEtb(row.budgetEtb)}</DashboardTableTd>
+                  <DashboardTableTd align="right">{formatEtb(row.actualEtb)}</DashboardTableTd>
+                </DashboardTableRow>
+              ))
+            )}
+          </DashboardTableBody>
+        </DashboardTable>
+      </DashboardPanel>
 
-          <DashboardPanel title="Shortcuts" noPadding contentClassName="divide-y">
-            <DashboardPanelRow href="/planning/rate-card">Rate card</DashboardPanelRow>
-            <DashboardPanelRow href="/planning/afp">Annual plan</DashboardPanelRow>
-            <DashboardPanelRow href="/planning/afe">AFEs</DashboardPanelRow>
-            <DashboardPanelRow href="/operations/interventions">Core operations</DashboardPanelRow>
-          </DashboardPanel>
-        </div>
-
-        <div className="space-y-4">
-          <ActionQueueCard title="Approval queue" />
+      <div className="space-y-3">
+        <h2 className="text-sm font-semibold text-foreground">Needs your approval</h2>
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+          <ActionQueueCard
+            title="Spend authorizations"
+            emptyLabel="Nothing waiting — SPX will notify you."
+          />
           <RateCardApprovalsPanel />
           <AfpBlockApprovalsPanel />
-
-          <DashboardPanel title="Payments & reports" noPadding contentClassName="divide-y">
-            <DashboardPanelRow href="/payments/settlements">Settlements</DashboardPanelRow>
-            <DashboardPanelRow href="/reports/monthly">
-              <span className="flex-1">Monthly reports</span>
-              <span className="text-xs text-muted-foreground">
-                {data?.reports?.monthlyReady ? "Ready" : "Pending"} · {data?.harvestKpis?.yieldTrendVsBaselinePercent ?? 0}%
-              </span>
-            </DashboardPanelRow>
-          </DashboardPanel>
         </div>
       </div>
 
-      <CropfortDashboardSection />
+      <DashboardPanel title="More" noPadding contentClassName="divide-y">
+        <DashboardPanelRow href="/payments/settlements">Settlements</DashboardPanelRow>
+        <DashboardPanelRow href="/vendors">
+          <span className="flex-1">Assigned partners</span>
+          {vendorAlerts > 0 ? (
+            <span className="flex items-center gap-1 text-xs text-rose-600">
+              <Users className="h-3.5 w-3.5" />
+              {vendorAlerts} alert{vendorAlerts !== 1 ? "s" : ""}
+            </span>
+          ) : (
+            <span className="text-xs text-muted-foreground">OK</span>
+          )}
+        </DashboardPanelRow>
+        <DashboardPanelRow href="/operations/projects">New project request</DashboardPanelRow>
+        <DashboardPanelRow href="/operations/interventions">New intervention request</DashboardPanelRow>
+      </DashboardPanel>
     </div>
   );
 }

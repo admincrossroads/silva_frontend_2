@@ -184,7 +184,17 @@ export function SidebarNav({
                             : "text-sidebar-foreground/55 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
                         )}
                       >
-                        {child.label}
+                        <span className="block leading-tight">{child.label}</span>
+                        {child.description ? (
+                          <span
+                            className={cn(
+                              "mt-0.5 block text-[10px] font-normal leading-tight",
+                              active ? "text-sidebar-brand/70" : "text-sidebar-foreground/40",
+                            )}
+                          >
+                            {child.description}
+                          </span>
+                        ) : null}
                       </Link>
                     );
                   })}

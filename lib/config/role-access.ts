@@ -28,7 +28,7 @@ export type NavItem = {
   procoreLabel?: string;
   href?: string;
   icon: LucideIcon;
-  children?: { label: string; procoreLabel?: string; href: string }[];
+  children?: { label: string; procoreLabel?: string; href: string; description?: string }[];
 };
 
 export type SettingsSection = {
@@ -167,27 +167,13 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
     { label: "Dashboard", procoreLabel: "Home", href: "/dashboard", icon: LayoutDashboard },
   ];
 
-  // Planning workflow: Rate card → Plan builder → Annual plan → AFEs
+  // Planning workflow: Rate card → AFEs
   if (isSpxRole(role) || isSilvaRole(role) || role === "system_admin") {
     items.push({
       label: "Rate card",
       procoreLabel: "Budget",
       href: "/planning/rate-card",
       icon: FileText,
-    });
-    if (isSpxRole(role) || role === "system_admin") {
-      items.push({
-        label: "Plan builder",
-        procoreLabel: "Budget",
-        href: "/execution/work-plans",
-        icon: ClipboardList,
-      });
-    }
-    items.push({
-      label: "Annual plan",
-      procoreLabel: "Budget",
-      href: "/planning/afp",
-      icon: Wallet,
     });
     items.push({
       label: "AFEs",
@@ -205,18 +191,30 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
     role === "vendor_supervisor" ||
     role === "vendor_field_lead"
   ) {
-    const operationsChildren: NavItem["children"] = [
-      { label: "Interventions", procoreLabel: "Budget", href: "/operations/interventions" },
-      { label: "Projects", procoreLabel: "Budget", href: "/operations/projects" },
-    ];
-    // Vendors build plans here; SPX uses Planning → Plan builder
-    if (role === "vendor_admin" || role === "vendor_manager") {
+    const operationsChildren: NavItem["children"] = [];
+    // Tier order: Core Operations (T1) → Projects (T2) → Interventions (T3)
+    if (
+      isSpxRole(role) ||
+      role === "system_admin" ||
+      role === "vendor_admin" ||
+      role === "vendor_manager"
+    ) {
       operationsChildren.push({
-        label: "Plan builder",
+        label: "Core Operations",
+        description: "Tier 1",
         procoreLabel: "Budget",
         href: "/execution/work-plans",
       });
     }
+    operationsChildren.push(
+      { label: "Projects", description: "Tier 2", procoreLabel: "Budget", href: "/operations/projects" },
+      {
+        label: "Interventions",
+        description: "Tier 3",
+        procoreLabel: "Budget",
+        href: "/operations/interventions",
+      },
+    );
     items.push({
       label: "Operations",
       procoreLabel: "Budget",
@@ -242,6 +240,15 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
     icon: CalendarDays,
     children: scheduleChildren,
   });
+
+  if (isSpxRole(role) || isSilvaRole(role) || role === "system_admin") {
+    items.push({
+      label: "Annual plan",
+      procoreLabel: "Budget",
+      href: "/planning/afp",
+      icon: Wallet,
+    });
+  }
 
   if (dailyLogChildren.length) {
     items.push({

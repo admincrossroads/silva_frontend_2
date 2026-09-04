@@ -347,6 +347,8 @@ export function CoreOperationsView({ view = "all", embedded = false }: CoreOpera
 
   const pageTitle =
     view === "intervention" ? "Interventions" : view === "project" ? "Projects" : "Core Operations";
+  const pageDescription =
+    view === "intervention" ? "Tier 3" : view === "project" ? "Tier 2" : undefined;
 
   const emptyMessage =
     view === "intervention"
@@ -372,6 +374,7 @@ export function CoreOperationsView({ view = "all", embedded = false }: CoreOpera
     <>
       <PageHeader
         title={pageTitle}
+        description={pageDescription}
         actions={
           canRequest ? (
             <Button onClick={openCreate}>
@@ -556,7 +559,7 @@ export function CoreOperationsView({ view = "all", embedded = false }: CoreOpera
                     <FormItem>
                       <FormLabel>Title</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. Emergency irrigation pump repair" {...field} />
+                        <Input placeholder="e.g. Urgent materials procurement or facility repair" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

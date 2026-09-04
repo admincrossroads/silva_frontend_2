@@ -36,8 +36,8 @@ type DemoAccount = {
 /** Core workflow demos — password Password123! for all */
 const DEMO_ACCOUNTS: DemoAccount[] = [
   { org: "Silva", role: "Owner", email: "owner@silva.example" },
-  { org: "SPX", role: "Principal", email: "principal@spx.example" },
-  { org: "SPX", role: "Account handler", email: "handler@spx.example" },
+  { org: "SPX", role: "Admin", email: "admin@spx.example" },
+  { org: "SPX", role: "Account Manager", email: "principal@spx.example" },
   { org: "B-Agro", role: "Admin", email: "admin@bagro.example" },
   { org: "B-Agro", role: "Field lead", email: "lead@bagro.example" },
 ];

@@ -55,7 +55,8 @@ export default function WorkPlansPage() {
       <FarmAreaScopeBanner />
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Plan builder</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Core Operations</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Tier 1</p>
         </div>
         {canManageWorkPlan ? (
           <Button disabled={createPlan.isPending} onClick={() => setModalOpen(true)}>

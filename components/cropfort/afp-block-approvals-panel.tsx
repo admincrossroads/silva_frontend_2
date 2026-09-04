@@ -21,7 +21,7 @@ export function AfpBlockApprovalsPanel() {
   const preview = lines.slice(0, 5);
 
   return (
-    <DashboardPanel title="Annual plan approvals" viewAllHref="/planning/afp">
+    <DashboardPanel title="Plan lines to approve" viewAllHref="/planning/afp">
       {isLoading ? (
         <p className="px-1 py-4 text-sm text-muted-foreground">Loading…</p>
       ) : preview.length === 0 ? (

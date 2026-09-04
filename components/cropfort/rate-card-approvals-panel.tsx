@@ -20,7 +20,7 @@ export function RateCardApprovalsPanel() {
   const preview = lines.slice(0, 5);
 
   return (
-    <DashboardPanel title="Rate card approvals" viewAllHref="/planning/rate-card">
+    <DashboardPanel title="Rates to approve" viewAllHref="/planning/rate-card">
       {isLoading ? (
         <p className="px-1 py-4 text-sm text-muted-foreground">Loading…</p>
       ) : preview.length === 0 ? (
