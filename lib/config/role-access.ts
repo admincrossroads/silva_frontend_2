@@ -320,7 +320,6 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
     }
 
     const reportChildren = [
-      { label: "Weekly", procoreLabel: "Reports", href: "/reports/weekly" },
       { label: "Monthly", procoreLabel: "Reports", href: "/reports/monthly" },
       { label: "Quarterly", procoreLabel: "Reports", href: "/reports/quarterly" },
       { label: "Annual", procoreLabel: "Reports", href: "/reports/annual" },
