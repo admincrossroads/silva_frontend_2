@@ -11,6 +11,7 @@ import {
   RotateCcw,
   Search,
   Users,
+  Wrench,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,12 +43,11 @@ import {
 } from "@/hooks/use-rate-card";
 
 type StatusFilter = "all" | "draft" | "submitted" | "approved" | "returned";
-type TypeFilter = "all" | RateCardResourceType;
 type FlagFilter = "all" | "flagged" | "ok";
 type BuilderForm = {
   resourceCode: string;
   resourceName: string;
-  resourceType: RateCardResourceType | "";
+  resourceType: RateCardResourceType;
   unitOfMeasure: string;
   rateEtb: string;
   benchmarkFarmARate: string;
@@ -55,16 +55,18 @@ type BuilderForm = {
   spxJustificationNote: string;
 };
 
-const EMPTY_FORM: BuilderForm = {
-  resourceCode: "",
-  resourceName: "",
-  resourceType: "material",
-  unitOfMeasure: "unit",
-  rateEtb: "",
-  benchmarkFarmARate: "",
-  benchmarkFarmBRate: "",
-  spxJustificationNote: "",
-};
+function emptyForm(resourceType: RateCardResourceType): BuilderForm {
+  return {
+    resourceCode: "",
+    resourceName: "",
+    resourceType,
+    unitOfMeasure: "unit",
+    rateEtb: "",
+    benchmarkFarmARate: "",
+    benchmarkFarmBRate: "",
+    spxJustificationNote: "",
+  };
+}
 
 const TABLE_HEAD =
   "border-b bg-muted/50 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground";
@@ -118,11 +120,11 @@ function matchesLaborSearch(row: LaborRateCard, query: string): boolean {
   ]);
 }
 
-function lineToForm(line: RateCardLine): BuilderForm {
+function lineToForm(line: RateCardLine, fallbackType: RateCardResourceType): BuilderForm {
   return {
     resourceCode: line.resourceCode,
     resourceName: line.resourceName,
-    resourceType: (line.resourceType as RateCardResourceType) || "",
+    resourceType: (line.resourceType as RateCardResourceType) || fallbackType,
     unitOfMeasure: line.unitOfMeasure,
     rateEtb: String(num(line.rateEtb) ?? ""),
     benchmarkFarmARate: line.benchmarkFarmARate != null ? String(num(line.benchmarkFarmARate) ?? "") : "",
@@ -135,13 +137,20 @@ function formToDto(form: BuilderForm): CreateRateCardLineDto {
   return {
     resourceCode: form.resourceCode.trim(),
     resourceName: form.resourceName.trim(),
-    resourceType: form.resourceType || null,
+    resourceType: form.resourceType,
     unitOfMeasure: form.unitOfMeasure.trim() || "unit",
     rateEtb: Number(form.rateEtb),
     benchmarkFarmARate: form.benchmarkFarmARate ? Number(form.benchmarkFarmARate) : null,
     benchmarkFarmBRate: form.benchmarkFarmBRate ? Number(form.benchmarkFarmBRate) : null,
     spxJustificationNote: form.spxJustificationNote.trim() || null,
   };
+}
+
+function isResourceType(line: RateCardLine, type: RateCardResourceType): boolean {
+  if (line.resourceType === type) return true;
+  // Legacy rows without type land under material
+  if (type === "material" && (line.resourceType == null || line.resourceType === "")) return true;
+  return false;
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -221,34 +230,38 @@ function TableShell({ children, footer }: { children: ReactNode; footer?: ReactN
   );
 }
 
-function RateCardBuilder() {
-  const { data: lines = [], isLoading } = useRateCardLines();
-  const { data: meta } = useRateCardMeta();
+function RateCardBuilder({ resourceType }: { resourceType: RateCardResourceType }) {
+  const { data: allLines = [], isLoading } = useRateCardLines();
   const createLine = useCreateRateCardLine();
   const updateLine = useUpdateRateCardLine();
   const submit = useSubmitRateCard();
   const reopen = useReopenRateCardLine();
 
+  const lines = useMemo(
+    () => allLines.filter((l) => isResourceType(l, resourceType)),
+    [allLines, resourceType],
+  );
+
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [flagFilter, setFlagFilter] = useState<FlagFilter>("all");
   const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);
-  const [form, setForm] = useState<BuilderForm>(EMPTY_FORM);
+  const [form, setForm] = useState<BuilderForm>(() => emptyForm(resourceType));
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [error, setError] = useState("");
   const [formError, setFormError] = useState("");
 
+  const typeLabel = resourceType === "service" ? "Service" : "Material";
+
   const filtered = useMemo(() => {
     return lines.filter((l) => {
       if (statusFilter !== "all" && l.status !== statusFilter) return false;
-      if (typeFilter !== "all" && l.resourceType !== typeFilter) return false;
       if (flagFilter === "flagged" && !l.isFlagged) return false;
       if (flagFilter === "ok" && l.isFlagged) return false;
       return matchesRateLineSearch(l, search);
     });
-  }, [lines, statusFilter, typeFilter, flagFilter, search]);
+  }, [lines, statusFilter, flagFilter, search]);
 
   const pagination = useClientPagination(filtered, 10);
 
@@ -259,12 +272,21 @@ function RateCardBuilder() {
     (l) => l.status === "draft" && l.isFlagged && !l.spxJustificationNote?.trim(),
   );
 
+  const typeCounts = useMemo(() => {
+    return {
+      draft: lines.filter((l) => l.status === "draft").length,
+      submitted: lines.filter((l) => l.status === "submitted").length,
+      approved: lines.filter((l) => l.status === "approved").length,
+      returned: lines.filter((l) => l.status === "returned").length,
+    };
+  }, [lines]);
+
   const setField = <K extends keyof BuilderForm>(key: K, value: BuilderForm[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
   const resetForm = () => {
-    setForm(EMPTY_FORM);
+    setForm(emptyForm(resourceType));
     setEditingId(null);
     setFormError("");
   };
@@ -285,7 +307,7 @@ function RateCardBuilder() {
       setFormError("Code, name, and rate are required.");
       return;
     }
-    const dto = formToDto(form);
+    const dto = formToDto({ ...form, resourceType });
     try {
       if (editingId) {
         await updateLine.mutateAsync({ lineId: editingId, dto });
@@ -312,27 +334,25 @@ function RateCardBuilder() {
   const startEdit = (line: RateCardLine) => {
     if (line.status !== "draft") return;
     setEditingId(line.id);
-    setForm(lineToForm(line));
+    setForm(lineToForm(line, resourceType));
     setFormError("");
     setFormOpen(true);
   };
 
   return (
     <div className="space-y-4">
-      {meta ? (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <StatTile label="Draft" value={meta.counts.draft} />
-          <StatTile label="Submitted" value={meta.counts.submitted} tone="amber" />
-          <StatTile label="Approved" value={meta.counts.approved} tone="emerald" />
-          <StatTile label="Returned" value={meta.counts.returned} tone="rose" />
-        </div>
-      ) : null}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <StatTile label="Draft" value={typeCounts.draft} />
+        <StatTile label="Submitted" value={typeCounts.submitted} tone="amber" />
+        <StatTile label="Approved" value={typeCounts.approved} tone="emerald" />
+        <StatTile label="Returned" value={typeCounts.returned} tone="rose" />
+      </div>
 
       <div className="flex flex-wrap items-center justify-end gap-3">
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" onClick={openCreate} className="gap-1.5">
             <Plus className="h-4 w-4" />
-            Add line
+            Add {typeLabel.toLowerCase()}
           </Button>
           <Button
             disabled={!submitIds.length || submit.isPending || flaggedDraftsNeedingNote.length > 0}
@@ -356,7 +376,7 @@ function RateCardBuilder() {
       <Modal
         open={formOpen}
         onClose={closeForm}
-        title={editingId ? "Edit line" : "Add line"}
+        title={editingId ? `Edit ${typeLabel.toLowerCase()}` : `Add ${typeLabel.toLowerCase()}`}
         className="sm:max-w-lg"
       >
         <div className="space-y-4">
@@ -374,15 +394,6 @@ function RateCardBuilder() {
               value={form.resourceName}
               onChange={(e) => setField("resourceName", e.target.value)}
             />
-            <Select
-              id="rc-type"
-              label="Type"
-              value={form.resourceType}
-              onChange={(e) => setField("resourceType", e.target.value as RateCardResourceType | "")}
-            >
-              <option value="material">Material</option>
-              <option value="service">Service</option>
-            </Select>
             <Input
               id="rc-uom"
               label="UoM"
@@ -462,17 +473,6 @@ function RateCardBuilder() {
           <option value="returned">Returned</option>
         </Select>
         <Select
-          id="rc-type-filter"
-          label="Type"
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value as TypeFilter)}
-          className="w-36"
-        >
-          <option value="all">All</option>
-          <option value="material">Material</option>
-          <option value="service">Service</option>
-        </Select>
-        <Select
           id="rc-flag-filter"
           label="Variance"
           value={flagFilter}
@@ -507,13 +507,12 @@ function RateCardBuilder() {
           />
         }
       >
-        <table className="w-full min-w-[48rem] text-sm">
+        <table className="w-full min-w-[44rem] text-sm">
           <thead>
             <tr className={TABLE_HEAD}>
               <th className={cn(TABLE_CELL, "w-8")} />
               <th className={TABLE_CELL}>Code</th>
               <th className={TABLE_CELL}>Resource</th>
-              <th className={TABLE_CELL}>Type</th>
               <th className={TABLE_CELL}>Rate</th>
               <th className={TABLE_CELL}>Status</th>
               <th className={TABLE_CELL}>Note</th>
@@ -523,14 +522,17 @@ function RateCardBuilder() {
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan={8}>
+                <td colSpan={7}>
                   <EmptyState icon={FileText} title="Loading rate lines…" />
                 </td>
               </tr>
             ) : pagination.slice.length === 0 ? (
               <tr>
-                <td colSpan={8}>
-                  <EmptyState icon={Package} title="No matching lines" />
+                <td colSpan={7}>
+                  <EmptyState
+                    icon={resourceType === "service" ? Wrench : Package}
+                    title={`No ${typeLabel.toLowerCase()} lines`}
+                  />
                 </td>
               </tr>
             ) : (
@@ -560,9 +562,6 @@ function RateCardBuilder() {
                     {line.returnedComment ? (
                       <p className="mt-1 text-xs text-destructive">{line.returnedComment}</p>
                     ) : null}
-                  </td>
-                  <td className={cn(TABLE_CELL, "capitalize text-muted-foreground")}>
-                    {line.resourceType || "—"}
                   </td>
                   <td className={cn(TABLE_CELL, "tabular-nums font-medium")}>
                     {formatEtb(line.rateEtb)}
@@ -609,34 +608,37 @@ function RateCardBuilder() {
   );
 }
 
-function RateCardApprovals() {
-  const { data: submitted = [], isLoading: loadingSubmitted } = useRateCardLines("submitted");
-  const { data: approved = [], isLoading: loadingApproved } = useRateCardLines("approved");
+function RateCardApprovals({ resourceType }: { resourceType: RateCardResourceType }) {
+  const { data: allSubmitted = [], isLoading: loadingSubmitted } = useRateCardLines("submitted");
+  const { data: allApproved = [], isLoading: loadingApproved } = useRateCardLines("approved");
   const approve = useApproveRateCardLine();
   const returnLine = useReturnRateCardLine();
   const [returnComment, setReturnComment] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
   const [pendingSearch, setPendingSearch] = useState("");
-  const [pendingType, setPendingType] = useState<TypeFilter>("all");
   const [pendingFlag, setPendingFlag] = useState<FlagFilter>("all");
   const [approvedSearch, setApprovedSearch] = useState("");
-  const [approvedType, setApprovedType] = useState<TypeFilter>("all");
+
+  const submitted = useMemo(
+    () => allSubmitted.filter((l) => isResourceType(l, resourceType)),
+    [allSubmitted, resourceType],
+  );
+  const approved = useMemo(
+    () => allApproved.filter((l) => isResourceType(l, resourceType)),
+    [allApproved, resourceType],
+  );
 
   const pendingFiltered = useMemo(() => {
     return submitted.filter((l) => {
-      if (pendingType !== "all" && l.resourceType !== pendingType) return false;
       if (pendingFlag === "flagged" && !l.isFlagged) return false;
       if (pendingFlag === "ok" && l.isFlagged) return false;
       return matchesRateLineSearch(l, pendingSearch);
     });
-  }, [submitted, pendingSearch, pendingType, pendingFlag]);
+  }, [submitted, pendingSearch, pendingFlag]);
 
   const approvedFiltered = useMemo(() => {
-    return approved.filter((l) => {
-      if (approvedType !== "all" && l.resourceType !== approvedType) return false;
-      return matchesRateLineSearch(l, approvedSearch);
-    });
-  }, [approved, approvedSearch, approvedType]);
+    return approved.filter((l) => matchesRateLineSearch(l, approvedSearch));
+  }, [approved, approvedSearch]);
 
   const pendingPage = useClientPagination(pendingFiltered, 10);
   const approvedPage = useClientPagination(approvedFiltered, 10);
@@ -699,17 +701,6 @@ function RateCardApprovals() {
                 className="pl-9"
               />
             </div>
-            <Select
-              id="rc-pending-type"
-              label="Type"
-              value={pendingType}
-              onChange={(e) => setPendingType(e.target.value as TypeFilter)}
-              className="w-36"
-            >
-              <option value="all">All</option>
-              <option value="material">Material</option>
-              <option value="service">Service</option>
-            </Select>
             <Select
               id="rc-pending-flag"
               label="Variance"
@@ -825,17 +816,6 @@ function RateCardApprovals() {
                 className="pl-9"
               />
             </div>
-            <Select
-              id="rc-approved-type"
-              label="Type"
-              value={approvedType}
-              onChange={(e) => setApprovedType(e.target.value as TypeFilter)}
-              className="w-36"
-            >
-              <option value="all">All</option>
-              <option value="material">Material</option>
-              <option value="service">Service</option>
-            </Select>
           </FilterToolbar>
           <TableShell
             footer={
@@ -869,7 +849,10 @@ function RateCardApprovals() {
                 ) : approvedPage.slice.length === 0 ? (
                   <tr>
                     <td colSpan={5}>
-                      <EmptyState icon={Package} title="No approved rates yet" />
+                      <EmptyState
+                        icon={resourceType === "service" ? Wrench : Package}
+                        title="No approved rates yet"
+                      />
                     </td>
                   </tr>
                 ) : (
@@ -1045,22 +1028,37 @@ export function RateCardPanel() {
   const canBuild = isSpx || isSystemAdmin;
   const canApprove = isSilva;
   const { data: meta } = useRateCardMeta();
+  const { data: allLines = [] } = useRateCardLines();
+
+  const materialCount = useMemo(
+    () => allLines.filter((l) => isResourceType(l, "material")).length,
+    [allLines],
+  );
+  const serviceCount = useMemo(
+    () => allLines.filter((l) => isResourceType(l, "service")).length,
+    [allLines],
+  );
 
   if (!canBuild && !canApprove) {
     return <p className="text-sm text-muted-foreground">No access</p>;
   }
 
   return (
-    <Tabs defaultValue="rates" className="space-y-4">
+    <Tabs defaultValue="material" className="space-y-4">
       <TabsList className="h-11 w-full justify-start gap-1 rounded-xl bg-muted/70 p-1 sm:w-auto">
-        <TabsTrigger value="rates" className="gap-1.5 rounded-lg px-4 data-[state=active]:shadow-sm">
+        <TabsTrigger value="material" className="gap-1.5 rounded-lg px-4 data-[state=active]:shadow-sm">
           <Package className="h-3.5 w-3.5" />
-          Material &amp; service
-          {meta ? (
-            <span className="rounded-md bg-background/80 px-1.5 py-0.5 text-[11px] tabular-nums text-muted-foreground">
-              {meta.counts.draft + meta.counts.submitted + meta.counts.approved + meta.counts.returned}
-            </span>
-          ) : null}
+          Material
+          <span className="rounded-md bg-background/80 px-1.5 py-0.5 text-[11px] tabular-nums text-muted-foreground">
+            {materialCount}
+          </span>
+        </TabsTrigger>
+        <TabsTrigger value="service" className="gap-1.5 rounded-lg px-4 data-[state=active]:shadow-sm">
+          <Wrench className="h-3.5 w-3.5" />
+          Service
+          <span className="rounded-md bg-background/80 px-1.5 py-0.5 text-[11px] tabular-nums text-muted-foreground">
+            {serviceCount}
+          </span>
         </TabsTrigger>
         <TabsTrigger value="labor" className="gap-1.5 rounded-lg px-4 data-[state=active]:shadow-sm">
           <Users className="h-3.5 w-3.5" />
@@ -1072,9 +1070,13 @@ export function RateCardPanel() {
           ) : null}
         </TabsTrigger>
       </TabsList>
-      <TabsContent value="rates" className="mt-0 space-y-8">
-        {canBuild ? <RateCardBuilder /> : null}
-        {canApprove ? <RateCardApprovals /> : null}
+      <TabsContent value="material" className="mt-0 space-y-8">
+        {canBuild ? <RateCardBuilder resourceType="material" /> : null}
+        {canApprove ? <RateCardApprovals resourceType="material" /> : null}
+      </TabsContent>
+      <TabsContent value="service" className="mt-0 space-y-8">
+        {canBuild ? <RateCardBuilder resourceType="service" /> : null}
+        {canApprove ? <RateCardApprovals resourceType="service" /> : null}
       </TabsContent>
       <TabsContent value="labor" className="mt-0">
         <LaborRateCardsSection />

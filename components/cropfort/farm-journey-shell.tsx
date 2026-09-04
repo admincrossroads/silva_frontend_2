@@ -131,7 +131,14 @@ function StagePanel({ farmId, stageKey }: { farmId: string; stageKey: string }) 
     );
   }
   if (stageKey === "fee_schedule_set") {
-    return <p className="text-sm text-muted-foreground">Set Core Services fee schedule.</p>;
+    return (
+      <div className="space-y-2 text-sm">
+        <p className="text-muted-foreground">Set Core Services fee schedule and field intensity.</p>
+        <Button size="sm" variant="outline" asChild>
+          <Link href="/planning/field-calendar">Open Field work calendar</Link>
+        </Button>
+      </div>
+    );
   }
   if (stageKey === "tier_election") {
     const elected = elections?.filter((e) => e.elected).length ?? 0;
@@ -164,7 +171,14 @@ function StagePanel({ farmId, stageKey }: { farmId: string; stageKey: string }) 
     );
   }
   if (stageKey === "master_plan_calendar") {
-    return <p className="text-sm text-muted-foreground">Calendar from term start and elections.</p>;
+    return (
+      <div className="space-y-2 text-sm">
+        <p className="text-muted-foreground">36-month P/A/L intensity from term start.</p>
+        <Button size="sm" variant="outline" asChild>
+          <Link href="/planning/field-calendar">Open Field work calendar</Link>
+        </Button>
+      </div>
+    );
   }
   if (stageKey === "supervisor_progress") {
     return (
@@ -186,17 +200,22 @@ function StagePanel({ farmId, stageKey }: { farmId: string; stageKey: string }) 
         ? Number(labor || 0) + Number(material || 0) + Number(service || 0)
         : null;
     return (
-      <div className="space-y-1 text-sm">
+      <div className="space-y-2 text-sm">
         <p>
           Labor <span className="font-medium tabular-nums">{labor?.toLocaleString() ?? "—"}</span>
-        </p>
-        <p>
+          {" · "}
           Material{" "}
           <span className="font-medium tabular-nums">{material?.toLocaleString() ?? "—"}</span>
+          {" · "}
+          Service{" "}
+          <span className="font-medium tabular-nums">{service?.toLocaleString() ?? "—"}</span>
         </p>
         <p>
-          Total <span className="font-medium tabular-nums">{total?.toLocaleString() ?? "—"}</span>
+          Opex total <span className="font-medium tabular-nums">{total?.toLocaleString() ?? "—"}</span>
         </p>
+        <Button size="sm" variant="outline" asChild>
+          <Link href="/planning/budget">Open Budget</Link>
+        </Button>
       </div>
     );
   }

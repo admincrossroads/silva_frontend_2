@@ -186,7 +186,10 @@ export const farmPlatformApi = {
 
   getBudgetRollup: (farmId: string, planYear: number) =>
     api
-      .get<{ data: unknown }>(`/cropfort/farms/${farmId}/budget-rollup`, { params: { planYear } })
+      .get<{ data: import("./farm-budget").FarmBudgetRollup }>(
+        `/cropfort/farms/${farmId}/budget-rollup`,
+        { params: { planYear } },
+      )
       .then((r) => r.data.data),
 
   getMonthlyReport: (farmId: string, reportMonth: string) =>

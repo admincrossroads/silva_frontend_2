@@ -190,6 +190,18 @@ export function getSidebarNav(user: AuthUser | null): NavItem[] {
       icon: Wallet,
     });
     items.push({
+      label: "Field work calendar",
+      procoreLabel: "Schedule",
+      href: "/planning/field-calendar",
+      icon: CalendarDays,
+    });
+    items.push({
+      label: "Budget",
+      procoreLabel: "Budget",
+      href: "/planning/budget",
+      icon: Landmark,
+    });
+    items.push({
       label: "AFEs",
       procoreLabel: "AFEs",
       href: "/planning/afe",
